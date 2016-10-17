@@ -1,12 +1,14 @@
 package com.sdarioo.bddtamer.ui;
 
 
-import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import com.intellij.ui.treeStructure.treetable.TreeTableModel;
+import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 
+import javax.swing.*;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.*;
 
-public class BddTreeTableModel  {
+public class BddTreeTableModel extends AbstractTreeTableModel implements TreeTableModel {
 
 
     public static Node getDefaultRoot() {
@@ -36,27 +38,84 @@ public class BddTreeTableModel  {
         return root;
     }
 
-    private static class Node extends DefaultMutableTreeTableNode {
+    @Override
+    public int getColumnCount() {
+        return 2;
+    }
+
+    @Override
+    public String getColumnName(int i) {
+        return i == 0 ? "Name" : "Status";
+    }
+
+    @Override
+    public Class getColumnClass(int i) {
+        return String.class;
+    }
+
+    @Override
+    public Object getValueAt(Object o, int i) {
+        return o.toString();
+    }
+
+    @Override
+    public boolean isCellEditable(Object o, int i) {
+        return false;
+    }
+
+    @Override
+    public void setValueAt(Object o, Object o1, int i) {
+
+    }
+
+    @Override
+    public void setTree(JTree jTree) {
+
+    }
+
+    @Override
+    public Object getRoot() {
+        return getDefaultRoot();
+    }
+
+    @Override
+    public Object getChild(Object parent, int index) {
+        return ((Node)parent).getChildAt(index);
+    }
+
+    @Override
+    public int getChildCount(Object parent) {
+        return ((Node)parent).getChildCount();
+    }
+
+    @Override
+    public boolean isLeaf(Object node) {
+        return ((Node)node).isLeaf();
+    }
+
+    @Override
+    public void valueForPathChanged(TreePath path, Object newValue) {
+
+    }
+
+    @Override
+    public int getIndexOfChild(Object parent, Object child) {
+        return ((Node)parent).getIndex((TreeNode)child);
+    }
+
+    @Override
+    public void addTreeModelListener(TreeModelListener l) {
+
+    }
+
+    @Override
+    public void removeTreeModelListener(TreeModelListener l) {
+
+    }
+
+    private static class Node extends DefaultMutableTreeNode {
         public Node(String text) {
             super(text);
-        }
-
-        @Override
-        public boolean isEditable(int column) {
-            return false;
-        }
-
-        @Override
-        public int getColumnCount() {
-            return 2;
-        }
-
-        @Override
-        public Object getValueAt(int column) {
-            if (column == 0) {
-                return getUserObject();
-            }
-            return "column-2";
         }
     }
 }

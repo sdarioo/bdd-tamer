@@ -5,20 +5,25 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.remoteServer.util.Column;
+import com.intellij.ui.TreeTableSpeedSearch;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
-import org.jdesktop.swingx.JXTreeTable;
-import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
-import org.jetbrains.annotations.NotNull;
 
+import com.intellij.ui.treeStructure.treetable.*;
+import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.UIUtil;
+import de.sciss.treetable.j.DefaultTreeTableNode;
+import org.jdesktop.swingx.treetable.TreeTableNode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.tree.TreeSelectionModel;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.Arrays;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+import java.util.concurrent.ThreadLocalRandom;
 
-
+//http://www.programcreek.com/java-api-examples/index.php?source_dir=platform_tools_adt_idea-master/android/src/com/android/tools/idea/editors/vmtrace/TraceViewPanel.java
 public class BddTamerToolWindowFactory implements ToolWindowFactory {
 
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -37,40 +42,82 @@ public class BddTamerToolWindowFactory implements ToolWindowFactory {
         panel.setToolbar(actionToolbar.getComponent());
 
 
-        panel.setContent(createContent2());
+        panel.setContent(createComponent4());
     }
 
-    // https://github.com/Sciss/TreeTable
-    private JComponent createContent2() {
-        return new JTree();
-    }
-
-    private JComponent createContent1() {
-        DefaultTreeTableModel model = new DefaultTreeTableModel(BddTreeTableModel.getDefaultRoot(), Arrays.asList("Name", "Status"));
-        JXTreeTable tree = new JXTreeTable(model);
-        tree.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-
-        tree.addMouseListener(new MouseAdapter() {
+    private JComponent createComponent4() {
+        ListTreeTableModelOnColumns model = new ListTreeTableModelOnColumns(node(),
+                new ColumnInfo[] { new Column("Name"), new Column("Status")}
+        );
+        TreeTable treeTable = new TreeTable(new BddTreeTableModel()) {
             @Override
-            public void mouseReleased(MouseEvent e) {
-                int r = tree.rowAtPoint(e.getPoint());
-                if (r >= 0 && r < tree.getRowCount()) {
-                    tree.setRowSelectionInterval(r, r);
-                } else {
-                    tree.clearSelection();
-                }
+            public TreeTableCellRenderer createTableRenderer(TreeTableModel treeTableModel) {
+                TreeTableCellRenderer tableRenderer = super.createTableRenderer(treeTableModel);
+                UIUtil.setLineStyleAngled(tableRenderer);
+                tableRenderer.setRootVisible(false);
+                tableRenderer.setShowsRootHandles(true);
 
-                int rowindex = tree.getSelectedRow();
-                if (rowindex < 0)
-                    return;
-                if (e.isPopupTrigger() && e.getComponent() instanceof JXTreeTable ) {
-                    //JPopupMenu popup = createYourPopUp();
-                    //popup.show(e.getComponent(), e.getX(), e.getY());
-                }
+                return tableRenderer;
             }
-        });
-        return tree;
+        };
+        new TreeTableSpeedSearch(treeTable);
+        treeTable.setRootVisible(true);
+        treeTable.setProcessCursorKeys(true);
+
+
+        return treeTable;
+    }
+
+    private static class Column extends ColumnInfo<TreeNode, String> {
+        public Column(String name) {
+            super(name);
+        }
+        @Override
+        public String valueOf(TreeNode treeNode) {
+            return treeNode.toString();
+        }
+    }
+
+    private static DefaultTreeTableNode buildRoot ()
+    {
+        DefaultTreeTableNode root = new DefaultTreeTableNode(new Object(), false);
+        DefaultTreeTableNode node1 = new DefaultTreeTableNode("Step 1. Open This Node", false);
+        DefaultTreeTableNode subNode1 = new DefaultTreeTableNode("Ignore this node", false);
+        node1.add(subNode1);
+        subNode1.add(new DefaultTreeTableNode("SubNode1-1", false));
+        subNode1 = new DefaultTreeTableNode("Step 2. Open This node and then Step 3. Click checkbox ->", false);
+        node1.add(subNode1);
+        subNode1.add(new DefaultTreeTableNode("SubNode2-1", false));
+        root.add(node1);
+        return root;
+    }
+
+
+//    private JComponent createContent3(){
+//
+//        TreeTableNode root = buildRoot();
+//        //root.setValueAt(Object.class, 0);
+//
+//        TreeTable treeTable = new TreeTable(root);
+//        treeTable.setRootVisible(false);
+//        treeTable.setShowsRootHandles(true);
+//
+//        treeTable.setAutoCreateRowSorter(true);
+//        ((DefaultTreeTableSorter)treeTable.getRowSorter()).setSortsOnUpdates(true);
+//
+//        //treeTable.setDragEnabled(true);
+//        //treeTable.setAutoCreateRowHeader(true);
+//
+//        treeTable.setRowSelectionAllowed(true);
+//
+//        return new JBScrollPane(treeTable);
+//    }
+
+    private TreeNode node() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+        root.add(new DefaultTreeTableNode("Child-1"));
+        root.add(new DefaultTreeTableNode("Child-2"));
+        return root;
     }
 
     private static class DemoAction extends AnAction {
@@ -87,3 +134,5 @@ public class BddTamerToolWindowFactory implements ToolWindowFactory {
     }
 
 }
+
+
