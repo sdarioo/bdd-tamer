@@ -2,10 +2,7 @@ package com.sdarioo.bddtamer.ui;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -29,32 +26,18 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, "", false);
         toolWindow.getContentManager().addContent(content);
-
-
-        DefaultActionGroup actionGroup = new DefaultActionGroup();
-        actionGroup.add(new DemoAction());
-        actionGroup.addSeparator();
-
-        ActionManager instance = ActionManager.getInstance();
-        ActionToolbar actionToolbar = instance.createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
-        panel.setToolbar(actionToolbar.getComponent());
+        toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
 
         BddTreeView bddTreeView = new BddTreeView(project, new ProjectScannerStoryProvider());
         panel.setContent(bddTreeView.getComponent());
+
+        DefaultActionGroup actionGroup = new DefaultActionGroup();
+        BddActionManager actionManager = bddTreeView.getActionManager();
+        actionManager.getToolbarAction().forEach(a -> actionGroup.add(a));
+
+        ActionToolbar toolBar = ActionManager.getInstance().createActionToolbar("bddTree.Toolbar", actionGroup, false);
+        panel.setToolbar(toolBar.getComponent());
     }
-
-    private static class DemoAction extends AnAction {
-
-        DemoAction() {
-            super("REFRESH", "text", AllIcons.Actions.Refresh);
-        }
-
-        @Override
-        public void actionPerformed(AnActionEvent anActionEvent) {
-
-        }
-    }
-
 
 }
 

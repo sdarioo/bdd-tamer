@@ -28,7 +28,6 @@
     <toolWindow id="BDD Tamer"
                 anchor="bottom"
                 factoryClass="com.sdarioo.bddtamer.ui.BddToolWindowFactory"
-                icon="/icons/bddtamer_view_16x16.png"
     />
   </extensions>
 

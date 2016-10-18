@@ -13,6 +13,7 @@ import de.sciss.treetable.j.TreeTableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,6 +38,11 @@ public class BddTree {
 
     public TreeTable getTreeTable() {
         return tree;
+    }
+
+    public void refresh() {
+        DefaultTreeModel model = new DefaultTreeModel(buildRoot());
+        tree.setTreeModel(model);
     }
 
     private void initializeUI() {
