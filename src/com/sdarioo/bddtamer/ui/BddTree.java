@@ -50,6 +50,7 @@ public class BddTree {
         tree = new TreeTable(root);
         tree.setRootVisible(false);
         tree.setShowsRootHandles(true);
+        tree.setIconMap(new BddIconMap());
 
         tree.setAutoCreateRowSorter(true);
         ((DefaultTreeTableSorter)tree.getRowSorter()).setSortsOnUpdates(true);
@@ -74,8 +75,8 @@ public class BddTree {
         return root;
     }
 
-    private static DefaultTreeTableNode createNode(Object modelObject) {
-        return new DefaultTreeTableNode(getRowData(modelObject));
+    private static BddTreeNode createNode(Object modelObject) {
+        return new BddTreeNode(modelObject, getRowData(modelObject));
     }
 
     private static String[] getRowData(Object modelObject) {
@@ -89,5 +90,7 @@ public class BddTree {
         }
         return new String[] { "", ""};
     }
+
+
 
 }
