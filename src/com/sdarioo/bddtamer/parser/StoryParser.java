@@ -1,4 +1,4 @@
-package com.sdarioo.bddtamer;
+package com.sdarioo.bddtamer.parser;
 
 import com.sdarioo.bddtamer.model.Location;
 import com.sdarioo.bddtamer.model.Meta;
