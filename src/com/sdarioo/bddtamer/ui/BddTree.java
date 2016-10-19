@@ -45,18 +45,14 @@ public class BddTree {
         return tree;
     }
 
+    public Project getProject() {
+        return project;
+    }
+
     public void refresh() {
         DefaultTreeTableNode root = buildRoot();
         treeModel = createTreeModel(root);
         tree.setTreeModel(treeModel);
-    }
-
-    public void search(String text) {
-        treeModel.setFilter(text);
-        tree.setTreeModel(treeModel);
-
-
-        //((DefaultTreeModel)treeModel.getTreeModel()).reload();
     }
 
     private void initializeUI() {
@@ -79,7 +75,6 @@ public class BddTree {
         tree.setCellSelectionEnabled(false);
         tree.setColumnFocusEnabled(false);
 
-        new BddTreeSpeedSearch(tree);
         addTreeListeners();
     }
 

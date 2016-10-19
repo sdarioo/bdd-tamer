@@ -14,9 +14,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
 
 public class StoryParser {
 
@@ -25,17 +26,6 @@ public class StoryParser {
     private static final String SCENARIO_PREFIX = "Scenario:";
     private static final String META_PREFIX = "Meta:";
     private static final String EXAMPLES_PREFIX = "Examples:";
-
-
-    public static void main(String[] args) throws IOException {
-        Path path = Paths.get("c:\\Users\\PWH473\\IdeaProjects\\TestCmd\\src\\com\\company\\stories\\api_endpoints_config_license_box_test.story");
-        Story story = parse(path);
-        for (Scenario scenario : story.getScenarios()) {
-            System.out.println(scenario.getName());
-        }
-    }
-
-
 
     public static Story parse(Path path) throws IOException {
         List<String> lines = Files.readAllLines(path);
@@ -116,7 +106,15 @@ public class StoryParser {
     }
 
     private static String toStoryName(Path path) {
-        return path.getFileName().toString();
+        String name = path.getFileName().toString();
+        int index = name.lastIndexOf('.');
+        if (index > 0) {
+            name = name.substring(0, index);
+        }
+        String[] parts = name.split("_");
+        StringBuilder sb = new StringBuilder();
+        Arrays.stream(parts).forEach(s -> sb.append(Character.toUpperCase(s.charAt(0)) + s.substring(1)));
+        return sb.toString();
     }
 
 

@@ -3,6 +3,7 @@ package com.sdarioo.bddtamer.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
 import com.sdarioo.bddtamer.StoryProvider;
+import com.sdarioo.bddtamer.ui.search.SearchComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,9 @@ public class BddTreeView {
     private final StoryProvider storyProvider;
 
     private JPanel rootComponent;
+    private BddTree tree;
+    private SearchComponent searchComponent;
+
     private BddActionManager actionManager;
 
     public BddTreeView(Project project, StoryProvider storyProvider) {
@@ -38,12 +42,11 @@ public class BddTreeView {
 
         rootComponent = new JPanel(new BorderLayout());
 
-        BddTree tree = new BddTree(project, storyProvider);
-        JBScrollPane treePane = new JBScrollPane(tree.getTreeTable());
-        SearchComponent searchComponent = new SearchComponent(tree, rootComponent, project);
+        tree = new BddTree(project, storyProvider);
+        searchComponent = new SearchComponent(tree.getTreeTable());
 
         rootComponent.add(searchComponent.getComponent(), BorderLayout.NORTH);
-        rootComponent.add(treePane, BorderLayout.CENTER);
+        rootComponent.add(new JBScrollPane(tree.getTreeTable()), BorderLayout.CENTER);
 
         actionManager = new BddActionManager(tree);
     }
