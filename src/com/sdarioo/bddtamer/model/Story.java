@@ -28,4 +28,9 @@ public class Story {
     public List<Scenario> getScenarios() {
         return Collections.unmodifiableList(scenarios);
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

@@ -1,24 +1,18 @@
 package com.sdarioo.bddtamer.ui;
 
 import com.intellij.openapi.project.Project;
-import com.sdarioo.bddtamer.ProjectScannerStoryProvider;
 import com.sdarioo.bddtamer.StoryProvider;
-import com.sdarioo.bddtamer.parser.StoryParser;
 import com.sdarioo.bddtamer.model.Scenario;
 import com.sdarioo.bddtamer.model.Story;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.DefaultTreeTableSorter;
 import de.sciss.treetable.j.TreeTable;
-import de.sciss.treetable.j.TreeTableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Function;
+
 
 public class BddTree {
 
@@ -75,20 +69,17 @@ public class BddTree {
         return root;
     }
 
-    private static BddTreeNode createNode(Object modelObject) {
-        return new BddTreeNode(modelObject, getRowData(modelObject));
+    private static DefaultTreeTableNode createNode(Object modelObject) {
+        return new DefaultTreeTableNode(getRowData(modelObject));
     }
 
-    private static String[] getRowData(Object modelObject) {
-        if (modelObject instanceof Story) {
-            Story story = (Story)modelObject;
-            return new String[] { story.getName(), "" };
-        }
+    private static Object[] getRowData(Object modelObject) {
+
+        Object requirement = "";
         if (modelObject instanceof Scenario) {
-            Scenario scenario = (Scenario)modelObject;
-            return new String[] { scenario.getName(), scenario.getMeta().getRequirements() };
+            requirement = ((Scenario)modelObject).getMeta().getRequirements();
         }
-        return new String[] { "", ""};
+        return new Object[] { modelObject, requirement };
     }
 
 

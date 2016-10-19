@@ -70,7 +70,7 @@ public class SearchComponent {
         }.registerCustomShortcutSet(CommonShortcuts.getFind(), parent);
 
         rootComponent = new NonOpaquePanel(new BorderLayout());
-        rootComponent.add(searchField, BorderLayout.WEST);
+        rootComponent.add(searchField, BorderLayout.NORTH);
     }
 
     private static String getText(DocumentEvent e) {

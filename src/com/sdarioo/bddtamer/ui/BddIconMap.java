@@ -16,17 +16,13 @@ public class BddIconMap implements IconMap {
 
     @Override
     public Icon getIcon(TreeTable treeTable, Object node, boolean expanded, boolean leaf) {
-        if (!(node instanceof BddTreeNode)) {
-            LOGGER.warn("Expected BddTreeNode. Got: " + node.getClass().getName());
-            return AllIcons.General.TodoQuestion;
+
+        if (node instanceof Story) {
+            return AllIcons.Nodes.Folder;
         }
-        Object modelObject = ((BddTreeNode)node).getModelObject();
-        if (modelObject instanceof Story) {
-            return AllIcons.Nodes.TestSourceFolder;
+        if (node instanceof Scenario) {
+            return AllIcons.General.Bullet;
         }
-        if (modelObject instanceof Scenario) {
-            return AllIcons.Nodes.JunitTestMark;
-        }
-        return AllIcons.General.TodoQuestion;
+        return null;
     }
 }

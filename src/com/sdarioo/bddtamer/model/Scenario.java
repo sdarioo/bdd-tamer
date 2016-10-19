@@ -41,5 +41,8 @@ public class Scenario {
         return Collections.unmodifiableList(steps);
     }
 
-
+    @Override
+    public String toString() {
+        return name;
+    }
 }
