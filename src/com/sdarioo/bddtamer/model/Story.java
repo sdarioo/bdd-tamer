@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Story {
+public class Story implements LocationHolder {
 
     private final String name;
     private final Location location;
@@ -21,6 +21,7 @@ public class Story {
         return name;
     }
 
+    @Override
     public Location getLocation() {
         return location;
     }

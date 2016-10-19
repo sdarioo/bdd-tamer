@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Scenario {
+public class Scenario implements LocationHolder {
 
     private final String name;
     private final Meta meta;
@@ -29,6 +29,7 @@ public class Scenario {
         return meta;
     }
 
+    @Override
     public Location getLocation() {
         return location;
     }
