@@ -10,7 +10,7 @@ public class RunSelectedAction extends AnAction {
     private static final String TEXT = "Run Selected Tests";
 
     public RunSelectedAction() {
-        super(TEXT, TEXT, AllIcons.General.Run);
+        super(TEXT, TEXT, AllIcons.Toolwindows.ToolWindowRun);
     }
 
     @Override

@@ -16,20 +16,24 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+
 public class SearchComponent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchComponent.class);
-    private static final int WIDTH = 350;
 
+    private final BddTree tree;
     private JComponent rootComponent;
     private SearchTextField searchField;
 
-    public SearchComponent(JComponent parent, Project project) {
+
+    public SearchComponent(BddTree tree, JComponent parent, Project project) {
+        this.tree = tree;
         initializeUI(parent, project);
     }
 
@@ -44,15 +48,16 @@ public class SearchComponent {
         searchField.setEnabled(true);
         Utils.setSmallerFont(searchField);
 
+        JTextField editorTextField = searchField.getTextEditor();
+        editorTextField.setMinimumSize(new Dimension(200, -1));
+
         searchField.addDocumentListener(new DocumentAdapter() {
             @Override
             public void textChanged(DocumentEvent e) {
                 String text = getText(e);
-                // TODO
+                //tree.search(text);
             }
         });
-        JTextField editorTextField = searchField.getTextEditor();
-        editorTextField.setMinimumSize(new Dimension(WIDTH, -1));
 
         editorTextField.registerKeyboardAction(new ActionListener() {
             @Override
@@ -60,7 +65,6 @@ public class SearchComponent {
                 IdeFocusManager.getInstance(project).requestFocus(parent, true);
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-
 
         new AnAction() {
             @Override
