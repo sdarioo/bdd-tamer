@@ -1,5 +1,7 @@
 package com.sdarioo.bddtamer.ui.util;
 
+import de.sciss.treetable.j.DefaultTreeTableNode;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -35,5 +37,19 @@ public class TreeUtil {
             return ((DefaultMutableTreeNode) node).getUserObject();
         }
         return null;
+    }
+
+    public static DefaultTreeTableNode findNode(DefaultTreeTableNode root, Object modelObject) {
+        if (modelObject.equals(root.getUserObject())) {
+            return root;
+        }
+        DefaultTreeTableNode result = null;
+        for (int i = 0; i < root.getChildCount(); i++) {
+            result = findNode((DefaultTreeTableNode)root.getChildAt(i), modelObject);
+            if (result != null) {
+                break;
+            }
+        }
+        return result;
     }
 }

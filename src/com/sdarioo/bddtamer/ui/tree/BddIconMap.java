@@ -1,7 +1,6 @@
-package com.sdarioo.bddtamer.ui;
+package com.sdarioo.bddtamer.ui.tree;
 
 import com.intellij.icons.AllIcons;
-import com.sdarioo.bddtamer.Plugin;
 import com.sdarioo.bddtamer.launcher.RunStatus;
 import com.sdarioo.bddtamer.launcher.SessionManager;
 import com.sdarioo.bddtamer.launcher.TestResult;

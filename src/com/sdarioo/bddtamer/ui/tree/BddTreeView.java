@@ -1,4 +1,4 @@
-package com.sdarioo.bddtamer.ui;
+package com.sdarioo.bddtamer.ui.tree;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;

@@ -32,7 +32,7 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
-    <toolWindow id="BDD Tamer"
+    <toolWindow id="BDD"
                 anchor="bottom"
                 factoryClass="com.sdarioo.bddtamer.ui.BddToolWindowFactory"
     />

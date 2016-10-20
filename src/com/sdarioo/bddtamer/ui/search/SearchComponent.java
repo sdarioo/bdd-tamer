@@ -54,7 +54,6 @@ public class SearchComponent {
 
     private void closeSearchComponent() {
         tree.requestFocus();
-        LOGGER.error("CLOSE");
     }
 
     /**

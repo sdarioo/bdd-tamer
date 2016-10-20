@@ -2,7 +2,7 @@ package com.sdarioo.bddtamer.ui.actions;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.sdarioo.bddtamer.ui.BddTree;
+import com.sdarioo.bddtamer.ui.tree.BddTree;
 
 public class ReloadAction extends ActionBase {
 

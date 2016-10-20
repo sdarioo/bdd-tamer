@@ -1,8 +1,7 @@
-package com.sdarioo.bddtamer.ui;
+package com.sdarioo.bddtamer.ui.tree;
 
 
 import com.sdarioo.bddtamer.Plugin;
-import com.sdarioo.bddtamer.launcher.SessionManager;
 import com.sdarioo.bddtamer.launcher.TestResult;
 import com.sdarioo.bddtamer.model.Scenario;
 

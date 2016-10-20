@@ -12,6 +12,8 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.sdarioo.bddtamer.Plugin;
 import com.sdarioo.bddtamer.ui.actions.BddActionManager;
+import com.sdarioo.bddtamer.ui.console.OutputConsole;
+import com.sdarioo.bddtamer.ui.tree.BddTreeView;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +23,23 @@ import org.slf4j.LoggerFactory;
 public class BddToolWindowFactory implements ToolWindowFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BddToolWindowFactory.class);
+    private static final String TREE_LABEL = "Tree";
+    private static final String CONSOLE_LABEL = "Output";
 
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
-        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
-        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, "", false);
-        toolWindow.getContentManager().addContent(content);
+        Content treeContent = createTreeContent(project);
+        Content consoleContent = createConsoleContent(project);
+
+        toolWindow.getContentManager().addContent(treeContent);
+        toolWindow.getContentManager().addContent(consoleContent);
+
         toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
+    }
+
+    private static Content createTreeContent(Project project) {
+        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
+        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, TREE_LABEL, false);
 
         BddTreeView bddTreeView = new BddTreeView(project,
                 Plugin.getInstance().getStoryProvider(),
@@ -41,6 +53,18 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         ActionToolbar toolBar = ActionManager.getInstance().createActionToolbar("bddTree.Toolbar", actionGroup, false);
         panel.setToolbar(toolBar.getComponent());
+
+        return content;
+    }
+
+    private static Content createConsoleContent(Project project) {
+        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
+        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, CONSOLE_LABEL, false);
+
+        OutputConsole console = new OutputConsole(Plugin.getInstance().getSessionManager());
+        panel.setContent(console.getComponent());
+
+        return content;
     }
 
 }

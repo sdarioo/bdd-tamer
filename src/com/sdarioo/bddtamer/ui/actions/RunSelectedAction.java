@@ -7,7 +7,7 @@ import com.sdarioo.bddtamer.launcher.Launcher;
 import com.sdarioo.bddtamer.launcher.LauncherException;
 import com.sdarioo.bddtamer.model.Scenario;
 import com.sdarioo.bddtamer.model.Story;
-import com.sdarioo.bddtamer.ui.BddTree;
+import com.sdarioo.bddtamer.ui.tree.BddTree;
 import com.sdarioo.bddtamer.ui.util.TreeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -6,9 +6,8 @@ import com.sdarioo.bddtamer.launcher.Launcher;
 import com.sdarioo.bddtamer.launcher.LauncherListenerAdapter;
 import com.sdarioo.bddtamer.launcher.SessionManager;
 import com.sdarioo.bddtamer.model.Scenario;
-import com.sdarioo.bddtamer.ui.BddTree;
+import com.sdarioo.bddtamer.ui.tree.BddTree;
 
-import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.sdarioo.bddtamer.ui;
+package com.sdarioo.bddtamer.ui.tree;
 
 import com.intellij.openapi.project.Project;
 import com.sdarioo.bddtamer.launcher.*;
@@ -7,6 +7,7 @@ import com.sdarioo.bddtamer.model.LocationHolder;
 import com.sdarioo.bddtamer.model.Scenario;
 import com.sdarioo.bddtamer.model.Story;
 import com.sdarioo.bddtamer.ui.util.IdeUtil;
+import com.sdarioo.bddtamer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeColumnModel;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.DefaultTreeTableSorter;
@@ -49,18 +50,19 @@ public class BddTree {
         return tree;
     }
 
+    public DefaultTreeTableNode getRootNode() {
+        return (DefaultTreeTableNode)treeModel.getRoot();
+    }
+
     public void reload() {
         DefaultTreeTableNode root = buildRoot();
         treeModel = createTreeModel(root);
         tree.setTreeModel(treeModel);
     }
 
-    public void refreshNode(Object userObject) {
-        DefaultTreeTableNode node = findNode((DefaultTreeTableNode) treeModel.getRoot(), userObject);
-        if (node != null) {
-            updateRowData(node);
-            SwingUtilities.invokeLater(() -> treeModel.nodeChanged(node));
-        }
+    public void refreshNode(DefaultTreeTableNode node) {
+        updateRowData(node);
+        treeModel.nodeChanged(node);
     }
 
     private void initializeUI(SessionManager sessionManager) {
@@ -108,20 +110,6 @@ public class BddTree {
         DefaultTreeTableNode node = new DefaultTreeTableNode(getRowData(modelObject));
         node.setUserObject(modelObject);
         return node;
-    }
-
-    private  DefaultTreeTableNode findNode(DefaultTreeTableNode root, Object modelObject) {
-        if (modelObject.equals(root.getUserObject())) {
-            return root;
-        }
-        DefaultTreeTableNode result = null;
-        for (int i = 0; i < root.getChildCount(); i++) {
-            result = findNode((DefaultTreeTableNode)root.getChildAt(i), modelObject);
-            if (result != null) {
-                break;
-            }
-        }
-        return result;
     }
 
     private static String[] getColumnNames() {
@@ -172,21 +160,35 @@ public class BddTree {
         launcher.addListener(new LauncherListener() {
             @Override
             public void scenarioStarted(Scenario scenario) {
-                refreshNode(scenario);
+                refreshScenario(scenario, true);
             }
 
             @Override
             public void scenarioFinished(Scenario scenario, TestResult result) {
-                refreshNode(scenario);
+                refreshScenario(scenario, false);
             }
 
             @Override
             public void sessionStarted(List<Scenario> scope) {
-                scope.forEach(BddTree.this::refreshNode);
+                scope.forEach( scenario -> refreshScenario(scenario, false));
             }
 
             @Override
             public void sessionFinished() {
+            }
+
+            private void refreshScenario(Scenario scenario, boolean scrollTo) {
+                DefaultTreeTableNode node = TreeUtil.findNode((DefaultTreeTableNode) treeModel.getRoot(), scenario);
+                if (node != null) {
+                    SwingUtilities.invokeLater(() -> {
+                        if (scrollTo) {
+                            tree.scrollPathToVisible(TreeUtil.pathToRoot(node));
+                        }
+                        refreshNode(node);
+                    });
+                } else {
+                    LOGGER.warn("Cannot find node for scenario: " + scenario);
+                }
             }
         });
     }

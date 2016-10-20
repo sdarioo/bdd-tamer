@@ -4,7 +4,9 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.sdarioo.bddtamer.launcher.SessionManager;
 import com.sdarioo.bddtamer.model.Scenario;
-import com.sdarioo.bddtamer.ui.BddTree;
+import com.sdarioo.bddtamer.ui.tree.BddTree;
+import com.sdarioo.bddtamer.ui.util.TreeUtil;
+import de.sciss.treetable.j.DefaultTreeTableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,11 @@ public class ClearResultsAction extends ActionBase {
         }
         List<Scenario> scenariosToRefresh = new ArrayList<>(sessionManager.getFinishedScenarios());
         sessionManager.clear();
-        scenariosToRefresh.forEach(tree::refreshNode);
+        scenariosToRefresh.forEach(s -> {
+            DefaultTreeTableNode node = TreeUtil.findNode(tree.getRootNode(), s);
+            if (node != null) {
+                tree.refreshNode(node);
+            }
+        });
     }
 }
