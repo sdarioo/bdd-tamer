@@ -6,29 +6,24 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TestLauncher extends AbstractLauncher {
+public class DummyLauncher extends AbstractLauncher {
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    private static final TestLauncher INSTANCE = new TestLauncher();
-
-    private TestLauncher() {}
-
-    public static TestLauncher getInstance() {
-        return INSTANCE;
-    }
-
+    private volatile boolean isRunning;
 
     @Override
-    public void submit(List<Scenario> scenarios) {
+    public void submit(List<Scenario> scenarios) throws LauncherException {
+        throwIfRunning();
         executorService.submit(() -> {
             execute(scenarios);
         });
     }
 
     private void execute(List<Scenario> scenarios) {
-        notifySessionStarted();
+        isRunning = true;
         try {
+            notifySessionStarted(scenarios);
             for (Scenario scenario : scenarios) {
                 notifyTestStarted(scenario);
                 try {Thread.sleep(500);} catch (InterruptedException e) {}
@@ -36,6 +31,13 @@ public class TestLauncher extends AbstractLauncher {
             }
         } finally {
             notifySessionFinished();
+            isRunning = false;
+        }
+    }
+
+    protected void throwIfRunning() throws LauncherException {
+        if (isRunning) {
+            throw new LauncherException("There is other run in progress.");
         }
     }
 }

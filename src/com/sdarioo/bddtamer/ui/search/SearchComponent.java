@@ -8,14 +8,12 @@ import com.intellij.openapi.actionSystem.CommonShortcuts;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.SearchTextField;
 import com.intellij.ui.components.panels.NonOpaquePanel;
-import com.sdarioo.bddtamer.ui.BddTree;
 import de.sciss.treetable.j.TreeTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
-import javax.swing.text.BadLocationException;
 import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -51,9 +49,17 @@ public class SearchComponent {
         editorTextField.setPreferredSize(new Dimension(350, editorTextField.getPreferredSize().height));
 
         mainComponent = new NonOpaquePanel(new BorderLayout());
-        mainComponent.add(searchField, BorderLayout.WEST);
+        mainComponent.add(searchField, BorderLayout.CENTER);
     }
 
+    private void closeSearchComponent() {
+        tree.requestFocus();
+        LOGGER.error("CLOSE");
+    }
+
+    /**
+     * SearchTextField customization
+     */
     private class MySearchTextField extends SearchTextField {
 
         MySearchTextField() {
@@ -72,8 +78,7 @@ public class SearchComponent {
         @Override
         protected void onFocusLost() {
             super.onFocusLost();
-            tree.requestFocus();
-            LOGGER.error("FOCUS LOST");
+            closeSearchComponent();
         }
 
         @Override
@@ -112,6 +117,13 @@ public class SearchComponent {
                     onTextEntered(getText());
                 }
             }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+            getTextEditor().registerKeyboardAction(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    closeSearchComponent();
+                }
+            }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
             new AnAction() {
                 @Override

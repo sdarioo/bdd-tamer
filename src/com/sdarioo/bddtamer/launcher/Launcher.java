@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface Launcher {
 
-    void submit(List<Scenario> scenarios);
+    void submit(List<Scenario> scenarios) throws LauncherException;
 
     void addListener(LauncherListener listener);
 

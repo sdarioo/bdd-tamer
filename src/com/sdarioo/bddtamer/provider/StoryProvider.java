@@ -1,4 +1,4 @@
-package com.sdarioo.bddtamer;
+package com.sdarioo.bddtamer.provider;
 
 
 import com.intellij.openapi.project.Project;

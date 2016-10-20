@@ -18,6 +18,13 @@
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
   <idea-version since-build="141.0"/>
 
+  <application-components>
+    <component>
+      <interface-class>com.intellij.openapi.components.ApplicationComponent</interface-class>
+      <implementation-class>com.sdarioo.bddtamer.Plugin</implementation-class>
+    </component>
+  </application-components>
+
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
   <!-- uncomment to enable plugin in all products

@@ -1,8 +1,10 @@
 package com.sdarioo.bddtamer.ui;
 
 import com.intellij.openapi.project.Project;
-import com.sdarioo.bddtamer.StoryProvider;
+import com.sdarioo.bddtamer.launcher.*;
+import com.sdarioo.bddtamer.provider.StoryProvider;
 import com.sdarioo.bddtamer.model.LocationHolder;
+import com.sdarioo.bddtamer.model.Scenario;
 import com.sdarioo.bddtamer.model.Story;
 import com.sdarioo.bddtamer.ui.util.IdeUtil;
 import de.sciss.treetable.j.DefaultTreeColumnModel;
@@ -31,31 +33,37 @@ public class BddTree {
     private final StoryProvider storyProvider;
 
     private TreeTable tree;
-    private FilteredTreeModel treeModel;
+    private DefaultTreeModel treeModel;
 
 
-    public BddTree(Project project, StoryProvider storyProvider) {
+    public BddTree(Project project,
+                   StoryProvider storyProvider,
+                   SessionManager sessionManager) {
         this.project = project;
         this.storyProvider = storyProvider;
 
-        initializeUI();
+        initializeUI(sessionManager);
     }
 
     public TreeTable getTreeTable() {
         return tree;
     }
 
-    public Project getProject() {
-        return project;
-    }
-
-    public void refresh() {
+    public void reload() {
         DefaultTreeTableNode root = buildRoot();
         treeModel = createTreeModel(root);
         tree.setTreeModel(treeModel);
     }
 
-    private void initializeUI() {
+    public void refreshNode(Object userObject) {
+        DefaultTreeTableNode node = findNode((DefaultTreeTableNode) treeModel.getRoot(), userObject);
+        if (node != null) {
+            updateRowData(node);
+            SwingUtilities.invokeLater(() -> treeModel.nodeChanged(node));
+        }
+    }
+
+    private void initializeUI(SessionManager sessionManager) {
         DefaultTreeTableNode root = buildRoot();
         treeModel = createTreeModel(root);
         DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root, getColumnNames());
@@ -64,7 +72,7 @@ public class BddTree {
         tree = new TreeTable(treeModel, columnModel);
         tree.setRootVisible(false);
         tree.setShowsRootHandles(true);
-        tree.setIconMap(new BddIconMap());
+        tree.setIconMap(new BddIconMap(sessionManager));
 
         tree.setAutoCreateRowSorter(true);
         ((DefaultTreeTableSorter)tree.getRowSorter()).setSortsOnUpdates(true);
@@ -75,12 +83,12 @@ public class BddTree {
         tree.setCellSelectionEnabled(false);
         tree.setColumnFocusEnabled(false);
 
-
         addTreeListeners();
+        addLauncherListener(sessionManager.getLauncher());
     }
 
-    private FilteredTreeModel createTreeModel(DefaultTreeTableNode root) {
-        return new FilteredTreeModel(new DefaultTreeModel(root));
+    private DefaultTreeModel createTreeModel(DefaultTreeTableNode root) {
+        return new DefaultTreeModel(root);
     }
 
     private DefaultTreeTableNode buildRoot()
@@ -102,6 +110,20 @@ public class BddTree {
         return node;
     }
 
+    private  DefaultTreeTableNode findNode(DefaultTreeTableNode root, Object modelObject) {
+        if (modelObject.equals(root.getUserObject())) {
+            return root;
+        }
+        DefaultTreeTableNode result = null;
+        for (int i = 0; i < root.getChildCount(); i++) {
+            result = findNode((DefaultTreeTableNode)root.getChildAt(i), modelObject);
+            if (result != null) {
+                break;
+            }
+        }
+        return result;
+    }
+
     private static String[] getColumnNames() {
         return Arrays.stream(BddTreeColumns.values())
                 .map(BddTreeColumns::getName)
@@ -114,6 +136,13 @@ public class BddTree {
                 .map(c -> c.getValue(modelObject))
                 .collect(Collectors.toList())
                 .toArray(new Object[0]);
+    }
+
+    private static void updateRowData(DefaultTreeTableNode node) {
+        Object[] data = getRowData(node.getUserObject());
+        for (int i = 0; i < data.length; i++) {
+            node.setValueAt(data[i], i);
+        }
     }
 
     private void addTreeListeners() {
@@ -137,6 +166,29 @@ public class BddTree {
             }
         };
         tree.addMouseListener(listener);
+    }
+
+    private void addLauncherListener(Launcher launcher) {
+        launcher.addListener(new LauncherListener() {
+            @Override
+            public void scenarioStarted(Scenario scenario) {
+                refreshNode(scenario);
+            }
+
+            @Override
+            public void scenarioFinished(Scenario scenario, TestResult result) {
+                refreshNode(scenario);
+            }
+
+            @Override
+            public void sessionStarted(List<Scenario> scope) {
+                scope.forEach(BddTree.this::refreshNode);
+            }
+
+            @Override
+            public void sessionFinished() {
+            }
+        });
     }
 
 }

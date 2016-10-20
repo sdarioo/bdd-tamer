@@ -1,5 +1,6 @@
 package com.sdarioo.bddtamer.ui.util;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.LinkedList;
@@ -21,5 +22,18 @@ public class TreeUtil {
             node = (node.getParent() != null) ? node.getParent() : null;
         }
         return new TreePath(path.toArray(new Object[0]));
+    }
+
+    /**
+     * Return user object from last component of given tree path
+     * @param path
+     * @return
+     */
+    public static Object getUserObject(TreePath path) {
+        Object node = path.getLastPathComponent();
+        if (node instanceof DefaultMutableTreeNode) {
+            return ((DefaultMutableTreeNode) node).getUserObject();
+        }
+        return null;
     }
 }

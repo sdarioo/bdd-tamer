@@ -9,6 +9,11 @@ public abstract class AbstractLauncher implements Launcher {
 
     private final List<LauncherListener> listeners = new CopyOnWriteArrayList<>();
 
+    private volatile boolean isRunning = false;
+
+    protected AbstractLauncher() {
+    }
+
     @Override
     public void addListener(LauncherListener listener) {
         listeners.add(listener);
@@ -19,8 +24,8 @@ public abstract class AbstractLauncher implements Launcher {
         listeners.remove(listener);
     }
 
-    protected void notifySessionStarted() {
-        listeners.forEach(LauncherListener::sessionStarted);
+    protected void notifySessionStarted(List<Scenario> scope) {
+        listeners.forEach(l -> l.sessionStarted(scope));
     }
 
     protected void notifySessionFinished() {

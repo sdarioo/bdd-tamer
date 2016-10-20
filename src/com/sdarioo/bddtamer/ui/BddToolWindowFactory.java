@@ -10,7 +10,8 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
-import com.sdarioo.bddtamer.ProjectScannerStoryProvider;
+import com.sdarioo.bddtamer.Plugin;
+import com.sdarioo.bddtamer.ui.actions.BddActionManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,10 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         toolWindow.getContentManager().addContent(content);
         toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
 
-        BddTreeView bddTreeView = new BddTreeView(project, new ProjectScannerStoryProvider());
+        BddTreeView bddTreeView = new BddTreeView(project,
+                Plugin.getInstance().getStoryProvider(),
+                Plugin.getInstance().getSessionManager());
+
         panel.setContent(bddTreeView.getComponent());
 
         DefaultActionGroup actionGroup = new DefaultActionGroup();

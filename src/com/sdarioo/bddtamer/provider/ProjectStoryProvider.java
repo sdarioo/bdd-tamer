@@ -1,10 +1,9 @@
-package com.sdarioo.bddtamer;
+package com.sdarioo.bddtamer.provider;
 
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.sdarioo.bddtamer.model.Story;
-import com.sdarioo.bddtamer.parser.StoryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +13,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectScannerStoryProvider implements StoryProvider {
+public class ProjectStoryProvider implements StoryProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectScannerStoryProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectStoryProvider.class);
 
     @Override
     public List<Story> getStories(Project project) {

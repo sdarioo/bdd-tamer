@@ -1,6 +1,9 @@
 package com.sdarioo.bddtamer.ui;
 
 
+import com.sdarioo.bddtamer.Plugin;
+import com.sdarioo.bddtamer.launcher.SessionManager;
+import com.sdarioo.bddtamer.launcher.TestResult;
 import com.sdarioo.bddtamer.model.Scenario;
 
 import java.util.function.Function;
@@ -9,7 +12,7 @@ public enum BddTreeColumns {
 
     NAME("Name", modelObject -> modelObject),
     REQUIREMENT("Requirement", BddTreeColumns::getRequirement),
-    RUN_TIME("Exec. Time", modelObject -> "");
+    RUN_TIME("Exec. Time", BddTreeColumns::getExecutionTime);
 
     private final String name;
     private final Function<Object, Object> valueProvider;
@@ -29,5 +32,16 @@ public enum BddTreeColumns {
 
     private static Object getRequirement(Object modelObject) {
         return (modelObject instanceof Scenario) ? ((Scenario)modelObject).getMeta().getRequirements() : "";
+    }
+
+    private static Object getExecutionTime(Object modelObject) {
+        if (modelObject instanceof Scenario) {
+            Scenario scenario = (Scenario)modelObject;
+            TestResult result = Plugin.getInstance().getSessionManager().getResult(scenario);
+            if (result != null) {
+                return String.valueOf(result.getTime());
+            }
+        }
+        return "";
     }
 }
