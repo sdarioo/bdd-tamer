@@ -2,6 +2,7 @@ package com.sdarioo.bddtamer.ui.search;
 
 
 import com.intellij.find.editorHeaderActions.Utils;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonShortcuts;
@@ -14,24 +15,24 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.awt.*;
+import java.awt.event.*;
 
 
 public class SearchComponent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchComponent.class);
+    private static final String CARD_FIND = "find";
+    private static final String CARD_GENERAL = "general";
 
     private final TreeTable tree;
+    private final JComponent parent;
+
     private JComponent mainComponent;
     private MySearchTextField searchField;
 
-    private boolean isFindAll = true;
-
-    public SearchComponent(TreeTable tree) {
+    public SearchComponent(JComponent parent, TreeTable tree) {
+        this.parent = parent;
         this.tree = tree;
         initializeUI();
     }
@@ -48,12 +49,52 @@ public class SearchComponent {
         editorTextField.setMinimumSize(new Dimension(200, -1));
         editorTextField.setPreferredSize(new Dimension(350, editorTextField.getPreferredSize().height));
 
-        mainComponent = new NonOpaquePanel(new BorderLayout());
-        mainComponent.add(searchField, BorderLayout.CENTER);
+        mainComponent = new JPanel(new CardLayout());
+
+        JPanel searchPanel = new NonOpaquePanel(new BorderLayout());
+
+
+        JLabel closeLabel = new JLabel(AllIcons.Actions.Cross);
+        closeLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                closeSearchComponent();
+            }
+        });
+        JLabel findAll = new JLabel(AllIcons.Toolwindows.ToolWindowFind);
+        findAll.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                SearchHelper.findAll(tree, editorTextField.getText());
+            }
+        });
+
+        JPanel leftPanel = new NonOpaquePanel(new BorderLayout());
+        leftPanel.add(findAll, BorderLayout.EAST);
+        leftPanel.add(searchField, BorderLayout.CENTER);
+
+        searchPanel.add(leftPanel, BorderLayout.WEST);
+        searchPanel.add(closeLabel, BorderLayout.EAST);
+
+        JPanel generalPanel = new JPanel();
+        generalPanel.setPreferredSize(new Dimension(0, 0));
+
+        mainComponent.add(generalPanel, CARD_GENERAL);
+        mainComponent.add(searchPanel, CARD_FIND);
     }
 
     private void closeSearchComponent() {
+        ((CardLayout)mainComponent.getLayout()).show(mainComponent, CARD_GENERAL);
+        mainComponent.setPreferredSize(new Dimension(0, 0));
+        parent.doLayout();
         tree.requestFocus();
+    }
+
+    private void showSearchComponent() {
+        ((CardLayout)mainComponent.getLayout()).show(mainComponent, CARD_FIND);
+        mainComponent.setPreferredSize(new Dimension(-1, searchField.getPreferredSize().height));
+        parent.doLayout();
+        searchField.requestFocusInWindow();
     }
 
     /**
@@ -77,7 +118,6 @@ public class SearchComponent {
         @Override
         protected void onFocusLost() {
             super.onFocusLost();
-            closeSearchComponent();
         }
 
         @Override
@@ -85,15 +125,8 @@ public class SearchComponent {
             super.onFocusGained();
         }
 
-        protected void onTextChanged(String text) {
-        }
-
         protected void onTextEntered(String text) {
-            if (isFindAll) {
-                SearchHelper.findAll(tree, text);
-            } else {
-                SearchHelper.findNext(tree, text);
-            }
+            SearchHelper.findNext(tree, text);
         }
 
         private void addListeners() {
@@ -101,12 +134,6 @@ public class SearchComponent {
             addDocumentListener(new DocumentAdapter() {
                 @Override
                 public void textChanged(DocumentEvent e) {
-//                    try {
-//                        String text = e.getDocument().getText(e.getOffset(), e.getLength());
-//                        onTextChanged(text);
-//                    } catch (BadLocationException exc) {
-//                        LOGGER.error(exc.toString());
-//                    }
                 }
             });
 
@@ -127,7 +154,7 @@ public class SearchComponent {
             new AnAction() {
                 @Override
                 public void actionPerformed(AnActionEvent e) {
-                    requestFocusInWindow();
+                    showSearchComponent();
                 }
             }.registerCustomShortcutSet(CommonShortcuts.getFind(), tree);
         }
