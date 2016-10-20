@@ -9,8 +9,6 @@ public abstract class AbstractLauncher implements Launcher {
 
     private final List<LauncherListener> listeners = new CopyOnWriteArrayList<>();
 
-    private volatile boolean isRunning = false;
-
     protected AbstractLauncher() {
     }
 

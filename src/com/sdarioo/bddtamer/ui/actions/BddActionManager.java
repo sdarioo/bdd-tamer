@@ -23,7 +23,7 @@ public class BddActionManager {
     public BddActionManager(BddTree tree, SessionManager sessionManager) {
 
         cleanResultsAction = new ClearResultsAction(tree, sessionManager);
-        runSelectedAction = new RunSelectedAction(tree, sessionManager.getLauncher(), cleanResultsAction);
+        runSelectedAction = new RunSelectedAction(tree, sessionManager.getLauncher());
 
         expandAllAction = new ExpandAction(tree.getTreeTable());
         collapseAllAction = new CollapseAction(tree.getTreeTable());

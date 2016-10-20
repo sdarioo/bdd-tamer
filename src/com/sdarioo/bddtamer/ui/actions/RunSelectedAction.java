@@ -25,19 +25,20 @@ public class RunSelectedAction extends ActionBase {
 
     private final BddTree tree;
     private final Launcher launcher;
-    private ActionBase cleanResultsAction;
 
-    public RunSelectedAction(BddTree tree, Launcher launcher, ActionBase cleanResultsAction) {
+    public RunSelectedAction(BddTree tree, Launcher launcher) {
         super(TEXT, AllIcons.Toolwindows.ToolWindowRun);
         this.tree = tree;
         this.launcher = launcher;
-        this.cleanResultsAction = cleanResultsAction;
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
 
         TreePath[] paths = tree.getTreeTable().getSelectionPaths();
+        if ((paths == null) || (paths.length == 0)) {
+            return;
+        }
         Set<Scenario> scope = new LinkedHashSet<>();
 
         for (TreePath path : paths) {
@@ -49,7 +50,7 @@ public class RunSelectedAction extends ActionBase {
             }
         }
         try {
-            cleanResultsAction.actionPerformed(anActionEvent);
+            tree.getActionManager().getCleanResultsAction().actionPerformed(anActionEvent);
             launcher.submit(new ArrayList<>(scope));
         } catch (LauncherException e) {
             LOGGER.error(e.toString());

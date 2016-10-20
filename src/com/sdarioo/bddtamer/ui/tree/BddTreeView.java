@@ -49,6 +49,7 @@ public class BddTreeView {
         rootComponent.add(new JBScrollPane(tree.getTreeTable()), BorderLayout.CENTER);
 
         actionManager = new BddActionManager(tree, sessionManager);
+        tree.setActionManager(actionManager);
     }
 
 }

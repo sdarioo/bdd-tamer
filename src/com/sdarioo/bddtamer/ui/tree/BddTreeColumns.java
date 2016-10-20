@@ -10,7 +10,7 @@ import java.util.function.Function;
 public enum BddTreeColumns {
 
     NAME("Name", modelObject -> modelObject),
-    REQUIREMENT("Requirement", BddTreeColumns::getRequirement),
+    REQUIREMENT("L2", BddTreeColumns::getRequirement),
     RUN_TIME("Exec. Time", BddTreeColumns::getExecutionTime);
 
     private final String name;

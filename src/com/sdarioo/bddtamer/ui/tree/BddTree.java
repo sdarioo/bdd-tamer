@@ -6,6 +6,8 @@ import com.sdarioo.bddtamer.provider.StoryProvider;
 import com.sdarioo.bddtamer.model.LocationHolder;
 import com.sdarioo.bddtamer.model.Scenario;
 import com.sdarioo.bddtamer.model.Story;
+import com.sdarioo.bddtamer.ui.actions.ActionAdapter;
+import com.sdarioo.bddtamer.ui.actions.BddActionManager;
 import com.sdarioo.bddtamer.ui.util.IdeUtil;
 import com.sdarioo.bddtamer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeColumnModel;
@@ -35,6 +37,7 @@ public class BddTree {
 
     private TreeTable tree;
     private DefaultTreeModel treeModel;
+    private BddActionManager actionManager;
 
 
     public BddTree(Project project,
@@ -48,6 +51,14 @@ public class BddTree {
 
     public TreeTable getTreeTable() {
         return tree;
+    }
+
+    public BddActionManager getActionManager() {
+        return actionManager;
+    }
+
+    public void setActionManager(BddActionManager actionManager) {
+        this.actionManager = actionManager;
     }
 
     public DefaultTreeTableNode getRootNode() {
@@ -93,8 +104,7 @@ public class BddTree {
         return new DefaultTreeModel(root);
     }
 
-    private DefaultTreeTableNode buildRoot()
-    {
+    private DefaultTreeTableNode buildRoot() {
         DefaultTreeTableNode root = createNode(project);
 
         List<Story> stories = storyProvider.getStories(project);
@@ -133,6 +143,12 @@ public class BddTree {
         }
     }
 
+    private JPopupMenu createPopupMenu() {
+        JPopupMenu menu = new JPopupMenu();
+        menu.add(new ActionAdapter(actionManager.getRunSelectedAction()));
+        return menu;
+    }
+
     private void addTreeListeners() {
         MouseListener listener = new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -141,10 +157,15 @@ public class BddTree {
                     return;
                 }
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    tree.setSelectionRow(row);
+                    if (!tree.isRowSelected(row)) {
+                        tree.setSelectionRow(row);
+                    }
+                    createPopupMenu().show(e.getComponent(), e.getX(), e.getY());
+
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
                     if (e.getClickCount() == 2) {
                         TreePath path = tree.getPathForRow(row);
+                        tree.expandPath(path);
                         Object modelObject = ((DefaultTreeTableNode) path.getLastPathComponent()).getUserObject();
                         if (modelObject instanceof LocationHolder) {
                             IdeUtil.openInEditor(project, ((LocationHolder)modelObject).getLocation());
