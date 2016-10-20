@@ -43,7 +43,7 @@ public class BddTreeView {
         rootComponent = new JPanel(new BorderLayout());
 
         tree = new BddTree(project, storyProvider, sessionManager);
-        searchComponent = new SearchComponent(tree.getTreeTable());
+        searchComponent = new SearchComponent(rootComponent, tree.getTreeTable());
 
         rootComponent.add(searchComponent.getComponent(), BorderLayout.NORTH);
         rootComponent.add(new JBScrollPane(tree.getTreeTable()), BorderLayout.CENTER);

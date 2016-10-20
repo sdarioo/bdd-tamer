@@ -1,20 +1,17 @@
 package com.sdarioo.bddtamer.ui.search;
 
 
-
 import com.sdarioo.bddtamer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.TreeTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiPredicate;
-import java.util.regex.Matcher;
+
 
 public class SearchHelper {
 
@@ -53,6 +50,7 @@ public class SearchHelper {
                 TreePath path = TreeUtil.pathToRoot(next);
                 tree.addSelectionPath(path);
                 tree.expandPath(path);
+                tree.scrollPathToVisible(path);
                 break;
             }
         }
@@ -78,6 +76,9 @@ public class SearchHelper {
                 TreePath path = TreeUtil.pathToRoot(next);
                 tree.addSelectionPath(path);
                 tree.expandPath(path);
+                if (i == 0) {
+                    tree.scrollPathToVisible(path);
+                }
             }
         }
     }
