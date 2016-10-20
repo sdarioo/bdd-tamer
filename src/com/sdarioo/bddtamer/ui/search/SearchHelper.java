@@ -2,20 +2,31 @@ package com.sdarioo.bddtamer.ui.search;
 
 
 
+import com.sdarioo.bddtamer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.TreeTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiPredicate;
+import java.util.regex.Matcher;
 
 public class SearchHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchHelper.class);
 
+    private static final boolean IGNORE_CASE = true;
+
+    /**
+     * Finds, selects and expands next matching node
+     * @param tree
+     * @param text
+     */
     public static void findNext(TreeTable tree, String text) {
         if (text.length() <= 0) {
             return;
@@ -34,9 +45,12 @@ public class SearchHelper {
             LOGGER.error("Cannot find current row!");
             return;
         }
-        for (int i = currentIndex + 1; i < allNodes.size(); i++) {
-            if (isMatching(allNodes.get(i), text)) {
-                TreePath path = getPath(allNodes.get(i));
+        tree.clearSelection();
+        for (int i = 0; i < allNodes.size(); i++) {
+            int idx = (currentIndex + i + 1) % allNodes.size();
+            DefaultTreeTableNode next = allNodes.get(idx);
+            if (isMatching(next, text)) {
+                TreePath path = TreeUtil.pathToRoot(next);
                 tree.addSelectionPath(path);
                 tree.expandPath(path);
                 break;
@@ -44,6 +58,11 @@ public class SearchHelper {
         }
     }
 
+    /**
+     * Finds, selects and expands all matching nodes.
+     * @param tree
+     * @param text
+     */
     public static void findAll(TreeTable tree, String text) {
         if (text.length() <= 0) {
             return;
@@ -52,9 +71,11 @@ public class SearchHelper {
         List<DefaultTreeTableNode> allNodes = new ArrayList<>();
         visit(model, model.getRoot(), allNodes);
 
+        tree.clearSelection();
         for (int i = 0; i < allNodes.size(); i++) {
-            if (isMatching(allNodes.get(i), text)) {
-                TreePath path = getPath(allNodes.get(i));
+            DefaultTreeTableNode next = allNodes.get(i);
+            if (isMatching(next, text)) {
+                TreePath path = TreeUtil.pathToRoot(next);
                 tree.addSelectionPath(path);
                 tree.expandPath(path);
             }
@@ -75,7 +96,7 @@ public class SearchHelper {
         if (node != null) {
             for (int i = 0; i < node.getColumnCount(); i++) {
                 String columnText = node.getValueAt(i).toString();
-                if (columnText.contains(text)) {
+                if (MATCHER.test(columnText, text)) {
                     return true;
                 }
             }
@@ -91,12 +112,8 @@ public class SearchHelper {
         return (DefaultTreeTableNode)nodeObj;
     }
 
-    private static TreePath getPath(DefaultTreeTableNode node) {
-        List<Object> path = new LinkedList<>();
-        while (node != null) {
-            path.add(0, node);
-            node = (node.getParent() != null) ? toNode(node.getParent()) : null;
-        }
-        return new TreePath(path.toArray(new Object[0]));
-    }
+    private static final BiPredicate<String, String> MATCHER = (col, text) -> IGNORE_CASE ?
+            col.toLowerCase().contains(text.toLowerCase()) :
+            col.contains(text);
+
 }

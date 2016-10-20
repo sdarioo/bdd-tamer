@@ -8,7 +8,8 @@ import java.util.function.Function;
 public enum BddTreeColumns {
 
     NAME("Name", modelObject -> modelObject),
-    REQUIREMENT("Requirement", BddTreeColumns::getRequirement);
+    REQUIREMENT("Requirement", BddTreeColumns::getRequirement),
+    RUN_TIME("Exec. Time", modelObject -> "");
 
     private final String name;
     private final Function<Object, Object> valueProvider;

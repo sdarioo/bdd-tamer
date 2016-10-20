@@ -31,6 +31,7 @@ public class SearchComponent {
     private JComponent mainComponent;
     private MySearchTextField searchField;
 
+    private boolean isFindAll = true;
 
     public SearchComponent(TreeTable tree) {
         this.tree = tree;
@@ -72,6 +73,7 @@ public class SearchComponent {
         protected void onFocusLost() {
             super.onFocusLost();
             tree.requestFocus();
+            LOGGER.error("FOCUS LOST");
         }
 
         @Override
@@ -83,7 +85,11 @@ public class SearchComponent {
         }
 
         protected void onTextEntered(String text) {
-            SearchHelper.findNext(tree, text);
+            if (isFindAll) {
+                SearchHelper.findAll(tree, text);
+            } else {
+                SearchHelper.findNext(tree, text);
+            }
         }
 
         private void addListeners() {
@@ -91,12 +97,12 @@ public class SearchComponent {
             addDocumentListener(new DocumentAdapter() {
                 @Override
                 public void textChanged(DocumentEvent e) {
-                    try {
-                        String text = e.getDocument().getText(e.getOffset(), e.getLength());
-                        onTextChanged(text);
-                    } catch (BadLocationException exc) {
-                        LOGGER.error(exc.toString());
-                    }
+//                    try {
+//                        String text = e.getDocument().getText(e.getOffset(), e.getLength());
+//                        onTextChanged(text);
+//                    } catch (BadLocationException exc) {
+//                        LOGGER.error(exc.toString());
+//                    }
                 }
             });
 

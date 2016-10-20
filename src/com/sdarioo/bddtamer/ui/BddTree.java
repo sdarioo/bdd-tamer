@@ -75,6 +75,7 @@ public class BddTree {
         tree.setCellSelectionEnabled(false);
         tree.setColumnFocusEnabled(false);
 
+
         addTreeListeners();
     }
 
