@@ -85,7 +85,6 @@ public class SearchComponent {
         ((CardLayout)mainComponent.getLayout()).show(mainComponent, CARD_GENERAL);
         mainComponent.setPreferredSize(new Dimension(0, 0));
         parent.doLayout();
-        tree.grabFocus();
         tree.requestFocus();
     }
 
