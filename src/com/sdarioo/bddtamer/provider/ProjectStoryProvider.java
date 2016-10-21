@@ -50,7 +50,7 @@ public class ProjectStoryProvider implements StoryProvider {
         }
     }
 
-    private static boolean isStoryFile(VirtualFile file) {
+    public static boolean isStoryFile(VirtualFile file) {
         String name = file.getName();
         return (name != null) && name.endsWith(".story");
     }

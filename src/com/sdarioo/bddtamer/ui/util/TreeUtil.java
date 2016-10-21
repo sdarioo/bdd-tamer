@@ -1,14 +1,23 @@
 package com.sdarioo.bddtamer.ui.util;
 
+import com.sdarioo.bddtamer.ui.tree.BddTree;
+import com.sdarioo.bddtamer.ui.tree.BddTreeWalker;
 import de.sciss.treetable.j.DefaultTreeTableNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 public class TreeUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BddTree.class);
 
     private TreeUtil() {}
 
@@ -27,6 +36,18 @@ public class TreeUtil {
     }
 
     /**
+     * Converts node object into DefaultTreeTableNode.
+     * @param node
+     * @return
+     */
+    public static DefaultTreeTableNode asNode(Object node) {
+        if (!(node instanceof DefaultTreeTableNode)) {
+            throw new IllegalArgumentException("Expected DefaultTreeTableNode. Got: " + node);
+        }
+        return (DefaultTreeTableNode)node;
+    }
+
+    /**
      * Return user object from last component of given tree path
      * @param path
      * @return
@@ -39,17 +60,21 @@ public class TreeUtil {
         return null;
     }
 
-    public static DefaultTreeTableNode findNode(DefaultTreeTableNode root, Object modelObject) {
-        if (modelObject.equals(root.getUserObject())) {
-            return root;
-        }
-        DefaultTreeTableNode result = null;
-        for (int i = 0; i < root.getChildCount(); i++) {
-            result = findNode((DefaultTreeTableNode)root.getChildAt(i), modelObject);
-            if (result != null) {
-                break;
+    public static DefaultTreeTableNode findNode(TreeModel model,
+                                                Predicate<? super DefaultTreeTableNode> predicate) {
+
+        AtomicReference<DefaultTreeTableNode> result = new AtomicReference<>();
+        BddTreeWalker.walkTree(model, (path, node) -> {
+            if (predicate.test(node)) {
+                result.set(node);
+                return false;
             }
-        }
-        return result;
+            return true;
+        });
+        return result.get();
+    }
+
+    public static DefaultTreeTableNode findNode(TreeModel model, Object userObject) {
+        return findNode(model, node -> userObject.equals(node.getUserObject()));
     }
 }

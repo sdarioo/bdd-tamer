@@ -36,6 +36,7 @@ public enum BddTreeColumns {
     private static Object getExecutionTime(Object modelObject) {
         if (modelObject instanceof Scenario) {
             Scenario scenario = (Scenario)modelObject;
+            // TODO - fix me
             TestResult result = Plugin.getInstance().getSessionManager().getResult(scenario);
             if (result != null) {
                 return String.valueOf(result.getTime());

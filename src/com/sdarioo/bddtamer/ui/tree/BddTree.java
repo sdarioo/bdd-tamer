@@ -1,7 +1,14 @@
 package com.sdarioo.bddtamer.ui.tree;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.openapi.vfs.newvfs.BulkFileListener;
+import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
+import com.intellij.util.messages.MessageBusConnection;
 import com.sdarioo.bddtamer.launcher.*;
+import com.sdarioo.bddtamer.provider.ProjectStoryProvider;
+import com.sdarioo.bddtamer.provider.StoryParser;
 import com.sdarioo.bddtamer.provider.StoryProvider;
 import com.sdarioo.bddtamer.model.LocationHolder;
 import com.sdarioo.bddtamer.model.Scenario;
@@ -14,6 +21,7 @@ import de.sciss.treetable.j.DefaultTreeColumnModel;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.DefaultTreeTableSorter;
 import de.sciss.treetable.j.TreeTable;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +31,10 @@ import javax.swing.tree.TreePath;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -46,7 +56,11 @@ public class BddTree {
         this.project = project;
         this.storyProvider = storyProvider;
 
-        initializeUI(sessionManager);
+        initialize(sessionManager);
+
+        addTreeListeners();
+        addLauncherListener(sessionManager.getLauncher());
+        addProjectListener();
     }
 
     public TreeTable getTreeTable() {
@@ -61,8 +75,8 @@ public class BddTree {
         this.actionManager = actionManager;
     }
 
-    public DefaultTreeTableNode getRootNode() {
-        return (DefaultTreeTableNode)treeModel.getRoot();
+    public DefaultTreeModel getModel() {
+        return treeModel;
     }
 
     public void reload() {
@@ -76,7 +90,7 @@ public class BddTree {
         treeModel.nodeChanged(node);
     }
 
-    private void initializeUI(SessionManager sessionManager) {
+    private void initialize(SessionManager sessionManager) {
         DefaultTreeTableNode root = buildRoot();
         treeModel = createTreeModel(root);
         DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root, getColumnNames());
@@ -95,9 +109,6 @@ public class BddTree {
         tree.setRowSelectionAllowed(true);
         tree.setCellSelectionEnabled(false);
         tree.setColumnFocusEnabled(false);
-
-        addTreeListeners();
-        addLauncherListener(sessionManager.getLauncher());
     }
 
     private DefaultTreeModel createTreeModel(DefaultTreeTableNode root) {
@@ -199,7 +210,7 @@ public class BddTree {
             }
 
             private void refreshScenario(Scenario scenario, boolean scrollTo) {
-                DefaultTreeTableNode node = TreeUtil.findNode((DefaultTreeTableNode) treeModel.getRoot(), scenario);
+                DefaultTreeTableNode node = TreeUtil.findNode(treeModel, scenario);
                 if (node != null) {
                     SwingUtilities.invokeLater(() -> {
                         if (scrollTo) {
@@ -209,6 +220,50 @@ public class BddTree {
                     });
                 } else {
                     LOGGER.warn("Cannot find node for scenario: " + scenario);
+                }
+            }
+        });
+    }
+
+    private void addProjectListener() {
+        MessageBusConnection connect = project.getMessageBus().connect();
+
+        connect.subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
+            @Override
+            public void before(@NotNull List<? extends VFileEvent> list) {
+            }
+            @Override
+            public void after(@NotNull List<? extends VFileEvent> list) {
+                for (VFileEvent e : list) {
+                    if (!(e instanceof VFileContentChangeEvent)) {
+                        continue;
+                    }
+                    if ((e.getFile() == null) || !ProjectStoryProvider.isStoryFile(e.getFile())) {
+                        continue;
+                    }
+                    Path path = Paths.get(e.getPath());
+                    DefaultTreeTableNode node = TreeUtil.findNode(treeModel, n -> isStoryNode(n, path));
+                    if (node != null) {
+             //           reloadStoryNode(node, path);
+                    }
+                }
+            }
+
+            private boolean isStoryNode(DefaultTreeTableNode node, Path storyPath) {
+                return (node.getUserObject() instanceof Story) &&
+                        ((Story) node.getUserObject()).getLocation().getPath().equals(storyPath);
+            }
+
+            private void reloadStoryNode(DefaultTreeTableNode node, Path storyPath) {
+                try {
+                    Story newStory = StoryParser.parse(storyPath);
+                    node.setUserObject(newStory);
+                    updateRowData(node);
+                    node.removeAllChildren();
+                    newStory.getScenarios().forEach(scenario -> node.add(createNode(scenario)));
+                    treeModel.nodeStructureChanged(node);
+                } catch (IOException e) {
+                    LOGGER.warn(e.toString());
                 }
             }
         });

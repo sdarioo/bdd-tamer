@@ -38,7 +38,7 @@ public class ClearResultsAction extends ActionBase {
         List<Scenario> scenariosToRefresh = new ArrayList<>(sessionManager.getFinishedScenarios());
         sessionManager.clear();
         scenariosToRefresh.forEach(s -> {
-            DefaultTreeTableNode node = TreeUtil.findNode(tree.getRootNode(), s);
+            DefaultTreeTableNode node = TreeUtil.findNode(tree.getModel(), s);
             if (node != null) {
                 tree.refreshNode(node);
             }
