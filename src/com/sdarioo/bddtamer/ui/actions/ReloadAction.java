@@ -18,6 +18,6 @@ public class ReloadAction extends ActionBase {
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
         tree.getActionManager().getCleanResultsAction().actionPerformed(anActionEvent);
-        tree.reload();
+        tree.reloadTree();
     }
 }

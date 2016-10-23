@@ -19,7 +19,6 @@ public class Location {
         this.endLine = endLine;
     }
 
-
     public Path getPath() {
         return path;
     }

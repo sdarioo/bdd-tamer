@@ -75,16 +75,26 @@ public class BddTree {
         this.actionManager = actionManager;
     }
 
+    /**
+     * @return tree model
+     */
     public DefaultTreeModel getModel() {
         return treeModel;
     }
 
-    public void reload() {
+    /**
+     * Reloads whole tree structure
+     */
+    public void reloadTree() {
         DefaultTreeTableNode root = buildRoot();
         treeModel = createTreeModel(root);
         tree.setTreeModel(treeModel);
     }
 
+    /**
+     * Refreshes visual appearance of given node
+     * @param node
+     */
     public void refreshNode(DefaultTreeTableNode node) {
         updateRowData(node);
         treeModel.nodeChanged(node);
@@ -125,6 +135,14 @@ public class BddTree {
             story.getScenarios().forEach(scenario -> storyNode.add(createNode(scenario)));
         });
         return root;
+    }
+
+    private void reloadStoryNode(DefaultTreeTableNode node, Story story) {
+        node.setUserObject(story);
+        updateRowData(node);
+        node.removeAllChildren();
+        story.getScenarios().forEach(scenario -> node.add(createNode(scenario)));
+        treeModel.reload(node);
     }
 
     private static DefaultTreeTableNode createNode(Object modelObject) {
@@ -244,27 +262,18 @@ public class BddTree {
                     Path path = Paths.get(e.getPath());
                     DefaultTreeTableNode node = TreeUtil.findNode(treeModel, n -> isStoryNode(n, path));
                     if (node != null) {
-             //           reloadStoryNode(node, path);
+                        try {
+                            Story story = StoryParser.parse(path);
+                            reloadStoryNode(node, story);
+                        } catch (IOException exc) {
+                            LOGGER.warn(e.toString());
+                        }
                     }
                 }
             }
-
             private boolean isStoryNode(DefaultTreeTableNode node, Path storyPath) {
                 return (node.getUserObject() instanceof Story) &&
                         ((Story) node.getUserObject()).getLocation().getPath().equals(storyPath);
-            }
-
-            private void reloadStoryNode(DefaultTreeTableNode node, Path storyPath) {
-                try {
-                    Story newStory = StoryParser.parse(storyPath);
-                    node.setUserObject(newStory);
-                    updateRowData(node);
-                    node.removeAllChildren();
-                    newStory.getScenarios().forEach(scenario -> node.add(createNode(scenario)));
-                    treeModel.nodeStructureChanged(node);
-                } catch (IOException e) {
-                    LOGGER.warn(e.toString());
-                }
             }
         });
     }

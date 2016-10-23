@@ -3,14 +3,43 @@ package com.sdarioo.bddtamer.launcher;
 import com.sdarioo.bddtamer.model.Scenario;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AbstractLauncher implements Launcher {
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
     private final List<LauncherListener> listeners = new CopyOnWriteArrayList<>();
 
     protected AbstractLauncher() {
     }
+
+    @Override
+    public void submit(List<Scenario> scenarios) throws LauncherException {
+        if (!isRunning.compareAndSet(false, true)) {
+            throw new LauncherException("There is other run in progress.");
+        }
+        notifySessionStarted(scenarios);
+
+        executeAsync(scenarios, () -> {
+            isRunning.set(false);
+            notifySessionFinished();
+        });
+    }
+
+    protected void executeAsync(List<Scenario> scenarios, Runnable finishCallback) {
+
+        CompletableFuture.runAsync( () -> {
+            for (Scenario scenario : scenarios) {
+                notifyTestStarted(scenario);
+                TestResult result = execute(scenario);
+                notifyTestFinished(scenario, result);
+            }
+        }).thenRun(finishCallback);
+    }
+
+    protected abstract TestResult execute(Scenario scenario);
 
     @Override
     public void addListener(LauncherListener listener) {
@@ -37,4 +66,5 @@ public abstract class AbstractLauncher implements Launcher {
     protected void notifyTestFinished(Scenario scenario, TestResult result) {
         listeners.forEach(l -> l.scenarioFinished(scenario, result));
     }
+
 }

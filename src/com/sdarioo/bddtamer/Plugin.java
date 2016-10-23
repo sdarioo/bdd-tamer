@@ -1,6 +1,7 @@
 package com.sdarioo.bddtamer;
 
 import com.intellij.openapi.components.ApplicationComponent;
+import com.sdarioo.bddtamer.launcher.CmdLauncher;
 import com.sdarioo.bddtamer.launcher.DummyLauncher;
 import com.sdarioo.bddtamer.launcher.Launcher;
 import com.sdarioo.bddtamer.launcher.SessionManager;
@@ -39,7 +40,8 @@ public class Plugin implements ApplicationComponent {
     public void initComponent() {
         LOGGER.info("Initialize: " + LocalDateTime.now());
 
-        launcher = new DummyLauncher();
+        //launcher = new DummyLauncher();
+        launcher = new CmdLauncher();
         storyProvider = new ProjectStoryProvider();
         sessionManager = new SessionManager(launcher);
     }
