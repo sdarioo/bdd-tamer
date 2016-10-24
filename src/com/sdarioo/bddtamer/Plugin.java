@@ -8,15 +8,18 @@ import com.sdarioo.bddtamer.launcher.SessionManager;
 import com.sdarioo.bddtamer.provider.ProjectStoryProvider;
 import com.sdarioo.bddtamer.provider.StoryProvider;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+import com.intellij.openapi.diagnostic.Logger;
+
 
 import java.time.LocalDateTime;
 
 
 public class Plugin implements ApplicationComponent {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Plugin.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(Plugin.class);
+    private static final Logger LOGGER = Logger.getInstance(Plugin.class);
     private static final String NAME = "BDD Viewer";
 
     private static Plugin INSTANCE;

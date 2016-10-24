@@ -128,10 +128,23 @@ public class BddTree {
     private DefaultTreeTableNode buildRoot() {
         DefaultTreeTableNode root = createNode(project);
 
+        Map<Path, DefaultTreeTableNode> folderNodes = new HashMap<>();
+
         List<Story> stories = storyProvider.getStories(project);
         stories.forEach(story -> {
             DefaultTreeTableNode storyNode = createNode(story);
-            root.add(storyNode);
+            Path dir = story.getLocation().getPath().getParent();
+            DefaultTreeTableNode parent = root;
+            if (!"stories".equals(dir.getFileName().toString())) {
+                parent = folderNodes.get(dir);
+                if (parent == null) {
+                    parent = createNode(dir.getFileName());
+                    folderNodes.put(dir, parent);
+                    root.add(parent);
+                }
+            }
+
+            parent.add(storyNode);
             story.getScenarios().forEach(scenario -> storyNode.add(createNode(scenario)));
         });
         return root;

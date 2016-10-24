@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.nio.file.Path;
 
 public class BddIconMap implements IconMap {
 
@@ -24,13 +25,16 @@ public class BddIconMap implements IconMap {
     }
 
     @Override
-    public Icon getIcon(TreeTable treeTable, Object node, boolean expanded, boolean leaf) {
+    public Icon getIcon(TreeTable treeTable, Object userObject, boolean expanded, boolean leaf) {
 
-        if (node instanceof Story) {
+        if (userObject instanceof Path) {
             return AllIcons.Nodes.Folder;
         }
-        if (node instanceof Scenario) {
-            Scenario scenario = (Scenario)node;
+        if (userObject instanceof Story) {
+            return AllIcons.FileTypes.Text;
+        }
+        if (userObject instanceof Scenario) {
+            Scenario scenario = (Scenario)userObject;
 
             Icon icon = null;
             if (sessionManager.isPending(scenario)) {
@@ -49,7 +53,7 @@ public class BddIconMap implements IconMap {
                     }
                 }
             }
-            return (icon != null) ? icon : AllIcons.General.Bullet;
+            return (icon != null) ? icon : AllIcons.Json.Object;
         }
         return null;
     }
