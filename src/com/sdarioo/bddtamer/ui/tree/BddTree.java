@@ -48,19 +48,23 @@ public class BddTree {
     private TreeTable tree;
     private DefaultTreeModel treeModel;
     private BddActionManager actionManager;
-
+    private final List<BddTreeColumns.ColumnInfo> columnInfos;
 
     public BddTree(Project project,
                    StoryProvider storyProvider,
                    SessionManager sessionManager) {
         this.project = project;
         this.storyProvider = storyProvider;
-
+        this.columnInfos = BddTreeColumns.getColumns(sessionManager);
         initialize(sessionManager);
 
         addTreeListeners();
         addLauncherListener(sessionManager.getLauncher());
         addProjectListener();
+
+        for (BddTreeColumns.ColumnInfo column : columnInfos) {
+            tree.getColumn(column.getName()).setPreferredWidth(column.getPreferredWidth());
+        }
     }
 
     public TreeTable getTreeTable() {
@@ -103,7 +107,8 @@ public class BddTree {
     private void initialize(SessionManager sessionManager) {
         DefaultTreeTableNode root = buildRoot();
         treeModel = createTreeModel(root);
-        DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root, getColumnNames());
+        DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root,
+                columnInfos.stream().map(c -> c.toString()).collect(Collectors.toList()));
         columnModel.setAllColumnsEditable(false);
 
         tree = new TreeTable(treeModel, columnModel);
@@ -127,7 +132,6 @@ public class BddTree {
 
     private DefaultTreeTableNode buildRoot() {
         DefaultTreeTableNode root = createNode(project);
-
         List<Story> stories = storyProvider.getStories(project);
         stories.forEach(story -> {
             DefaultTreeTableNode storyNode = createNode(story);
@@ -145,27 +149,20 @@ public class BddTree {
         treeModel.reload(node);
     }
 
-    private static DefaultTreeTableNode createNode(Object modelObject) {
+    private DefaultTreeTableNode createNode(Object modelObject) {
         DefaultTreeTableNode node = new DefaultTreeTableNode(getRowData(modelObject));
         node.setUserObject(modelObject);
         return node;
     }
 
-    private static String[] getColumnNames() {
-        return Arrays.stream(BddTreeColumns.values())
-                .map(BddTreeColumns::getName)
-                .collect(Collectors.toList())
-                .toArray(new String[0]);
-    }
-
-    private static Object[] getRowData(Object modelObject) {
-        return Arrays.stream(BddTreeColumns.values())
+    private Object[] getRowData(Object modelObject) {
+        return columnInfos.stream()
                 .map(c -> c.getValue(modelObject))
                 .collect(Collectors.toList())
                 .toArray(new Object[0]);
     }
 
-    private static void updateRowData(DefaultTreeTableNode node) {
+    private void updateRowData(DefaultTreeTableNode node) {
         Object[] data = getRowData(node.getUserObject());
         for (int i = 0; i < data.length; i++) {
             node.setValueAt(data[i], i);
