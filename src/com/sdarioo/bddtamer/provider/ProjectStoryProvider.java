@@ -39,7 +39,8 @@ public class ProjectStoryProvider implements StoryProvider {
         if (!file.exists()) {
             return;
         }
-        if (file.isDirectory()) {
+
+        if (file.isDirectory() && !"target".equals(file.getName())) {
             VirtualFile[] children = file.getChildren();
             for (VirtualFile child : children) {
                 recursiveFindPaths(child, paths);
