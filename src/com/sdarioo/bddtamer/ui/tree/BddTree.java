@@ -19,7 +19,6 @@ import com.sdarioo.bddtamer.ui.util.IdeUtil;
 import com.sdarioo.bddtamer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeColumnModel;
 import de.sciss.treetable.j.DefaultTreeTableNode;
-import de.sciss.treetable.j.DefaultTreeTableSorter;
 import de.sciss.treetable.j.TreeTable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -121,9 +120,6 @@ public class BddTree {
 
         tree.setDragEnabled(false);
         tree.setAutoCreateRowHeader(false);
-        tree.setRowSelectionAllowed(true);
-        tree.setCellSelectionEnabled(false);
-        tree.setColumnFocusEnabled(false);
     }
 
     private DefaultTreeModel createTreeModel(DefaultTreeTableNode root) {
@@ -185,7 +181,7 @@ public class BddTree {
 
     private JPopupMenu createPopupMenu() {
         JPopupMenu menu = new JPopupMenu();
-        menu.add(new ActionAdapter(actionManager.getRunSelectedAction()));
+        actionManager.getContextMenuActions().stream().forEach(a -> menu.add(new ActionAdapter(a)));
         return menu;
     }
 
@@ -218,26 +214,19 @@ public class BddTree {
     }
 
     private void addLauncherListener(Launcher launcher) {
-        launcher.addListener(new LauncherListener() {
+        launcher.addListener(new LauncherListenerAdapter() {
             @Override
             public void scenarioStarted(Scenario scenario) {
                 refreshScenario(scenario, true);
             }
-
             @Override
             public void scenarioFinished(Scenario scenario, TestResult result) {
                 refreshScenario(scenario, false);
             }
-
             @Override
             public void sessionStarted(List<Scenario> scope) {
                 scope.forEach( scenario -> refreshScenario(scenario, false));
             }
-
-            @Override
-            public void sessionFinished() {
-            }
-
             private void refreshScenario(Scenario scenario, boolean scrollTo) {
                 DefaultTreeTableNode node = TreeUtil.findNode(treeModel, scenario);
                 if (node != null) {

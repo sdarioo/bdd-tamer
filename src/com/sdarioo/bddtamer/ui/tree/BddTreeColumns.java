@@ -11,22 +11,25 @@ import java.util.List;
 
 public class BddTreeColumns {
 
+    public static String NAME_COLUMN = "Name";
+    public static String L2_COLUMN = "L2";
+    public static String TIME_COLUMN = "Exec. Time";
 
     public static List<ColumnInfo> getColumns(SessionManager sessionManager) {
         List<ColumnInfo> columns = new ArrayList<>();
-        columns.add(new ColumnInfo("Name", 1000) {
+        columns.add(new ColumnInfo(NAME_COLUMN, 1000) {
             @Override
             Object getValue(Object userObject) {
                 return userObject;
             }
         });
-        columns.add(new ColumnInfo("L2", 400) {
+        columns.add(new ColumnInfo(L2_COLUMN, 400) {
             @Override
             Object getValue(Object userObject) {
                 return (userObject instanceof Scenario) ? ((Scenario)userObject).getMeta().getRequirements() : "";
             }
         });
-        columns.add(new ColumnInfo("Exec. Time", 150) {
+        columns.add(new ColumnInfo(TIME_COLUMN, 150) {
             @Override
             Object getValue(Object userObject) {
                 if (userObject instanceof Scenario) {

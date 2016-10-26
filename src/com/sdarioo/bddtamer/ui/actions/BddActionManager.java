@@ -7,6 +7,7 @@ import com.sdarioo.bddtamer.launcher.LauncherListenerAdapter;
 import com.sdarioo.bddtamer.launcher.SessionManager;
 import com.sdarioo.bddtamer.model.Scenario;
 import com.sdarioo.bddtamer.ui.tree.BddTree;
+import com.sdarioo.bddtamer.ui.tree.BddTreeColumns;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,7 @@ public class BddActionManager {
     private final ActionBase expandAllAction;
     private final ActionBase collapseAllAction;
     private final ActionBase reloadTreeAction;
+    private final ActionBase copyL2Action;
 
 
     public BddActionManager(BddTree tree, SessionManager sessionManager) {
@@ -28,12 +30,17 @@ public class BddActionManager {
         expandAllAction = new ExpandAction(tree.getTreeTable());
         collapseAllAction = new CollapseAction(tree.getTreeTable());
         reloadTreeAction = new ReloadAction(tree);
+        copyL2Action = new CopyAction(tree.getTreeTable(), BddTreeColumns.L2_COLUMN);
 
         addLauncherListener(sessionManager.getLauncher());
 
     }
 
-    public List<AnAction> getToolbarAction() {
+    public List<AnAction> getContextMenuActions() {
+        return Arrays.asList(runSelectedAction, copyL2Action);
+    }
+
+    public List<AnAction> getToolbarActions() {
         return Arrays.asList(runSelectedAction,
                 cleanResultsAction,
                 Separator.getInstance(),

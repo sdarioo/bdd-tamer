@@ -49,7 +49,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         DefaultActionGroup actionGroup = new DefaultActionGroup();
         BddActionManager actionManager = bddTreeView.getActionManager();
-        actionManager.getToolbarAction().forEach(a -> actionGroup.add(a));
+        actionManager.getToolbarActions().forEach(a -> actionGroup.add(a));
 
         ActionToolbar toolBar = ActionManager.getInstance().createActionToolbar("bddTree.Toolbar", actionGroup, false);
         panel.setToolbar(toolBar.getComponent());
