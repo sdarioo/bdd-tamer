@@ -89,9 +89,10 @@ public class BddTree {
      * Reloads whole tree structure
      */
     public void reloadTree() {
-        DefaultTreeTableNode root = buildRoot();
-        treeModel = createTreeModel(root);
-        tree.setTreeModel(treeModel);
+        DefaultTreeTableNode root = (DefaultTreeTableNode)treeModel.getRoot();
+        root.removeAllChildren();
+        addRootChildren(root);
+        treeModel.reload(root);
     }
 
     /**
@@ -104,7 +105,7 @@ public class BddTree {
     }
 
     private void initialize(SessionManager sessionManager) {
-        DefaultTreeTableNode root = buildRoot();
+        DefaultTreeTableNode root = createRoot();
         treeModel = createTreeModel(root);
         DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root,
                 columnInfos.stream().map(c -> c.toString()).collect(Collectors.toList()));
@@ -126,8 +127,13 @@ public class BddTree {
         return new DefaultTreeModel(root);
     }
 
-    private DefaultTreeTableNode buildRoot() {
+    private DefaultTreeTableNode createRoot() {
         DefaultTreeTableNode root = createNode(project);
+        addRootChildren(root);
+        return root;
+    }
+
+    private void addRootChildren(DefaultTreeTableNode root) {
 
         Map<Path, DefaultTreeTableNode> folderNodes = new HashMap<>();
 
@@ -148,7 +154,6 @@ public class BddTree {
             parent.add(storyNode);
             story.getScenarios().forEach(scenario -> storyNode.add(createNode(scenario)));
         });
-        return root;
     }
 
     private void reloadStoryNode(DefaultTreeTableNode node, Story story) {
