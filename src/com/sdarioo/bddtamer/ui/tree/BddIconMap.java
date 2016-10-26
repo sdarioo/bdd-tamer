@@ -31,7 +31,7 @@ public class BddIconMap implements IconMap {
             return AllIcons.Nodes.Folder;
         }
         if (userObject instanceof Story) {
-            return AllIcons.FileTypes.Text;
+            return AllIcons.Nodes.Class;
         }
         if (userObject instanceof Scenario) {
             Scenario scenario = (Scenario)userObject;
@@ -53,7 +53,7 @@ public class BddIconMap implements IconMap {
                     }
                 }
             }
-            return (icon != null) ? icon : AllIcons.Json.Object;
+            return (icon != null) ? icon : AllIcons.FileTypes.Text;
         }
         return null;
     }

@@ -111,8 +111,8 @@ public class BddTree {
         tree.setShowsRootHandles(true);
         tree.setIconMap(new BddIconMap(sessionManager));
 
-        tree.setAutoCreateRowSorter(true);
-        ((DefaultTreeTableSorter)tree.getRowSorter()).setSortsOnUpdates(true);
+        BddTreeSorter sorter = new BddTreeSorter(treeModel, columnModel);
+        tree.setRowSorter(sorter);
 
         tree.setDragEnabled(false);
         tree.setAutoCreateRowHeader(false);
