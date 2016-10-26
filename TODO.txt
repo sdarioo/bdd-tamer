@@ -1,5 +1,4 @@
-1. Tree sorting
-2. Column size
+
 4. Search field in non dark theme
 5. Raw selection color in non-dark theme
 6. Individual cell selection
