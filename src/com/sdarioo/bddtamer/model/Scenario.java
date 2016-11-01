@@ -13,6 +13,8 @@ public class Scenario implements LocationHolder {
     private final List<Step> steps;
     private final Table examples;
 
+    private Story story;
+
     Scenario(String name, Meta meta, Location location, List<Step> steps, Table examples) {
         this.name = name;
         this.meta = meta;
@@ -40,6 +42,14 @@ public class Scenario implements LocationHolder {
 
     public List<Step> getSteps() {
         return Collections.unmodifiableList(steps);
+    }
+
+    public Story getStory() {
+        return story;
+    }
+
+    void setStory(Story story) {
+        this.story = story;
     }
 
     @Override

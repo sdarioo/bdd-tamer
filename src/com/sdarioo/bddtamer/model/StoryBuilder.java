@@ -6,23 +6,13 @@ import java.util.Objects;
 
 public class StoryBuilder {
 
-    private String name;
     private Location location;
 
     private List<Scenario> scenarioList = new ArrayList<>();
 
     public Story build() {
-        Objects.nonNull(name);
         Objects.nonNull(location);
-        return new Story(name, location, scenarioList);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        return new Story(location, scenarioList);
     }
 
     public Location getLocation() {

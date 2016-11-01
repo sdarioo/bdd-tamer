@@ -2,7 +2,7 @@ package com.sdarioo.bddtamer.model;
 
 
 /**
- * Base inteface for model objects that have locations
+ * Base interface for model objects that have associated locations
  */
 public interface LocationHolder {
 

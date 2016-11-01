@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -31,7 +30,6 @@ public class StoryParser {
         List<String> lines = Files.readAllLines(path);
 
         StoryBuilder builder = new StoryBuilder();
-        builder.setName(toStoryName(path));
         builder.setLocation(new Location(path, 1, lines.size()));
 
         int scenarioStartLine = -1;
@@ -104,19 +102,5 @@ public class StoryParser {
         }
         return builder.build();
     }
-
-    private static String toStoryName(Path path) {
-        String name = path.getFileName().toString();
-        int index = name.lastIndexOf('.');
-        if (index > 0) {
-            name = name.substring(0, index);
-        }
-        String[] parts = name.split("_");
-        StringBuilder sb = new StringBuilder();
-        Arrays.stream(parts).forEach(s -> sb.append(Character.toUpperCase(s.charAt(0)) + s.substring(1)));
-        return sb.toString();
-    }
-
-
 
 }

@@ -13,6 +13,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * StoryProvider implementation that scans whole project for .story files.
+ */
 public class ProjectStoryProvider implements StoryProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectStoryProvider.class);

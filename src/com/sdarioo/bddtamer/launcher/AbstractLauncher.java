@@ -33,7 +33,12 @@ public abstract class AbstractLauncher implements Launcher {
         CompletableFuture.runAsync( () -> {
             for (Scenario scenario : scenarios) {
                 notifyTestStarted(scenario);
-                TestResult result = execute(scenario);
+                TestResult result;
+                if (isRunnable(scenario)) {
+                    result = execute(scenario);
+                } else {
+                    result = new TestResult(RunStatus.Skipped, 0L, "");
+                }
                 notifyTestFinished(scenario, result);
             }
         }).thenRun(finishCallback);
@@ -49,6 +54,10 @@ public abstract class AbstractLauncher implements Launcher {
     @Override
     public void removeListener(LauncherListener listener) {
         listeners.remove(listener);
+    }
+
+    protected boolean isRunnable(Scenario scenario) {
+        return scenario.getStory().isRunnable();
     }
 
     protected void notifySessionStarted(List<Scenario> scope) {
