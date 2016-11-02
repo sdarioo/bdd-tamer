@@ -13,6 +13,7 @@ public class Meta {
     private final Map<String, String> props = new HashMap<>();
 
     private static final String REQUIREMENT_KEY = "Requirement";
+    private static final String SKIP_KEY = "Skip";
 
     public void add(String key, String value) {
         props.put(key, value);
@@ -29,5 +30,9 @@ public class Meta {
     public List<String> getRequirementsList() {
         String req = getRequirements();
         return Arrays.stream(req.split(",")).map(String::trim).collect(Collectors.toList());
+    }
+
+    public boolean isSkip() {
+        return props.containsKey(SKIP_KEY);
     }
 }

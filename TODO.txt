@@ -1,6 +1,4 @@
 
-4. Search field in non dark theme
-5. Raw selection color in non-dark theme
-6. Individual cell selection
-
-8. Launcher implementation
+1. Search field in non dark theme
+2. Launcher implementation
+3. Logging

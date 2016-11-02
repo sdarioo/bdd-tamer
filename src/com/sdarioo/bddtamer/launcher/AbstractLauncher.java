@@ -34,10 +34,10 @@ public abstract class AbstractLauncher implements Launcher {
             for (Scenario scenario : scenarios) {
                 notifyTestStarted(scenario);
                 TestResult result;
-                if (isRunnable(scenario)) {
+                if (scenario.isRunnable()) {
                     result = execute(scenario);
                 } else {
-                    result = new TestResult(RunStatus.Skipped, 0L, "");
+                    result = new TestResult(RunStatus.Skipped, 0L, "Skipping: " + scenario.getName());
                 }
                 notifyTestFinished(scenario, result);
             }
@@ -54,10 +54,6 @@ public abstract class AbstractLauncher implements Launcher {
     @Override
     public void removeListener(LauncherListener listener) {
         listeners.remove(listener);
-    }
-
-    protected boolean isRunnable(Scenario scenario) {
-        return scenario.getStory().isRunnable();
     }
 
     protected void notifySessionStarted(List<Scenario> scope) {

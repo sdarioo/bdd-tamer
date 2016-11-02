@@ -52,6 +52,16 @@ public class Scenario implements LocationHolder {
         this.story = story;
     }
 
+    /**
+     * @return whether this scenario can be automatically executed
+     */
+    public boolean isRunnable() {
+        if (story == null) {
+            return false;
+        }
+        return story.isRunnable() && !meta.isSkip();
+    }
+
     @Override
     public String toString() {
         return name;

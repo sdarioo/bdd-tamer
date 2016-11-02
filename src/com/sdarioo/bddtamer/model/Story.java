@@ -46,7 +46,7 @@ public class Story implements LocationHolder {
     }
 
     /**
-     * @return whether given story can be automatically executed
+     * @return whether this story can be automatically executed
      */
     public boolean isRunnable() {
         return Files.isRegularFile(getJavaPath());
