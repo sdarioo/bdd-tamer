@@ -1,8 +1,8 @@
 <idea-plugin version="2">
-  <id>com.sdarioo.bddtamer</id>
-  <name>BDD visualizer and runner</name>
+  <id>com.sdarioo.bddviewer</id>
+  <name>BDD Viewer</name>
   <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <vendor email="sdarioo@github.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
   <description><![CDATA[
       Enter short description for your plugin here.<br>
@@ -21,7 +21,7 @@
   <application-components>
     <component>
       <interface-class>com.intellij.openapi.components.ApplicationComponent</interface-class>
-      <implementation-class>com.sdarioo.bddtamer.Plugin</implementation-class>
+      <implementation-class>com.sdarioo.bddviewer.Plugin</implementation-class>
     </component>
   </application-components>
 
@@ -32,9 +32,9 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
-    <toolWindow id="BDD"
+    <toolWindow id="BDD Viewer"
                 anchor="bottom"
-                factoryClass="com.sdarioo.bddtamer.ui.BddToolWindowFactory"
+                factoryClass="com.sdarioo.bddviewer.ui.BddToolWindowFactory"
     />
   </extensions>
 
