@@ -48,7 +48,6 @@ public class OutputConsole {
             public void sessionStarted(List<Scenario> scope) {
                 clear();
             }
-
             @Override
             public void scenarioFinished(Scenario scenario, TestResult result) {
                 String text = result.getOutput();
@@ -56,6 +55,10 @@ public class OutputConsole {
                     append(System.getProperty("line.separator"));
                     append(text);
                 }
+            }
+            @Override
+            public void output(String message) {
+                append(message);
             }
         });
     }

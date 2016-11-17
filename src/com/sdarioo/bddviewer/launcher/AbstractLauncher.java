@@ -72,4 +72,8 @@ public abstract class AbstractLauncher implements Launcher {
         listeners.forEach(l -> l.scenarioFinished(scenario, result));
     }
 
+    protected void notifyOutput(String message) {
+        listeners.forEach(l -> l.output(message));
+    }
+
 }

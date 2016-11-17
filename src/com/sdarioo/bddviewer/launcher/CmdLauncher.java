@@ -8,34 +8,94 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class CmdLauncher extends AbstractLauncher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdLauncher.class);
+
 
     @Override
     protected TestResult execute(Scenario scenario) {
 
         Path path = null;
         try {
+            Path runDir = getRunDirectory(scenario);
+            if (runDir == null) {
+                return new TestResult(RunStatus.Failed, 0L, "Cannot find run directory for scenario: " + scenario.getLocation().getPath());
+            }
             path = writeToTempFile(scenario);
-            StringBuilder sb = new StringBuilder();
-            execute(new String[] { "java", "-version"}, s->sb.append(s+'\n'), s->sb.append(s+'\n'));
+            String cmdLine = createCommandLine(path);
+            Consumer<String> output = msg -> notifyOutput(msg + '\n');
 
-            return new TestResult(RunStatus.Passed, 100L, path.toString() + '\n' + sb.toString());
+            long startTime = System.currentTimeMillis();
+            output.accept("Running: " + cmdLine);
+            int exitCode = execute(cmdLine, runDir, output, output);
+            long time = System.currentTimeMillis() - startTime;
+
+            RunStatus status = (exitCode == 0) ? RunStatus.Passed : RunStatus.Failed;
+            return new TestResult(status, time, "Process finished with exit code: " + exitCode);
         } catch (IOException e) {
             return new TestResult(RunStatus.Failed, 0L, e.toString());
         } finally {
-            delete(path);
+            deleteFile(path);
         }
     }
 
-    private static final Path writeToTempFile(Scenario scenario) throws IOException {
+    private static int execute(String command, Path runDir, Consumer<String> out, Consumer<String> err) {
+        try {
+            Runtime runtime = Runtime.getRuntime();
+            Process process = runtime.exec(command, null, runDir.toFile());
+
+            readStream(process.getInputStream(), out);
+            readStream(process.getErrorStream(), err);
+            return process.waitFor();
+
+        } catch (IOException | InterruptedException e) {
+            err.accept(e.toString());
+            return -1;
+        }
+    }
+
+    private static void readStream(InputStream inputStream, Consumer<String> consumer) throws IOException {
+        String line = null;
+        try (BufferedReader stdError = new BufferedReader(new InputStreamReader(inputStream))) {
+            while ((line = stdError.readLine()) != null) {
+                consumer.accept(line);
+            }
+        }
+    }
+
+    private static Path getRunDirectory(Scenario scenario) {
+        Path path = scenario.getLocation().getPath();
+        while (path != null) {
+            if (Files.isDirectory(path) && "pscm_bdd".equals(path.getFileName().toString())) {
+                return path;
+            }
+            path = path.getParent();
+        }
+        return null;
+    }
+
+    private static String createCommandLine(Path path) {
+        String normalizedPath = path.toString().replace("\\", "/");
+        normalizedPath = normalizedPath.replace(" ", "\\ ");
+
+        List<String> argsList = new ArrayList<>();
+        argsList.add("launchCustomScenario");
+        argsList.add(normalizedPath);
+        String args = argsList.stream().collect(Collectors.joining(" "));
+        return "mvn.cmd exec:java -Dexec.classpathScope=test -Dexec.args=\"" + args + "\"";
+    }
+
+    private static Path writeToTempFile(Scenario scenario) throws IOException {
         Location location = scenario.getLocation();
         List<String> allLines = Files.readAllLines(location.getPath());
         List<String> scenarioLines = allLines.subList(location.getStartLine() - 1, location.getEndLine());
@@ -45,7 +105,7 @@ public class CmdLauncher extends AbstractLauncher {
         return path;
     }
 
-    private static void delete(Path path) {
+    private static void deleteFile(Path path) {
         if (path != null) {
             try {
                 Files.deleteIfExists(path);
@@ -54,28 +114,4 @@ public class CmdLauncher extends AbstractLauncher {
             }
         }
     }
-
-    private static int execute(String[] command, Consumer<String> out, Consumer<String> err) {
-        try {
-            Process proc = Runtime.getRuntime().exec(command);
-
-            String line;
-            try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-                while ((line = stdInput.readLine()) != null) {
-                    out.accept(line);
-                }
-            }
-            try (BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
-                while ((line = stdError.readLine()) != null) {
-                    err.accept(line);
-                }
-            }
-            return proc.waitFor();
-
-        } catch (IOException | InterruptedException e) {
-            err.accept(e.toString());
-            return -1;
-        }
-    }
-
 }

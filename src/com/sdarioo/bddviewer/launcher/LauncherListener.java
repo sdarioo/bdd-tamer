@@ -13,4 +13,6 @@ public interface LauncherListener {
     void sessionStarted(List<Scenario> scope);
 
     void sessionFinished();
+
+    void output(String message);
 }

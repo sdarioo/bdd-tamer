@@ -21,4 +21,9 @@ public class LauncherListenerAdapter implements LauncherListener {
     @Override
     public void sessionFinished() {
     }
+
+    @Override
+    public void output(String message) {
+    }
+
 }
