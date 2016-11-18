@@ -1,4 +1,4 @@
-package com.sdarioo.bddviewer.ui.search;
+package com.sdarioo.bddviewer.ui.tree.search;
 
 
 import com.intellij.find.editorHeaderActions.Utils;

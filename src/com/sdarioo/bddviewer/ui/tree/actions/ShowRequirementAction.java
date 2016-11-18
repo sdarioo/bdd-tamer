@@ -1,8 +1,9 @@
-package com.sdarioo.bddviewer.ui.actions;
+package com.sdarioo.bddviewer.ui.tree.actions;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.ui.actions.ActionBase;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
 

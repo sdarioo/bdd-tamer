@@ -1,4 +1,4 @@
-package com.sdarioo.bddviewer.ui.actions;
+package com.sdarioo.bddviewer.ui.tree.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.Separator;
@@ -6,13 +6,14 @@ import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.ui.actions.ActionBase;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
 import com.sdarioo.bddviewer.ui.tree.BddTreeColumns;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class BddActionManager {
+public class BddTreeActionManager {
 
     private final ActionBase runSelectedAction;
     private final ActionBase cleanResultsAction;
@@ -22,7 +23,7 @@ public class BddActionManager {
     private final ActionBase copyL2Action;
 
 
-    public BddActionManager(BddTree tree, SessionManager sessionManager) {
+    public BddTreeActionManager(BddTree tree, SessionManager sessionManager) {
 
         cleanResultsAction = new ClearResultsAction(tree, sessionManager);
         runSelectedAction = new RunSelectedAction(tree, sessionManager.getLauncher());

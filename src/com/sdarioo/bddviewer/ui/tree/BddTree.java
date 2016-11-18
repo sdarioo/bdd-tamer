@@ -14,7 +14,7 @@ import com.sdarioo.bddviewer.model.LocationHolder;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.model.Story;
 import com.sdarioo.bddviewer.ui.actions.ActionAdapter;
-import com.sdarioo.bddviewer.ui.actions.BddActionManager;
+import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
 import com.sdarioo.bddviewer.ui.util.IdeUtil;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeColumnModel;
@@ -46,7 +46,7 @@ public class BddTree {
 
     private TreeTable tree;
     private DefaultTreeModel treeModel;
-    private BddActionManager actionManager;
+    private BddTreeActionManager actionManager;
     private final List<BddTreeColumns.ColumnInfo> columnInfos;
 
     public BddTree(Project project,
@@ -70,11 +70,11 @@ public class BddTree {
         return tree;
     }
 
-    public BddActionManager getActionManager() {
+    public BddTreeActionManager getActionManager() {
         return actionManager;
     }
 
-    public void setActionManager(BddActionManager actionManager) {
+    public void setActionManager(BddTreeActionManager actionManager) {
         this.actionManager = actionManager;
     }
 

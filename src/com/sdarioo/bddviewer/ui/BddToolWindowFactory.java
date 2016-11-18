@@ -8,15 +8,21 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.sdarioo.bddviewer.Plugin;
-import com.sdarioo.bddviewer.ui.actions.BddActionManager;
+import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
+import com.sdarioo.bddviewer.ui.console.actions.ConsoleActionManager;
 import com.sdarioo.bddviewer.ui.console.OutputConsole;
-import com.sdarioo.bddviewer.ui.tree.BddTreeView;
+import com.sdarioo.bddviewer.ui.tree.search.SearchComponent;
+import com.sdarioo.bddviewer.ui.tree.BddTree;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
 
 
 //http://www.programcreek.com/java-api-examples/index.php?source_dir=platform_tools_adt_idea-master/android/src/com/android/tools/idea/editors/vmtrace/TraceViewPanel.java
@@ -41,16 +47,21 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, TREE_LABEL, false);
 
-        BddTreeView bddTreeView = new BddTreeView(project,
+        BddTree tree = new BddTree(project,
                 Plugin.getInstance().getStoryProvider(),
                 Plugin.getInstance().getSessionManager());
 
-        panel.setContent(bddTreeView.getComponent());
+        JPanel treePanel = new JPanel(new BorderLayout());
+        SearchComponent searchPanel = new SearchComponent(treePanel, tree.getTreeTable());
+        treePanel.add(searchPanel.getComponent(), BorderLayout.NORTH);
+        treePanel.add(new JBScrollPane(tree.getTreeTable()), BorderLayout.CENTER);
 
+        BddTreeActionManager actionManager = new BddTreeActionManager(tree, Plugin.getInstance().getSessionManager());
+        tree.setActionManager(actionManager);
         DefaultActionGroup actionGroup = new DefaultActionGroup();
-        BddActionManager actionManager = bddTreeView.getActionManager();
-        actionManager.getToolbarActions().forEach(a -> actionGroup.add(a));
+        actionGroup.addAll(actionManager.getToolbarActions());
 
+        panel.setContent(treePanel);
         ActionToolbar toolBar = ActionManager.getInstance().createActionToolbar("bddTree.Toolbar", actionGroup, false);
         panel.setToolbar(toolBar.getComponent());
 
@@ -62,6 +73,14 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, CONSOLE_LABEL, false);
 
         OutputConsole console = new OutputConsole(Plugin.getInstance().getSessionManager());
+
+        ConsoleActionManager actionManager = new ConsoleActionManager(console);
+        DefaultActionGroup actionGroup = new DefaultActionGroup();
+        actionGroup.addAll(actionManager.getToolbarActions());
+
+        ActionToolbar toolBar = ActionManager.getInstance().createActionToolbar("bddConsole.Toolbar", actionGroup, false);
+        panel.setToolbar(toolBar.getComponent());
+
         panel.setContent(console.getComponent());
 
         return content;
