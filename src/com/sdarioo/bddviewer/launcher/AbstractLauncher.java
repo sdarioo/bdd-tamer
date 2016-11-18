@@ -33,13 +33,18 @@ public abstract class AbstractLauncher implements Launcher {
         CompletableFuture.runAsync( () -> {
             for (Scenario scenario : scenarios) {
                 notifyTestStarted(scenario);
-                TestResult result;
-                if (scenario.isRunnable()) {
-                    result = execute(scenario);
-                } else {
-                    result = new TestResult(RunStatus.Skipped, 0L, "Skipping: " + scenario.getName());
+                TestResult result = null;
+                try {
+                    if (scenario.isRunnable()) {
+                        result = execute(scenario);
+                    } else {
+                        result = new TestResult(RunStatus.Skipped, 0L, "Skipping: " + scenario.getName());
+                    }
+                } catch (Throwable t) {
+                    result = new TestResult(RunStatus.Failed, 0L, "Error: " + t.toString());
+                } finally {
+                    notifyTestFinished(scenario, result);
                 }
-                notifyTestFinished(scenario, result);
             }
         }).thenRun(finishCallback);
     }
