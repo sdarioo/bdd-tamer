@@ -11,13 +11,15 @@ public class ConsoleActionManager {
     private final OutputConsole console;
 
     private final ClearAction clearAction;
+    private final ShowLogsAction showLogsAction;
 
     public ConsoleActionManager(OutputConsole console) {
         this.console = console;
         this.clearAction = new ClearAction(console);
+        this.showLogsAction = new ShowLogsAction(console);
     }
 
     public List<AnAction> getToolbarActions() {
-        return Arrays.asList(clearAction);
+        return Arrays.asList(clearAction, showLogsAction);
     }
 }

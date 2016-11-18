@@ -1,5 +1,18 @@
 package com.sdarioo.bddviewer.ui.console;
 
+import com.intellij.execution.impl.ConsoleViewUtil;
+import com.intellij.execution.impl.EditorHyperlinkSupport;
+import com.intellij.execution.ui.ConsoleViewContentType;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.openapi.editor.ex.DocumentEx;
+import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.markup.HighlighterTargetArea;
+import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectManagerAdapter;
 import com.intellij.ui.components.JBScrollPane;
 import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
@@ -10,31 +23,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
 
 
 public class OutputConsole {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OutputConsole.class);
+    private static final String LINE_SEPARATOR = "\n";
 
-    private final JTextPane textPane;
+    private final EditorEx editor;
+    private final EditorHyperlinkSupport hyperlinkSupport;
     private final JScrollPane scrollPane;
 
+    private boolean showLogs = false;
 
-    public OutputConsole(SessionManager sessionManager) {
-        textPane = new JTextPane(new DefaultStyledDocument(new StyleContext()));
-        textPane.setEditable(false);
 
-        scrollPane = new JBScrollPane(textPane);
+    public OutputConsole(Project project, SessionManager sessionManager) {
 
+        editor = ConsoleViewUtil.setupConsoleEditor(project, false, false);
+        hyperlinkSupport = new EditorHyperlinkSupport(editor, project);
+
+        project.getMessageBus().connect().subscribe(ProjectManager.TOPIC, new ProjectManagerAdapter() {
+            public void projectClosed(Project project) {
+            EditorFactory.getInstance().releaseEditor(editor);
+            }
+        });
+
+        scrollPane = new JBScrollPane(editor.getComponent());
         addLaunchListener(sessionManager.getLauncher());
     }
 
@@ -42,16 +57,26 @@ public class OutputConsole {
         return scrollPane;
     }
 
-    public void append(String text) {
+    public boolean isShowLogs() {
+        return showLogs;
+    }
+
+    public void setShowLogs(boolean value) {
+        showLogs = value;
+    }
+
+    public void appendText(String text) {
         SwingUtilities.invokeLater(() -> {
-            appendText(text, Color.BLUE);
+            internalAppend(text);
             JScrollBar sb = scrollPane.getVerticalScrollBar();
             sb.setValue(sb.getMaximum());
         });
     }
 
     public void clear() {
-        SwingUtilities.invokeLater(() ->  textPane.setText(null));
+        SwingUtilities.invokeLater(() ->  {
+            editor.getDocument().deleteString(0, editor.getDocument().getTextLength());
+        });
     }
 
     private void addLaunchListener(Launcher launcher) {
@@ -64,14 +89,13 @@ public class OutputConsole {
             public void scenarioFinished(Scenario scenario, TestResult result) {
                 String text = result.getOutput();
                 if (text != null) {
-                    append(System.getProperty("line.separator"));
-                    append(text);
+                    appendText(text);
+                    appendText(LINE_SEPARATOR);
                 }
             }
             @Override
             public void output(String message) {
-                String[] lines = message.split("\\n");
-                Arrays.stream(lines).forEach(line -> append(line + '\n'));
+                appendText(message);
             }
         });
     }
@@ -80,36 +104,29 @@ public class OutputConsole {
         return line.contains("WARN") || line.contains("ERROR") || line.contains("DEBUG") || line.contains("INFO");
     }
 
-//    private Color getLineColor(String line) {
-//        if (line.contains("ERROR")) {
-//            return Color.red;
-//        }
-//        if (line.contains("WARN")) {
-//            return Color.pink;
-//        }
-//        if (line.contains("INFO")) {
-//
-//        }
-//    }
+    private void internalAppend(String text) {
+        text = fixLineSeparators(text);
+        DocumentEx document = editor.getDocument();
+        int startOffset = document.getTextLength();
+        document.insertString(startOffset, text);
+
+        // ConsoleViewContentType.NORMAL_OUTPUT_KEY
+        // ConsoleViewContentType.LOG_WARNING_OUTPUT_KEY
+        TextAttributesKey key = ConsoleViewContentType.NORMAL_OUTPUT_KEY;
+        TextAttributes attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(key);
+
+        editor.getMarkupModel().addRangeHighlighter(startOffset, document.getTextLength(), 2001, attributes, HighlighterTargetArea.EXACT_RANGE);
 
 
-    private void appendText(String msg, Color c)
-    {
-        StyleContext sc = StyleContext.getDefaultStyleContext();
-        AttributeSet attrSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
+        startOffset = document.getTextLength();
+        document.insertString(startOffset, "GoTo");
+        hyperlinkSupport.createHyperlink(startOffset, document.getTextLength(), (TextAttributes)null, project -> {
 
-        attrSet = sc.addAttribute(attrSet, StyleConstants.FontFamily, "Lucida Console");
-        attrSet = sc.addAttribute(attrSet, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+        });
+    }
 
-        int len = textPane.getDocument().getLength();
-        try {
-            textPane.getDocument().insertString(len, msg, attrSet);
-        } catch (BadLocationException e) {
-            LOGGER.error("Error appending text.", e);
-        }
-        //textPane.setCaretPosition(len);
-        //textPane.setCharacterAttributes(attrSet, false);
-
+    private static String fixLineSeparators(String text) {
+        return text.replace("\r\n", "\n");
     }
 
 }

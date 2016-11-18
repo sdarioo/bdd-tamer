@@ -9,13 +9,15 @@ import com.sdarioo.bddviewer.ui.console.OutputConsole;
 public class ClearAction extends ActionBase {
 
     private static final String TEXT = "Clear";
+    private final OutputConsole console;
 
     public ClearAction(OutputConsole console) {
-        super(TEXT, AllIcons.Actions.Clean);
+        super(TEXT, AllIcons.Actions.GC);
+        this.console = console;
     }
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
-
+        console.clear();
     }
 }

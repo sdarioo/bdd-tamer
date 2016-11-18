@@ -72,7 +72,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, CONSOLE_LABEL, false);
 
-        OutputConsole console = new OutputConsole(Plugin.getInstance().getSessionManager());
+        OutputConsole console = new OutputConsole(project, Plugin.getInstance().getSessionManager());
 
         ConsoleActionManager actionManager = new ConsoleActionManager(console);
         DefaultActionGroup actionGroup = new DefaultActionGroup();
