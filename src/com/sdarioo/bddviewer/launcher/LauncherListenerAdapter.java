@@ -23,7 +23,7 @@ public class LauncherListenerAdapter implements LauncherListener {
     }
 
     @Override
-    public void output(String message) {
+    public void outputLine(String line) {
     }
 
 }

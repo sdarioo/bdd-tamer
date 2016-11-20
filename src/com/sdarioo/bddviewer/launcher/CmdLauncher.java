@@ -33,7 +33,7 @@ public class CmdLauncher extends AbstractLauncher {
             }
             path = writeToTempFile(scenario);
             String cmdLine = createCommandLine(path);
-            Consumer<String> output = msg -> notifyOutput(msg + '\n');
+            Consumer<String> output = line -> notifyOutputLine(line);
 
             long startTime = System.currentTimeMillis();
             output.accept("Running: " + cmdLine);
@@ -76,6 +76,7 @@ public class CmdLauncher extends AbstractLauncher {
     private static Path getRunDirectory(Scenario scenario) {
         Path path = scenario.getLocation().getPath();
         while (path != null) {
+            // TODO - use scenario parent module
             if (Files.isDirectory(path) && "pscm_bdd".equals(path.getFileName().toString())) {
                 return path;
             }

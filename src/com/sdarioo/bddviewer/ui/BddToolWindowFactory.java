@@ -14,7 +14,7 @@ import com.intellij.ui.content.ContentFactory;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
 import com.sdarioo.bddviewer.ui.console.actions.ConsoleActionManager;
-import com.sdarioo.bddviewer.ui.console.OutputConsole;
+import com.sdarioo.bddviewer.ui.console.LauncherConsole;
 import com.sdarioo.bddviewer.ui.tree.search.SearchComponent;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +72,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, CONSOLE_LABEL, false);
 
-        OutputConsole console = new OutputConsole(project, Plugin.getInstance().getSessionManager());
+        LauncherConsole console = new LauncherConsole(project, Plugin.getInstance().getSessionManager());
 
         ConsoleActionManager actionManager = new ConsoleActionManager(console);
         DefaultActionGroup actionGroup = new DefaultActionGroup();

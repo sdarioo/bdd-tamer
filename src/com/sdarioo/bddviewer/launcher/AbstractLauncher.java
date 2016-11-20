@@ -35,11 +35,11 @@ public abstract class AbstractLauncher implements Launcher {
                 notifyTestStarted(scenario);
                 TestResult result = null;
                 try {
-                    if (scenario.isRunnable()) {
+                    //if (scenario.isRunnable()) {
                         result = execute(scenario);
-                    } else {
-                        result = new TestResult(RunStatus.Skipped, 0L, "Skipping: " + scenario.getName());
-                    }
+                    //} else {
+                    //    result = new TestResult(RunStatus.Skipped, 0L, "Skipping: " + scenario.getName());
+                    //}
                 } catch (Throwable t) {
                     result = new TestResult(RunStatus.Failed, 0L, "Error: " + t.toString());
                 } finally {
@@ -77,8 +77,8 @@ public abstract class AbstractLauncher implements Launcher {
         listeners.forEach(l -> l.scenarioFinished(scenario, result));
     }
 
-    protected void notifyOutput(String message) {
-        listeners.forEach(l -> l.output(message));
+    protected void notifyOutputLine(String line) {
+        listeners.forEach(l -> l.outputLine(line));
     }
 
 }

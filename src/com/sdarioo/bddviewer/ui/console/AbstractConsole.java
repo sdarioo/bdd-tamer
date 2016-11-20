@@ -12,11 +12,12 @@ import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerAdapter;
-import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.JBColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.function.Consumer;
 
 
@@ -26,24 +27,22 @@ public class AbstractConsole {
 
     private final EditorEx editor;
     private final EditorHyperlinkSupport hyperlinkSupport;
-    private final JScrollPane scrollPane;
 
     public AbstractConsole(Project project) {
         editor = ConsoleViewUtil.setupConsoleEditor(project, false, false);
         hyperlinkSupport = new EditorHyperlinkSupport(editor, project);
-        scrollPane = new JBScrollPane(editor.getComponent());
 
         project.getMessageBus().connect().subscribe(ProjectManager.TOPIC, new ProjectManagerAdapter() {
             public void projectClosed(Project closedProject) {
-                if (closedProject.getName().equals(project.getName())) {
-                    EditorFactory.getInstance().releaseEditor(editor);
-                }
+            if (closedProject.getName().equals(project.getName())) {
+                EditorFactory.getInstance().releaseEditor(editor);
+            }
             }
         });
     }
 
     public JComponent getComponent() {
-        return scrollPane;
+        return editor.getComponent();
     }
 
     public void appendText(String text) {
@@ -51,14 +50,17 @@ public class AbstractConsole {
     }
 
     public void appendText(String text, ContentType contentType) {
-        appendText(text, contentType, null);
+        appendText(text, contentType, null, null);
     }
 
-    public void appendText(String text, FontStyle fontStyle) {
-        appendText(text, null, fontStyle);
+    public void appendText(String text, FontStyle fontStyle, Color color) {
+        appendText(text, null, fontStyle, color);
     }
 
-    public void appendText(String text, ContentType contentType, FontStyle fontStyle) {
+    public void appendText(String text, ContentType contentType, FontStyle fontStyle, Color color) {
+        if (text.length() == 0) {
+            return;
+        }
         SwingUtilities.invokeLater(() -> {
 
             DocumentEx document = editor.getDocument();
@@ -68,8 +70,8 @@ public class AbstractConsole {
             if (contentType != null) {
                 highlight(offset, document.getTextLength(), contentType.key);
             }
-            if (fontStyle != null) {
-                highlight(offset, document.getTextLength(), fontStyle);
+            if ((fontStyle != null) || (color != null)) {
+                highlight(offset, document.getTextLength(), fontStyle, color);
             }
             scrollToEnd();
         });
@@ -92,8 +94,8 @@ public class AbstractConsole {
         });
     }
 
-    private RangeHighlighter highlight(int startOffset, int endOffset, FontStyle style) {
-        TextAttributes bold = new TextAttributes(null, null, null, null, style.value);
+    private RangeHighlighter highlight(int startOffset, int endOffset, FontStyle style, Color color) {
+        TextAttributes bold = new TextAttributes(color, null, null, null, (style != null ? style.value : 0));
         return highlight(startOffset, endOffset, bold);
     }
 
@@ -109,8 +111,8 @@ public class AbstractConsole {
     }
 
     private void scrollToEnd() {
-        JScrollBar sb = scrollPane.getVerticalScrollBar();
-        sb.setValue(sb.getMaximum());
+        JScrollBar scrollBar = editor.getScrollPane().getVerticalScrollBar();
+        scrollBar.setValue(scrollBar.getMaximum());
     }
 
     private static String fixLineSeparators(String text) {
@@ -120,7 +122,8 @@ public class AbstractConsole {
     public enum ContentType {
         NORMAL(ConsoleViewContentType.NORMAL_OUTPUT_KEY),
         WARNING(ConsoleViewContentType.LOG_WARNING_OUTPUT_KEY),
-        ERROR(ConsoleViewContentType.ERROR_OUTPUT_KEY);
+        ERROR(ConsoleViewContentType.ERROR_OUTPUT_KEY),
+        GRAY(ConsoleViewContentType.LOG_EXPIRED_ENTRY);
 
         TextAttributesKey key;
         ContentType(TextAttributesKey key) {

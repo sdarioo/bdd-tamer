@@ -65,7 +65,7 @@ public class SessionManager implements LauncherListener {
     }
 
     @Override
-    public void output(String message) {
+    public void outputLine(String line) {
     }
 
     public boolean isPending(Scenario scenario) {

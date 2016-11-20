@@ -2,6 +2,7 @@ package com.sdarioo.bddviewer;
 
 import com.intellij.openapi.components.ApplicationComponent;
 import com.sdarioo.bddviewer.launcher.CmdLauncher;
+import com.sdarioo.bddviewer.launcher.DummyLauncher;
 import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.provider.ProjectStoryProvider;
@@ -42,8 +43,8 @@ public class Plugin implements ApplicationComponent {
     public void initComponent() {
         LOGGER.info("Initialize: " + LocalDateTime.now());
 
-        //launcher = new DummyLauncher();
-        launcher = new CmdLauncher();
+        launcher = new DummyLauncher();
+        //launcher = new CmdLauncher();
         storyProvider = new ProjectStoryProvider();
         sessionManager = new SessionManager(launcher);
     }

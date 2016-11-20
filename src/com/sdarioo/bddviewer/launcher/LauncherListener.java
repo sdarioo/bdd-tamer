@@ -14,5 +14,5 @@ public interface LauncherListener {
 
     void sessionFinished();
 
-    void output(String message);
+    void outputLine(String line);
 }

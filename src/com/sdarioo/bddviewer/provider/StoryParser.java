@@ -93,7 +93,7 @@ public class StoryParser {
                 if (builder.getExamples() != null) {
                     builder.getExamples().add(line);
                 } else if (builder.lastStep() != null) {
-                    builder.lastStep().getTable().add(line);
+                    builder.lastStep().getValues().add(line);
                 }
             } else {
                 builder.addStep(new Step(line));
