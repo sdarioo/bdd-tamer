@@ -49,11 +49,11 @@ public class BddIconMap implements IconMap {
                     } else if (RunStatus.Failed.equals(result.getStatus())) {
                         icon = AllIcons.RunConfigurations.TestFailed;
                     } else {
-                        icon = AllIcons.RunConfigurations.TestSkipped;
+                        icon = AllIcons.RunConfigurations.TestIgnored;
                     }
                 }
             }
-            return (icon != null) ? icon : AllIcons.FileTypes.Text;
+            return (icon != null) ? icon : AllIcons.General.Bullet;
         }
         return null;
     }

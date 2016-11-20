@@ -10,6 +10,10 @@ public class Step {
         this.text = text;
     }
 
+    public boolean hasValues() {
+        return values.getRowsCount() > 0;
+    }
+
     public Table getValues() {
         return values;
     }

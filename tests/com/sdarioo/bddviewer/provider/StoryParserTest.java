@@ -1,5 +1,6 @@
 package com.sdarioo.bddviewer.provider;
 
+import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.model.Story;
 import org.junit.Test;
 
@@ -11,6 +12,7 @@ import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class StoryParserTest {
 
@@ -21,7 +23,13 @@ public class StoryParserTest {
             Story story = StoryParser.parse(path);
             assertNotNull(story);
             assertEquals(1, story.getScenarios().size());
-            assertEquals(8, story.getScenarios().get(0).getSteps().size());
+            Scenario scenario = story.getScenarios().get(0);
+            assertEquals(8, scenario.getSteps().size());
+            assertEquals(5, scenario.getExamples().getRowsCount());
+
+            assertTrue(scenario.getSteps().get(1).hasValues());
+            assertEquals(2, scenario.getSteps().get(1).getValues().getRowsCount());
+
         } finally {
             Files.deleteIfExists(path);
         }

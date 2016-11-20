@@ -9,7 +9,7 @@ And 3 instances of Car object with following values
 | Engine            | Color           |
 | big               | red             |
 | small             | blue            |
-| broken            | green           |
+|-- broken            | green           |
 And one configuration for all examples
 
 When open edit view for Car object with parameter color set to <color>

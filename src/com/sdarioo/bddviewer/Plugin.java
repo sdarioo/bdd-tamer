@@ -43,8 +43,8 @@ public class Plugin implements ApplicationComponent {
     public void initComponent() {
         LOGGER.info("Initialize: " + LocalDateTime.now());
 
-        launcher = new DummyLauncher();
-        //launcher = new CmdLauncher();
+        //launcher = new DummyLauncher();
+        launcher = new CmdLauncher();
         storyProvider = new ProjectStoryProvider();
         sessionManager = new SessionManager(launcher);
     }

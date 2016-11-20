@@ -90,10 +90,12 @@ public class StoryParser {
                 continue;
             }
             if (line.startsWith("|")) {
-                if (builder.getExamples() != null) {
-                    builder.getExamples().add(line);
-                } else if (builder.lastStep() != null) {
-                    builder.lastStep().getValues().add(line);
+                if (!line.startsWith("|--")) {
+                    if (builder.getExamples() != null) {
+                        builder.getExamples().add(line);
+                    } else if (builder.lastStep() != null) {
+                        builder.lastStep().getValues().add(line);
+                    }
                 }
             } else {
                 builder.addStep(new Step(line));

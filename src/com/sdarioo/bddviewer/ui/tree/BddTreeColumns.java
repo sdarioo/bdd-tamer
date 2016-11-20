@@ -36,7 +36,7 @@ public class BddTreeColumns {
                     Scenario scenario = (Scenario)userObject;
                     TestResult result = sessionManager.getResult(scenario);
                     if (result != null) {
-                        return String.valueOf(result.getTime());
+                        return String.valueOf(result.getTime()) + "ms";
                     }
                 }
                 return "";
