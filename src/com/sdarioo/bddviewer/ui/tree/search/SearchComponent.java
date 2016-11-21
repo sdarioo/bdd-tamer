@@ -44,7 +44,7 @@ public class SearchComponent {
     private void initializeUI() {
 
         searchField = new MySearchTextField();
-        searchField.setPreferredSize(new Dimension(300, searchField.getPreferredSize().height));
+        searchField.setPreferredSize(new Dimension(400, searchField.getPreferredSize().height));
 
         JLabel closeLabel = new JLabel(AllIcons.Actions.Cross);
         closeLabel.setToolTipText("Close");
@@ -52,6 +52,24 @@ public class SearchComponent {
             @Override
             public void mouseClicked(MouseEvent e) {
                 closeSearchComponent();
+            }
+        });
+
+        JLabel findPrev = new JLabel(AllIcons.Actions.PreviousOccurence);
+        findPrev.setToolTipText("Find Previous");
+        findPrev.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                //TODO
+            }
+        });
+
+        JLabel findNext = new JLabel(AllIcons.Actions.NextOccurence);
+        findNext.setToolTipText("Find Next");
+        findNext.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                //TODO
             }
         });
 
@@ -64,9 +82,15 @@ public class SearchComponent {
             }
         });
 
-        JPanel leftPanel = new NonOpaquePanel(new BorderLayout());
-        leftPanel.add(findAll, BorderLayout.EAST);
-        leftPanel.add(searchField, BorderLayout.CENTER);
+
+        JPanel leftPanel = new NonOpaquePanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        leftPanel.add(searchField);
+        leftPanel.add(findPrev);
+        leftPanel.add(findNext);
+        leftPanel.add(findAll);
+        leftPanel.add(new JSeparator());
+        leftPanel.add(new JCheckBox("Match Case")); //TODO
+        leftPanel.add(new JCheckBox("Regex")); //TODO
 
         JPanel searchPanel = new NonOpaquePanel(new BorderLayout());
         searchPanel.add(leftPanel, BorderLayout.WEST);
@@ -135,19 +159,11 @@ public class SearchComponent {
                 }
             });
 
-            getTextEditor().registerKeyboardAction(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    onTextEntered(getText());
-                }
-            }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+            getTextEditor().registerKeyboardAction(e -> onTextEntered(getText()),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-            getTextEditor().registerKeyboardAction(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    closeSearchComponent();
-                }
-            }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+            getTextEditor().registerKeyboardAction(e -> closeSearchComponent(),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
             new AnAction() {
                 @Override

@@ -12,6 +12,8 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.sdarioo.bddviewer.Plugin;
+import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
+import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
 import com.sdarioo.bddviewer.ui.console.actions.ConsoleActionManager;
 import com.sdarioo.bddviewer.ui.console.LauncherConsole;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 
 //http://www.programcreek.com/java-api-examples/index.php?source_dir=platform_tools_adt_idea-master/android/src/com/android/tools/idea/editors/vmtrace/TraceViewPanel.java
@@ -41,6 +44,13 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         toolWindow.getContentManager().addContent(consoleContent);
 
         toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
+
+        Plugin.getInstance().getSessionManager().getLauncher().addListener(new LauncherListenerAdapter() {
+            @Override
+            public void sessionStarted(List<Scenario> scope) {
+                toolWindow.getContentManager().setSelectedContent(consoleContent);
+            }
+        });
     }
 
     private static Content createTreeContent(Project project) {
@@ -55,6 +65,8 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SearchComponent searchPanel = new SearchComponent(treePanel, tree.getTreeTable());
         treePanel.add(searchPanel.getComponent(), BorderLayout.NORTH);
         treePanel.add(new JBScrollPane(tree.getTreeTable()), BorderLayout.CENTER);
+
+        content.setPreferredFocusableComponent(tree.getTreeTable());
 
         BddTreeActionManager actionManager = new BddTreeActionManager(tree, Plugin.getInstance().getSessionManager());
         tree.setActionManager(actionManager);
