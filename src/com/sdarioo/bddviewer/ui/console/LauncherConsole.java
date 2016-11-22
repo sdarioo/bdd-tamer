@@ -12,6 +12,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 
@@ -20,8 +21,8 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
     private boolean showLogs;
 
     private Scenario runningScenario;
-    private int stepIndex;
-    private int valueIndex;
+    private Step runningStep;
+
 
     public LauncherConsole(Project project, SessionManager sessionManager) {
         super(project);
@@ -44,7 +45,7 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
     @Override
     public void scenarioStarted(Scenario scenario) {
         runningScenario = scenario;
-        stepIndex = 0;
+        runningStep = null;
     }
 
     @Override
@@ -84,28 +85,27 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
         }
 
         if (runningScenario != null) {
-            if (line.startsWith("Scenario: ")) {
-                appendText(line.substring(0, 10), FontStyle.BOLD, JBColor.ORANGE);
+            if (line.startsWith("Scenario:")) {
+                String[] pair = splitFirstToken(line);
+                appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
                 Location location = runningScenario.getLocation();
-                appendHyperlink(line.substring(10), project -> {
+                appendHyperlink(pair[1], project -> {
                     IdeUtil.openInEditor(project, location);
                 });
-            } else if (line.startsWith("Meta:")) {
-                appendText(line, FontStyle.BOLD, JBColor.ORANGE);
-            } else if (line.startsWith("@")) {
-                int index = line.indexOf(' ');
-                appendText(line.substring(0, index), FontStyle.BOLD, JBColor.ORANGE);
-                appendText(line.substring(index));
+            } else if (line.startsWith("Meta:") || line.startsWith("@")) {
+                String[] pair = splitFirstToken(line);
+                appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
+                appendText(pair[1]);
             } else if (isStep(line)) {
-                int index = line.indexOf(' ');
-                appendText(line.substring(0, index), FontStyle.BOLD, JBColor.ORANGE);
-                appendText(line.substring(index));
+                AtomicReference<Status> statusHolder = new AtomicReference<>();
+                line = removeStatus(line, statusHolder);
+                String[] pair = splitFirstToken(line);
+                appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
+                appendText(pair[1]);
 
-                Step step = getStep(line);
-                if (step != null) {
-                    stepIndex++;
-                    valueIndex = 0;
-                    appendText(" (PASSED)", FontStyle.BOLD, JBColor.GREEN);
+                runningStep = getStep(line);
+                if ((runningStep != null) && !runningStep.hasValues()) {
+                    appendText(' ' + statusHolder.get().text, FontStyle.BOLD, statusHolder.get().color);
                 }
 
             } else if (line.startsWith("|")) {
@@ -113,7 +113,7 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
 
                 appendText("    " + line, null, JBColor.GRAY);
             } else if (line.startsWith("Example: ")) {
-                stepIndex = 0;
+                runningStep = null;
                 appendText(line, null, JBColor.YELLOW);
             } else {
                 appendText(line);
@@ -126,20 +126,23 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
 
     private Step getStep(String text) {
         List<Step> steps = runningScenario.getSteps();
-        if (stepIndex >= steps.size()) {
-            return null;
+        int index = 0;
+        if (runningStep != null) {
+            index = steps.indexOf(runningStep) + 1;
         }
-        Step step = steps.get(stepIndex);
-        if (text.equals(step.getText())) {
-            return step;
-        }
-        String pattern = step.getPattern();
-        if (!pattern.equals(step.getText())) {
-            MessageFormat format = new MessageFormat(pattern);
-            try {
-                format.parse(text);
+        if (index < steps.size()) {
+            Step step = steps.get(index);
+            if (text.equals(step.getText())) {
                 return step;
-            } catch (ParseException e) { /* ignore */ }
+            }
+            String pattern = step.getPattern();
+            if (!pattern.equals(step.getText())) {
+                MessageFormat format = new MessageFormat(pattern);
+                try {
+                    format.parse(text);
+                    return step;
+                } catch (ParseException e) { /* ignore */ }
+            }
         }
         return null;
     }
@@ -159,10 +162,42 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
         return line.contains("ERROR") && !line.contains("INFO");
     }
 
-    public static boolean isStep(String line) {
+    private static boolean isStep(String line) {
         return line.startsWith("Given ") ||
                line.startsWith("And ") ||
                line.startsWith("When ") ||
                line.startsWith("Then ");
+    }
+
+    private static String removeStatus(String line, AtomicReference<Status> statusHolder) {
+        for (Status status : Status.values()) {
+            if (line.endsWith(status.text)) {
+                statusHolder.set(status);
+                return line.substring(0, line.length() - status.text.length()).trim();
+            }
+        }
+        statusHolder.set(Status.PASSED);
+        return line;
+    }
+
+    private static String[] splitFirstToken(String line) {
+        int index = line.indexOf(' ');
+        if (index > 0) {
+            return new String[] { line.substring(0, index), line.substring(index)};
+        }
+        return new String[] { line, ""};
+    }
+
+    enum Status {
+        PASSED("(PASSED)", JBColor.GREEN),
+        FAILED("(FAILED)", JBColor.RED),
+        NOT_PERFORMED("(NOT PERFORMED)", JBColor.ORANGE);
+
+        final String text;
+        final JBColor color;
+        Status(String text, JBColor color) {
+            this.text = text;
+            this.color = color;
+        }
     }
 }
