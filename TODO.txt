@@ -1,4 +1,26 @@
+I. Console
 
-1. Search field in non dark theme
-2. Launcher implementation
-3. Logging
+1. Copy&Paste actions
+2. Context menu
+3. Links to failing steps
+4. Compact mode (example line only)
+5. Problem with multiple windows
+
+II. Tree
+
+1. Run indicator
+2. Default sorting
+3. Next/Prev result actions
+4. Search next/prev, match case, regexp
+
+III. Launcher
+
+1. Multiple scenarios in single command
+2. Killing process after timeout
+3. Scenario launch status, output text
+
+IV. Other
+
+1. Logging
+2. Main icon
+3. Open reports folder action

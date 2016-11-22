@@ -43,4 +43,9 @@ public class Step {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return text;
+    }
 }

@@ -50,7 +50,11 @@ public class Table {
         return Collections.unmodifiableList(rows.get(index));
     }
 
-    private static List<String> split(String line) {
+    public List<String> getLastRow() {
+        return Collections.unmodifiableList(rows.get(rows.size() - 1));
+    }
+
+    public static List<String> split(String line) {
         return Arrays.stream(line.split("|"))
                 .map(String::trim)
                 .collect(Collectors.toList());

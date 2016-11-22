@@ -6,6 +6,7 @@ import com.sdarioo.bddviewer.launcher.*;
 import com.sdarioo.bddviewer.model.Location;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.model.Step;
+import com.sdarioo.bddviewer.model.Table;
 import com.sdarioo.bddviewer.ui.util.IdeUtil;
 
 import java.text.MessageFormat;
@@ -19,9 +20,11 @@ import java.util.stream.Collectors;
 public class LauncherConsole extends AbstractConsole implements LauncherListener {
 
     private boolean showLogs;
+    private boolean showStepValues;
 
-    private Scenario runningScenario;
-    private Step runningStep;
+    private Scenario currentScenario;
+    private Step currentStep;
+    boolean isExamples;
 
 
     public LauncherConsole(Project project, SessionManager sessionManager) {
@@ -37,6 +40,14 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
         showLogs = value;
     }
 
+    public boolean isShowStepValues() {
+        return showStepValues;
+    }
+
+    public void setShowStepValues(boolean showStepValues) {
+        this.showStepValues = showStepValues;
+    }
+
     @Override
     public void sessionStarted(List<Scenario> scope) {
         clear();
@@ -44,13 +55,14 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
 
     @Override
     public void scenarioStarted(Scenario scenario) {
-        runningScenario = scenario;
-        runningStep = null;
+        currentScenario = scenario;
+        currentStep = null;
+        isExamples = false;
     }
 
     @Override
     public void scenarioFinished(Scenario scenario, TestResult result) {
-        runningScenario = null;
+        currentScenario = null;
         String text = result.getOutput();
         if (text != null) {
             processOutput(text);
@@ -75,76 +87,118 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
         if (line.trim().length() == 0) {
             return;
         }
+        String lineLS = line + LINE_SEPARATOR;
         if (isLoggerLine(line)) {
             if (isLoggerError(line)) {
-                appendText(line + LINE_SEPARATOR, ContentType.ERROR);
+                appendText(lineLS, ContentType.ERROR);
             } else if (showLogs) {
-                appendText(line + LINE_SEPARATOR);
+                appendText(lineLS);
             }
             return;
         }
 
-        if (runningScenario != null) {
-            if (line.startsWith("Scenario:")) {
-                String[] pair = splitFirstToken(line);
-                appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
-                Location location = runningScenario.getLocation();
-                appendHyperlink(pair[1], project -> {
-                    IdeUtil.openInEditor(project, location);
-                });
-            } else if (line.startsWith("Meta:") || line.startsWith("@")) {
-                String[] pair = splitFirstToken(line);
-                appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
-                appendText(pair[1]);
-            } else if (isStep(line)) {
-                AtomicReference<Status> statusHolder = new AtomicReference<>();
-                line = removeStatus(line, statusHolder);
-                String[] pair = splitFirstToken(line);
-                appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
-                appendText(pair[1]);
-
-                runningStep = getStep(line);
-                if ((runningStep != null) && !runningStep.hasValues()) {
-                    appendText(' ' + statusHolder.get().text, FontStyle.BOLD, statusHolder.get().color);
-                }
-
-            } else if (line.startsWith("|")) {
-
-
-                appendText("    " + line, null, JBColor.GRAY);
-            } else if (line.startsWith("Example: ")) {
-                runningStep = null;
-                appendText(line, null, JBColor.YELLOW);
-            } else {
-                appendText(line);
-            }
-        } else {
-            appendText(line);
+        if (lineLS.startsWith("(BeforeStories)") || lineLS.startsWith("(AfterStories)")) {
+            appendText(lineLS, FontStyle.BOLD, JBColor.MAGENTA);
+            return;
         }
-        appendText(LINE_SEPARATOR);
+        if (currentScenario == null) {
+            appendText(lineLS);
+            return;
+        }
+        if (lineLS.startsWith("Scenario:")) {
+            String[] pair = splitFirstToken(lineLS);
+            appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
+            Location location = currentScenario.getLocation();
+            appendHyperlink(pair[1], project -> {
+                IdeUtil.openInEditor(project, location);
+            });
+            return;
+        }
+        if (lineLS.startsWith("Meta:") || lineLS.startsWith("@")) {
+            String[] pair = splitFirstToken(lineLS);
+            appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
+            appendText(pair[1]);
+            return;
+        }
+        if (lineLS.startsWith("Examples:")) {
+            isExamples = true;
+            return;
+        }
+        if (lineLS.startsWith("Example: ")) {
+            isExamples = false;
+            currentStep = null;
+            appendText(lineLS, FontStyle.BOLD, JBColor.MAGENTA);
+            return;
+        }
+        if (isExamples) {
+            return;
+        }
+        if (isStepLine(line)) {
+            AtomicReference<Status> statusHolder = new AtomicReference<>();
+            line = removeStatus(line, statusHolder);
+            String[] pair = splitFirstToken(line);
+            appendText(pair[0], FontStyle.BOLD, JBColor.ORANGE);
+            appendText(pair[1]);
+
+            currentStep = nextStep(line, !statusHolder.get().isFailed());
+            if ((currentStep != null) && !currentStep.hasValues()) {
+                appendStatusText(statusHolder.get());
+            }
+            appendText(LINE_SEPARATOR);
+            return;
+        }
+        if (line.startsWith("|")) {
+            AtomicReference<Status> statusHolder = new AtomicReference<>();
+            line = removeStatus(line, statusHolder);
+            boolean lastValue = false;
+            if ((currentStep != null) && currentStep.hasValues()) {
+                lastValue = currentStep.getValues().getLastRow().equals(Table.split(line));
+            }
+            if (showStepValues) {
+                appendText("    " + line, null, JBColor.GRAY);
+            } else if (lastValue) {
+                appendText("    [...]", null, JBColor.GRAY);
+            } else {
+                return;
+            }
+            if (lastValue) {
+                appendStatusText(statusHolder.get());
+            }
+            appendText(LINE_SEPARATOR);
+            return;
+        }
+        appendText(lineLS);
     }
 
-    private Step getStep(String text) {
-        List<Step> steps = runningScenario.getSteps();
-        int index = 0;
-        if (runningStep != null) {
-            index = steps.indexOf(runningStep) + 1;
+    private Step nextStep(String text, boolean matchText) {
+        List<Step> steps = currentScenario.getSteps();
+        int nextIndex = 0;
+        if (currentStep != null) {
+            nextIndex = steps.indexOf(currentStep) + 1;
         }
-        if (index < steps.size()) {
-            Step step = steps.get(index);
-            if (text.equals(step.getText())) {
-                return step;
-            }
-            String pattern = step.getPattern();
-            if (!pattern.equals(step.getText())) {
-                MessageFormat format = new MessageFormat(pattern);
-                try {
-                    format.parse(text);
+        if (nextIndex < steps.size()) {
+            Step step = steps.get(nextIndex);
+            if (matchText) {
+                if (text.equals(step.getText())) {
                     return step;
-                } catch (ParseException e) { /* ignore */ }
+                }
+                String pattern = step.getPattern();
+                if (!pattern.equals(step.getText())) {
+                    MessageFormat format = new MessageFormat(pattern);
+                    try {
+                        format.parse(text);
+                        return step;
+                    } catch (ParseException e) { /* ignore */ }
+                }
+            } else {
+                return step;
             }
         }
         return null;
+    }
+
+    private void appendStatusText(Status status) {
+        appendText(' ' + status.text, FontStyle.BOLD, status.color);
     }
 
     private static List<String> toLines(String text) {
@@ -162,7 +216,7 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
         return line.contains("ERROR") && !line.contains("INFO");
     }
 
-    private static boolean isStep(String line) {
+    private static boolean isStepLine(String line) {
         return line.startsWith("Given ") ||
                line.startsWith("And ") ||
                line.startsWith("When ") ||
@@ -199,5 +253,6 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
             this.text = text;
             this.color = color;
         }
+        boolean isFailed() { return this == FAILED; }
     }
 }

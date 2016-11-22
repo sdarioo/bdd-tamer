@@ -15,7 +15,7 @@ public class DummyLauncher extends AbstractLauncher {
             int time = ThreadLocalRandom.current().nextInt(2000);
             Thread.sleep(time);
 
-            List<String> lines = Files.readAllLines(Paths.get("D:\\Temp\\out.txt"));
+            List<String> lines = Files.readAllLines(Paths.get("D:\\Temp\\out2.txt"));
             lines.forEach(l -> notifyOutputLine(l));
 
 
