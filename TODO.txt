@@ -4,7 +4,6 @@ I. Console
 2. Context menu
 3. Links to failing steps
 4. Compact mode (example line only)
-5. Problem with multiple windows
 
 II. Tree
 
@@ -12,15 +11,18 @@ II. Tree
 2. Default sorting
 3. Next/Prev result actions
 4. Search next/prev, match case, regexp
+5. Duplicated scenarios (e.g from target)
 
 III. Launcher
 
 1. Multiple scenarios in single command
 2. Killing process after timeout
 3. Scenario launch status, output text
+4. Stop button - killing process
 
 IV. Other
 
 1. Logging
 2. Main icon
 3. Open reports folder action
+4. Generalize code (no PCM references)

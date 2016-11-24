@@ -22,6 +22,15 @@ public class CmdLauncher extends AbstractLauncher {
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdLauncher.class);
 
 
+    private Process runningProcess;
+
+    @Override
+    public void terminate() {
+        if ((runningProcess != null) && runningProcess.isAlive()) {
+            runningProcess.destroyForcibly();
+        }
+    }
+
     @Override
     protected TestResult execute(Scenario scenario) {
 
@@ -45,18 +54,19 @@ public class CmdLauncher extends AbstractLauncher {
         } catch (IOException e) {
             return new TestResult(RunStatus.Failed, 0L, e.toString());
         } finally {
+            runningProcess = null;
             deleteFile(path);
         }
     }
 
-    private static int execute(String command, Path runDir, Consumer<String> out, Consumer<String> err) {
+    private int execute(String command, Path runDir, Consumer<String> out, Consumer<String> err) {
         try {
             Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec(command, null, runDir.toFile());
+            runningProcess = runtime.exec(command, null, runDir.toFile());
 
-            readStream(process.getInputStream(), out);
-            readStream(process.getErrorStream(), err);
-            return process.waitFor();
+            readStream(runningProcess.getInputStream(), out);
+            readStream(runningProcess.getErrorStream(), err);
+            return runningProcess.waitFor();
 
         } catch (IOException | InterruptedException e) {
             err.accept(e.toString());

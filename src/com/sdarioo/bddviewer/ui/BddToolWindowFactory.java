@@ -13,6 +13,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
+import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
 import com.sdarioo.bddviewer.ui.console.actions.ConsoleActionManager;
@@ -45,7 +46,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
 
-        Plugin.getInstance().getSessionManager().getLauncher().addListener(new LauncherListenerAdapter() {
+        Plugin.getInstance().getSessionManager(project).getLauncher().addListener(new LauncherListenerAdapter() {
             @Override
             public void sessionStarted(List<Scenario> scope) {
                 toolWindow.getContentManager().setSelectedContent(consoleContent);
@@ -57,9 +58,11 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, TREE_LABEL, false);
 
+        SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
+
         BddTree tree = new BddTree(project,
-                Plugin.getInstance().getStoryProvider(),
-                Plugin.getInstance().getSessionManager());
+                Plugin.getInstance().getStoryProvider(project),
+                sessionManager);
 
         JPanel treePanel = new JPanel(new BorderLayout());
         SearchComponent searchPanel = new SearchComponent(treePanel, tree.getTreeTable());
@@ -68,7 +71,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         content.setPreferredFocusableComponent(tree.getTreeTable());
 
-        BddTreeActionManager actionManager = new BddTreeActionManager(tree, Plugin.getInstance().getSessionManager());
+        BddTreeActionManager actionManager = new BddTreeActionManager(tree, sessionManager);
         tree.setActionManager(actionManager);
         DefaultActionGroup actionGroup = new DefaultActionGroup();
         actionGroup.addAll(actionManager.getToolbarActions());
@@ -84,7 +87,8 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, CONSOLE_LABEL, false);
 
-        LauncherConsole console = new LauncherConsole(project, Plugin.getInstance().getSessionManager());
+        SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
+        LauncherConsole console = new LauncherConsole(project, sessionManager);
 
         ConsoleActionManager actionManager = new ConsoleActionManager(console);
         DefaultActionGroup actionGroup = new DefaultActionGroup();

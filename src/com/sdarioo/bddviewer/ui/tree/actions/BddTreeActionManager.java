@@ -16,6 +16,7 @@ import java.util.List;
 public class BddTreeActionManager {
 
     private final ActionBase runSelectedAction;
+    private final ActionBase stopAction;
     private final ActionBase cleanResultsAction;
     private final ActionBase expandAllAction;
     private final ActionBase collapseAllAction;
@@ -27,6 +28,8 @@ public class BddTreeActionManager {
 
         cleanResultsAction = new ClearResultsAction(tree, sessionManager);
         runSelectedAction = new RunSelectedAction(tree, sessionManager.getLauncher());
+        stopAction = new StopAction(sessionManager.getLauncher());
+        stopAction.setEnabled(false);
 
         expandAllAction = new ExpandAction(tree.getTreeTable());
         collapseAllAction = new CollapseAction(tree.getTreeTable());
@@ -43,6 +46,7 @@ public class BddTreeActionManager {
 
     public List<AnAction> getToolbarActions() {
         return Arrays.asList(runSelectedAction,
+                stopAction,
                 cleanResultsAction,
                 Separator.getInstance(),
                 expandAllAction,
@@ -78,12 +82,14 @@ public class BddTreeActionManager {
                 setEnabled(runSelectedAction, false);
                 setEnabled(cleanResultsAction, false);
                 setEnabled(reloadTreeAction, false);
+                setEnabled(stopAction, true);
             }
             @Override
             public void sessionFinished() {
                 setEnabled(runSelectedAction, true);
                 setEnabled(cleanResultsAction, true);
                 setEnabled(reloadTreeAction, true);
+                setEnabled(stopAction, false);
             }
         });
     }

@@ -12,4 +12,5 @@ public interface Launcher {
 
     void removeListener(LauncherListener listener);
 
+    void terminate();
 }

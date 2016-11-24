@@ -24,4 +24,8 @@ public class DummyLauncher extends AbstractLauncher {
             return new TestResult(RunStatus.Failed, 0L, e.toString());
         }
     }
+
+    @Override
+    public void terminate() {
+    }
 }
