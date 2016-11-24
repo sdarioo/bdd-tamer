@@ -46,7 +46,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
 
-        Plugin.getInstance().getSessionManager(project).getLauncher().addListener(new LauncherListenerAdapter() {
+        Plugin.getInstance().getLauncher(project).addListener(new LauncherListenerAdapter() {
             @Override
             public void sessionStarted(List<Scenario> scope) {
                 toolWindow.getContentManager().setSelectedContent(consoleContent);
@@ -58,11 +58,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, TREE_LABEL, false);
 
-        SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
-
-        BddTree tree = new BddTree(project,
-                Plugin.getInstance().getStoryProvider(project),
-                sessionManager);
+        BddTree tree = new BddTree(project);
 
         JPanel treePanel = new JPanel(new BorderLayout());
         SearchComponent searchPanel = new SearchComponent(treePanel, tree.getTreeTable());
@@ -71,7 +67,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         content.setPreferredFocusableComponent(tree.getTreeTable());
 
-        BddTreeActionManager actionManager = new BddTreeActionManager(tree, sessionManager);
+        BddTreeActionManager actionManager = new BddTreeActionManager(tree, project);
         tree.setActionManager(actionManager);
         DefaultActionGroup actionGroup = new DefaultActionGroup();
         actionGroup.addAll(actionManager.getToolbarActions());
@@ -87,8 +83,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, CONSOLE_LABEL, false);
 
-        SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
-        LauncherConsole console = new LauncherConsole(project, sessionManager);
+        LauncherConsole console = new LauncherConsole(project);
 
         ConsoleActionManager actionManager = new ConsoleActionManager(console);
         DefaultActionGroup actionGroup = new DefaultActionGroup();

@@ -1,5 +1,7 @@
 package com.sdarioo.bddviewer.launcher;
 
+import com.intellij.openapi.project.Project;
+import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.model.Scenario;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +25,9 @@ public class SessionManager implements LauncherListener {
 
     private final Launcher launcher;
 
-    public SessionManager(Launcher launcher) {
-        this.launcher = launcher;
+    public SessionManager(Project project) {
+        this.launcher = Plugin.getInstance().getLauncher(project);
         launcher.addListener(this);
-    }
-
-    public Launcher getLauncher() {
-        return launcher;
     }
 
     public boolean isRunning() {

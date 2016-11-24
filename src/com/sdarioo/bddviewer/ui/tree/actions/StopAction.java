@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
 public class StopAction extends ActionBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopAction.class);
-    private static final String TEXT = "Stop";
+    private static final String TEXT = "Kill Process";
 
     private final Launcher launcher;
 
     public StopAction(Launcher launcher) {
-        super(TEXT, AllIcons.Process.Stop);
+        super(TEXT, AllIcons.Debugger.KillProcess);
         this.launcher = launcher;
     }
 

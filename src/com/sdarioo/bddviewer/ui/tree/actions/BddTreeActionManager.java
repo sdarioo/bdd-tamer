@@ -2,6 +2,8 @@ package com.sdarioo.bddviewer.ui.tree.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.Separator;
+import com.intellij.openapi.project.Project;
+import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
 import com.sdarioo.bddviewer.launcher.SessionManager;
@@ -24,11 +26,14 @@ public class BddTreeActionManager {
     private final ActionBase copyL2Action;
 
 
-    public BddTreeActionManager(BddTree tree, SessionManager sessionManager) {
+    public BddTreeActionManager(BddTree tree, Project project) {
+
+        SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
+        Launcher launcher = Plugin.getInstance().getLauncher(project);
 
         cleanResultsAction = new ClearResultsAction(tree, sessionManager);
-        runSelectedAction = new RunSelectedAction(tree, sessionManager.getLauncher());
-        stopAction = new StopAction(sessionManager.getLauncher());
+        runSelectedAction = new RunSelectedAction(tree, launcher);
+        stopAction = new StopAction(launcher);
         stopAction.setEnabled(false);
 
         expandAllAction = new ExpandAction(tree.getTreeTable());
@@ -36,7 +41,7 @@ public class BddTreeActionManager {
         reloadTreeAction = new ReloadAction(tree);
         copyL2Action = new CopyAction(tree.getTreeTable(), BddTreeColumns.L2_COLUMN);
 
-        addLauncherListener(sessionManager.getLauncher());
+        addLauncherListener(launcher);
 
     }
 

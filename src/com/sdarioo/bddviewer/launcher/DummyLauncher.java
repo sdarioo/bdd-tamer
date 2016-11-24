@@ -9,20 +9,32 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class DummyLauncher extends AbstractLauncher {
 
+
     @Override
-    protected TestResult execute(Scenario scenario) {
-        try {
-            int time = ThreadLocalRandom.current().nextInt(2000);
-            Thread.sleep(time);
+    protected void executeAll(List<Scenario> scenario) {
+        scenario.forEach(this::execute);
+    }
 
-            List<String> lines = Files.readAllLines(Paths.get("D:\\Temp\\out2.txt"));
-            lines.forEach(l -> notifyOutputLine(l));
+    private void execute(Scenario scenario) {
+        notifyTestStarted(scenario);
 
+        TestResult result;
+        if (scenario.isRunnable()) {
+            try {
+                int time = ThreadLocalRandom.current().nextInt(2000);
+                Thread.sleep(time);
 
-            return new TestResult(RunStatus.Passed, time, scenario.getName() + " SUCCESS");
-        } catch (Exception e) {
-            return new TestResult(RunStatus.Failed, 0L, e.toString());
+                List<String> lines = Files.readAllLines(Paths.get("D:\\Temp\\out2.txt"));
+                lines.forEach(l -> notifyOutputLine(l));
+
+                result = new TestResult(RunStatus.Passed, time, scenario.getName() + " SUCCESS");
+            } catch (Exception e) {
+                result = new TestResult(RunStatus.Failed, 0L, scenario.getName() + " FAILED");
+            }
+        } else {
+            result = TestResult.skipped(scenario);
         }
+        notifyTestFinished(scenario, result);
     }
 
     @Override

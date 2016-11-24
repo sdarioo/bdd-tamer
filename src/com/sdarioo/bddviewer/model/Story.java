@@ -1,6 +1,8 @@
 package com.sdarioo.bddviewer.model;
 
 
+import com.sdarioo.bddviewer.util.PathUtil;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ public class Story implements LocationHolder {
 
     public Story(Location location, List<Scenario> scenarios) {
         this.location = location;
-        this.name = getNameWithoutExtension(getJavaPath());
+        this.name = PathUtil.getNameWithoutExtension(getJavaPath());
         this.scenarios = new ArrayList<>(scenarios);
 
         // Set parent story for child scenarios
@@ -57,7 +59,7 @@ public class Story implements LocationHolder {
      */
     public Path getJavaPath() {
         Path path = getLocation().getPath();
-        String name = getNameWithoutExtension(path);
+        String name = PathUtil.getNameWithoutExtension(path);
 
         String[] parts = name.split("_");
         String camelCaseName = Arrays.stream(parts)
@@ -65,15 +67,6 @@ public class Story implements LocationHolder {
                 .collect(Collectors.joining());
 
         return path.resolveSibling(camelCaseName + ".java");
-    }
-
-    private static String getNameWithoutExtension(Path path) {
-        String name = path.getFileName().toString();
-        int index = name.lastIndexOf('.');
-        if (index > 0) {
-            name = name.substring(0, index);
-        }
-        return name;
     }
 
     private static String capitalize(String str) {

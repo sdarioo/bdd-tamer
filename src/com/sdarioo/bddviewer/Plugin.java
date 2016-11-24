@@ -3,6 +3,7 @@ package com.sdarioo.bddviewer;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.launcher.CmdLauncher;
+import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.provider.ProjectStoryProvider;
 import com.sdarioo.bddviewer.provider.StoryProvider;
@@ -26,10 +27,13 @@ public class Plugin implements ApplicationComponent {
     private static Plugin INSTANCE;
 
     // Project path -> StoryProvider
-    private Map<Path, StoryProvider> storyProviders = new ConcurrentHashMap<>();
+    private final Map<Path, StoryProvider> storyProviders = new ConcurrentHashMap<>();
 
     // Project path -> sessionManagers
-    private Map<Path, SessionManager> sessionManagers = new ConcurrentHashMap<>();
+    private final Map<Path, SessionManager> sessionManagers = new ConcurrentHashMap<>();
+
+    // Project path -> launcher
+    private final Map<Path, Launcher> launchers = new ConcurrentHashMap<>();
 
 
     private Plugin() {
@@ -66,6 +70,11 @@ public class Plugin implements ApplicationComponent {
 
     public SessionManager getSessionManager(Project project) {
         Path path = Paths.get(project.getProjectFilePath());
-        return sessionManagers.computeIfAbsent(path, p -> new SessionManager(new CmdLauncher()));
+        return sessionManagers.computeIfAbsent(path, p -> new SessionManager(project));
+    }
+
+    public Launcher getLauncher(Project project) {
+        Path path = Paths.get(project.getProjectFilePath());
+        return launchers.computeIfAbsent(path, p -> new CmdLauncher());
     }
 }

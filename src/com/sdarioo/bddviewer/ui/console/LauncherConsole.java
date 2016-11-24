@@ -2,6 +2,7 @@ package com.sdarioo.bddviewer.ui.console;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
+import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.*;
 import com.sdarioo.bddviewer.model.Location;
 import com.sdarioo.bddviewer.model.Scenario;
@@ -27,9 +28,9 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
     boolean isExamples;
 
 
-    public LauncherConsole(Project project, SessionManager sessionManager) {
+    public LauncherConsole(Project project) {
         super(project);
-        sessionManager.getLauncher().addListener(this);
+        Plugin.getInstance().getLauncher(project).addListener(this);
     }
 
     public boolean isShowLogs() {

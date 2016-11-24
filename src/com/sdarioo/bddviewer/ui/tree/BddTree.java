@@ -6,6 +6,7 @@ import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.util.messages.MessageBusConnection;
+import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.*;
 import com.sdarioo.bddviewer.provider.ProjectStoryProvider;
 import com.sdarioo.bddviewer.provider.StoryParser;
@@ -49,16 +50,16 @@ public class BddTree {
     private BddTreeActionManager actionManager;
     private final List<BddTreeColumns.ColumnInfo> columnInfos;
 
-    public BddTree(Project project,
-                   StoryProvider storyProvider,
-                   SessionManager sessionManager) {
+    public BddTree(Project project) {
         this.project = project;
-        this.storyProvider = storyProvider;
+        this.storyProvider = Plugin.getInstance().getStoryProvider(project);
+        SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
         this.columnInfos = BddTreeColumns.getColumns(sessionManager);
         initialize(sessionManager);
 
         addTreeListeners();
-        addLauncherListener(sessionManager.getLauncher());
+        Launcher launcher = Plugin.getInstance().getLauncher(project);
+        addLauncherListener(launcher);
         addProjectListener();
 
         for (BddTreeColumns.ColumnInfo column : columnInfos) {

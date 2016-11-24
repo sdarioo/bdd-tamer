@@ -1,5 +1,7 @@
 package com.sdarioo.bddviewer.launcher;
 
+import com.sdarioo.bddviewer.model.Scenario;
+
 public class TestResult {
 
     private final RunStatus status;
@@ -10,6 +12,10 @@ public class TestResult {
         this.status = status;
         this.time = time;
         this.output = output;
+    }
+
+    public static TestResult skipped(Scenario scenario) {
+        return new TestResult(RunStatus.Skipped, 0L, "Scenario skipped: " + scenario.getName());
     }
 
     public RunStatus getStatus() {
@@ -23,4 +29,5 @@ public class TestResult {
     public String getOutput() {
         return output;
     }
+
 }
