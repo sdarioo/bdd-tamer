@@ -23,6 +23,4 @@ III. Launcher
 IV. Other
 
 1. Logging
-2. Main icon
 3. Open reports folder action
-4. Generalize code (no PCM references)

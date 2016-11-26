@@ -28,6 +28,7 @@ public class CmdLauncher extends AbstractLauncher {
     @Override
     public void terminate() {
         if ((runningProcess != null) && runningProcess.isAlive()) {
+            LOGGER.info("Terminating launcher process...");
             runningProcess.destroyForcibly();
         }
     }
@@ -98,8 +99,7 @@ public class CmdLauncher extends AbstractLauncher {
         Scenario scenario = scenarios.get(0);
         Path path = scenario.getLocation().getPath();
         while (path != null) {
-            // TODO - use scenario parent module
-            if (Files.isDirectory(path) && "pscm_bdd".equals(path.getFileName().toString())) {
+            if (Files.isDirectory(path) && Files.isRegularFile(path.resolve("pom.xml"))) {
                 return path;
             }
             path = path.getParent();

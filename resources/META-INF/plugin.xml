@@ -32,8 +32,9 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
-    <toolWindow id="BDD Viewer"
+    <toolWindow id="BDD"
                 anchor="bottom"
+                icon="/images/bdd.gif"
                 factoryClass="com.sdarioo.bddviewer.ui.BddToolWindowFactory"
     />
   </extensions>
