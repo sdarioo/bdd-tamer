@@ -19,7 +19,7 @@ public class BddTreeSorter
 
     public BddTreeSorter(DefaultTreeModel tm, DefaultTreeColumnModel cm) {
         super(tm, cm);
-
+        setSortCycle(ASCENDING_DESCENDING);
         setComparators();
     }
 

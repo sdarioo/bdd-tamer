@@ -18,6 +18,7 @@ import com.sdarioo.bddviewer.ui.actions.ActionAdapter;
 import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
 import com.sdarioo.bddviewer.ui.util.IdeUtil;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
+import com.sdarioo.bddviewer.util.PathUtil;
 import de.sciss.treetable.j.DefaultTreeColumnModel;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.TreeTable;
@@ -92,7 +93,7 @@ public class BddTree {
     public void reloadTree() {
         DefaultTreeTableNode root = (DefaultTreeTableNode)treeModel.getRoot();
         root.removeAllChildren();
-        addRootChildren(root);
+        createTreeStructure(root);
         treeModel.reload(root);
     }
 
@@ -130,31 +131,48 @@ public class BddTree {
 
     private DefaultTreeTableNode createRoot() {
         DefaultTreeTableNode root = createNode(project);
-        addRootChildren(root);
+        createTreeStructure(root);
         return root;
     }
 
-    private void addRootChildren(DefaultTreeTableNode root) {
-
-        Map<Path, DefaultTreeTableNode> folderNodes = new HashMap<>();
+    private void createTreeStructure(DefaultTreeTableNode rootNode) {
 
         List<Story> stories = storyProvider.getStories(project);
-        stories.forEach(story -> {
-            DefaultTreeTableNode storyNode = createNode(story);
-            Path dir = story.getLocation().getPath().getParent();
-            DefaultTreeTableNode parent = root;
-            if (!"stories".equals(dir.getFileName().toString())) {
-                parent = folderNodes.get(dir);
-                if (parent == null) {
-                    parent = createNode(dir.getFileName());
-                    folderNodes.put(dir, parent);
-                    root.add(parent);
-                }
-            }
+        List<Path> storyPaths = stories.stream()
+                .map(s -> s.getLocation().getPath())
+                .collect(Collectors.toList());
 
-            parent.add(storyNode);
+        Path projectDir = Paths.get(project.getBasePath());
+        Path commonRootDir = PathUtil.findCommonRoot(storyPaths);
+        if ((commonRootDir == null) || !commonRootDir.startsWith(projectDir)) {
+            commonRootDir = projectDir;
+        }
+        Map<Path, DefaultTreeTableNode> dirNodes = new HashMap<>();
+
+        for (Story story : stories) {
+
+            Path storyDir = story.getLocation().getPath().getParent();
+            if (!storyDir.startsWith(commonRootDir)) {
+                LOGGER.warn("Story path " + storyDir + " is not part of root path: " + commonRootDir);
+                continue;
+            }
+            Path parentDir = commonRootDir;
+            DefaultTreeTableNode parentNode = rootNode;
+            Path storyRelPath = commonRootDir.relativize(storyDir);
+            for (String segment : PathUtil.split(storyRelPath)) {
+                parentDir = parentDir.resolve(segment);
+                DefaultTreeTableNode nextParentNode = dirNodes.get(parentDir);
+                if (nextParentNode == null) {
+                    nextParentNode = createNode(segment);
+                    dirNodes.put(parentDir, nextParentNode);
+                    parentNode.add(nextParentNode);
+                }
+                parentNode = nextParentNode;
+            }
+            DefaultTreeTableNode storyNode = createNode(story);
+            parentNode.add(storyNode);
             story.getScenarios().forEach(scenario -> storyNode.add(createNode(scenario)));
-        });
+        }
     }
 
     private void reloadStoryNode(DefaultTreeTableNode node, Story story) {
