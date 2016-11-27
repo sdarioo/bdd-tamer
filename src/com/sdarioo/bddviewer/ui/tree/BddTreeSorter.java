@@ -15,11 +15,10 @@ import java.util.List;
 public class BddTreeSorter
         extends DefaultTreeTableSorter<TreeModel, TreeColumnModel, Object> {
 
-    private SortOrder order = SortOrder.UNSORTED;
+    private SortOrder order = SortOrder.ASCENDING;
 
     public BddTreeSorter(DefaultTreeModel tm, DefaultTreeColumnModel cm) {
         super(tm, cm);
-        setSortCycle(ASCENDING_DESCENDING);
         setComparators();
     }
 
@@ -44,9 +43,9 @@ public class BddTreeSorter
                 }
                 // No matter what sort order is, we want folders be at the beginning
                 if (order == SortOrder.ASCENDING) {
-                    return (n1 instanceof Path) ? 1 : -1;
+                    return (n1 instanceof Path) ? -1 : 1;
                 }
-                return (n1 instanceof Path) ? -1 : 1;
+                return (n1 instanceof Path) ? 1 : -1;
             });
         }
     }

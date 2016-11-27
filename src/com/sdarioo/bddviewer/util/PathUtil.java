@@ -26,8 +26,8 @@ public final class PathUtil {
 
     public static Path findCommonRoot(List<Path> paths) {
         Set<Path> roots = paths.stream().map(Path::getRoot).collect(Collectors.toSet());
-        if (roots.size() > 1) {
-            LOGGER.warn("Given paths have no common root: " + roots);
+        if (roots.size() != 1) {
+            LOGGER.warn("No common root found: " + roots);
             return null;
         }
         Path root = paths.stream().min(Comparator.comparing(Path::getNameCount)).get();

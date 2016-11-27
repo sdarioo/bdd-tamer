@@ -7,6 +7,7 @@ import com.sdarioo.bddviewer.model.Scenario;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class BddTreeColumns {
@@ -15,7 +16,27 @@ public class BddTreeColumns {
     public static String L2_COLUMN = "L2";
     public static String TIME_COLUMN = "Exec. Time";
 
-    public static List<ColumnInfo> getColumns(SessionManager sessionManager) {
+    private final SessionManager sessionManager;
+    private final List<ColumnInfo> columnInfos;
+
+    public BddTreeColumns(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+        this.columnInfos = createColumns();
+    }
+
+    public List<String> getColumnNames() {
+        return getColumns().stream().map(ColumnInfo::getName).collect(Collectors.toList());
+    }
+
+    public List<Object> getColumnValues(Object userObject) {
+        return getColumns().stream().map(c -> c.getValue(userObject)).collect(Collectors.toList());
+    }
+
+    public List<ColumnInfo> getColumns() {
+        return columnInfos;
+    }
+
+    private List<ColumnInfo> createColumns() {
         List<ColumnInfo> columns = new ArrayList<>();
         columns.add(new ColumnInfo(NAME_COLUMN, 1000) {
             @Override

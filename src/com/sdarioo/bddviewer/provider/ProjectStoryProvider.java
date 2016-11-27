@@ -43,7 +43,7 @@ public class ProjectStoryProvider implements StoryProvider {
             return;
         }
 
-        if (file.isDirectory() && !"target".equals(file.getName())) {
+        if (file.isDirectory() && !isOutputDir(file)) {
             VirtualFile[] children = file.getChildren();
             for (VirtualFile child : children) {
                 recursiveFindPaths(child, paths);
@@ -57,6 +57,10 @@ public class ProjectStoryProvider implements StoryProvider {
     public static boolean isStoryFile(VirtualFile file) {
         String name = file.getName();
         return (name != null) && name.endsWith(".story");
+    }
+
+    private static boolean isOutputDir(VirtualFile file) {
+        return "target".equals(file.getName()) || "bin".equals(file.getName());
     }
 
 }

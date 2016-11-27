@@ -18,7 +18,6 @@ import com.sdarioo.bddviewer.ui.actions.ActionAdapter;
 import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
 import com.sdarioo.bddviewer.ui.util.IdeUtil;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
-import com.sdarioo.bddviewer.util.PathUtil;
 import de.sciss.treetable.j.DefaultTreeColumnModel;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.TreeTable;
@@ -36,7 +35,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class BddTree {
@@ -47,15 +45,20 @@ public class BddTree {
     private final StoryProvider storyProvider;
 
     private TreeTable tree;
+    private BddTreeBuilder builder;
+    private BddTreeColumns columns;
     private DefaultTreeModel treeModel;
     private BddTreeActionManager actionManager;
-    private final List<BddTreeColumns.ColumnInfo> columnInfos;
+
 
     public BddTree(Project project) {
         this.project = project;
         this.storyProvider = Plugin.getInstance().getStoryProvider(project);
         SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
-        this.columnInfos = BddTreeColumns.getColumns(sessionManager);
+
+        this.columns = new BddTreeColumns(sessionManager);
+        this.builder = new BddTreeBuilder(project, storyProvider, columns);
+
         initialize(sessionManager);
 
         addTreeListeners();
@@ -63,7 +66,7 @@ public class BddTree {
         addLauncherListener(launcher);
         addProjectListener();
 
-        for (BddTreeColumns.ColumnInfo column : columnInfos) {
+        for (BddTreeColumns.ColumnInfo column : columns.getColumns()) {
             tree.getColumn(column.getName()).setPreferredWidth(column.getPreferredWidth());
         }
     }
@@ -93,7 +96,7 @@ public class BddTree {
     public void reloadTree() {
         DefaultTreeTableNode root = (DefaultTreeTableNode)treeModel.getRoot();
         root.removeAllChildren();
-        createTreeStructure(root);
+        builder.buildTreeStructure(root);
         treeModel.reload(root);
     }
 
@@ -107,10 +110,9 @@ public class BddTree {
     }
 
     private void initialize(SessionManager sessionManager) {
-        DefaultTreeTableNode root = createRoot();
-        treeModel = createTreeModel(root);
-        DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root,
-                columnInfos.stream().map(c -> c.toString()).collect(Collectors.toList()));
+        DefaultTreeTableNode root = builder.buildTree();
+        treeModel = new DefaultTreeModel(root);
+        DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root, columns.getColumnNames());
         columnModel.setAllColumnsEditable(false);
 
         tree = new TreeTable(treeModel, columnModel);
@@ -125,75 +127,16 @@ public class BddTree {
         tree.setAutoCreateRowHeader(false);
     }
 
-    private DefaultTreeModel createTreeModel(DefaultTreeTableNode root) {
-        return new DefaultTreeModel(root);
-    }
-
-    private DefaultTreeTableNode createRoot() {
-        DefaultTreeTableNode root = createNode(project);
-        createTreeStructure(root);
-        return root;
-    }
-
-    private void createTreeStructure(DefaultTreeTableNode rootNode) {
-
-        List<Story> stories = storyProvider.getStories(project);
-        List<Path> storyPaths = stories.stream()
-                .map(s -> s.getLocation().getPath())
-                .collect(Collectors.toList());
-
-        Path projectDir = Paths.get(project.getBasePath());
-        Path commonRootDir = PathUtil.findCommonRoot(storyPaths);
-        if ((commonRootDir == null) || !commonRootDir.startsWith(projectDir)) {
-            commonRootDir = projectDir;
-        }
-        Map<Path, DefaultTreeTableNode> dirNodes = new HashMap<>();
-
-        for (Story story : stories) {
-
-            Path storyDir = story.getLocation().getPath().getParent();
-            if (!storyDir.startsWith(commonRootDir)) {
-                LOGGER.warn("Story path " + storyDir + " is not part of root path: " + commonRootDir);
-                continue;
-            }
-            Path parentDir = commonRootDir;
-            DefaultTreeTableNode parentNode = rootNode;
-            Path storyRelPath = commonRootDir.relativize(storyDir);
-            for (String segment : PathUtil.split(storyRelPath)) {
-                parentDir = parentDir.resolve(segment);
-                DefaultTreeTableNode nextParentNode = dirNodes.get(parentDir);
-                if (nextParentNode == null) {
-                    nextParentNode = createNode(segment);
-                    dirNodes.put(parentDir, nextParentNode);
-                    parentNode.add(nextParentNode);
-                }
-                parentNode = nextParentNode;
-            }
-            DefaultTreeTableNode storyNode = createNode(story);
-            parentNode.add(storyNode);
-            story.getScenarios().forEach(scenario -> storyNode.add(createNode(scenario)));
-        }
-    }
-
     private void reloadStoryNode(DefaultTreeTableNode node, Story story) {
         node.setUserObject(story);
         updateRowData(node);
         node.removeAllChildren();
-        story.getScenarios().forEach(scenario -> node.add(createNode(scenario)));
+        story.getScenarios().forEach(scenario -> node.add(builder.createNode(scenario)));
         treeModel.reload(node);
     }
 
-    private DefaultTreeTableNode createNode(Object modelObject) {
-        DefaultTreeTableNode node = new DefaultTreeTableNode(getRowData(modelObject));
-        node.setUserObject(modelObject);
-        return node;
-    }
-
     private Object[] getRowData(Object modelObject) {
-        return columnInfos.stream()
-                .map(c -> c.getValue(modelObject))
-                .collect(Collectors.toList())
-                .toArray(new Object[0]);
+        return columns.getColumnValues(modelObject).toArray();
     }
 
     private void updateRowData(DefaultTreeTableNode node) {

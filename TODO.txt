@@ -8,7 +8,6 @@ I. Console
 II. Tree
 
 1. Run indicator
-2. Default sorting
 3. Next/Prev result actions
 4. Search next/prev, match case, regexp
 5. Duplicated scenarios (e.g from target)
