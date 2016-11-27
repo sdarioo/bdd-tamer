@@ -11,24 +11,41 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 
 public class SearchHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchHelper.class);
 
-    private static final boolean IGNORE_CASE = true;
+    private final Predicate<DefaultTreeTableNode> matcher;
+
+    public SearchHelper(String text, boolean matchCase) {
+        this(node -> containsText(node, text, matchCase));
+    }
+
+    public SearchHelper(Predicate<DefaultTreeTableNode> matcher) {
+        this.matcher = matcher;
+    }
 
     /**
      * Finds, selects and expands next matching node
      * @param tree
-     * @param text
      */
-    public static void findNext(TreeTable tree, String text) {
-        if (text.length() <= 0) {
-            return;
-        }
+    public void findNext(TreeTable tree) {
+        find(tree, Direction.Forward);
+    }
+
+    /**
+     * Finds, selects and expands previous matching node
+     * @param tree
+     */
+    public void findPrev(TreeTable tree) {
+        find(tree, Direction.Backward);
+    }
+
+    private void find(TreeTable tree, Direction direction) {
+
         TreeModel model = tree.getTreeModel();
         List<DefaultTreeTableNode> allNodes = new ArrayList<>();
         BddTreeWalker.walkTree(model, (path, node) -> allNodes.add(node));
@@ -46,11 +63,16 @@ public class SearchHelper {
         tree.clearSelection();
         for (int i = 0; i < allNodes.size(); i++) {
             int idx = (currentIndex + i + 1) % allNodes.size();
+            if (direction == Direction.Backward) {
+                idx = currentIndex - (i + 1);
+                if (idx < 0) {
+                    idx = allNodes.size() + idx;
+                }
+            }
             DefaultTreeTableNode next = allNodes.get(idx);
-            if (isMatching(next, text)) {
+            if (matcher.test(next)) {
                 TreePath path = TreeUtil.pathToRoot(next);
                 tree.addSelectionPath(path);
-                tree.expandPath(path);
                 tree.scrollPathToVisible(path);
                 break;
             }
@@ -60,12 +82,8 @@ public class SearchHelper {
     /**
      * Finds, selects and expands all matching nodes.
      * @param tree
-     * @param text
      */
-    public static void findAll(TreeTable tree, String text) {
-        if (text.length() <= 0) {
-            return;
-        }
+    public void findAll(TreeTable tree) {
         TreeModel model = tree.getTreeModel();
         List<DefaultTreeTableNode> allNodes = new ArrayList<>();
         BddTreeWalker.walkTree(model, (path, node) -> allNodes.add(node));
@@ -73,7 +91,7 @@ public class SearchHelper {
         tree.clearSelection();
         for (int i = 0; i < allNodes.size(); i++) {
             DefaultTreeTableNode next = allNodes.get(i);
-            if (isMatching(next, text)) {
+            if (matcher.test(next)) {
                 TreePath path = TreeUtil.pathToRoot(next);
                 tree.addSelectionPath(path);
                 tree.expandPath(path);
@@ -84,18 +102,26 @@ public class SearchHelper {
         }
     }
 
-    private static boolean isMatching(DefaultTreeTableNode node, String text) {
+    private static boolean containsText(DefaultTreeTableNode node, String text, boolean matchCase) {
+        if (text.length() == 0) {
+            return false;
+        }
         for (int i = 0; i < node.getColumnCount(); i++) {
             String columnText = node.getValueAt(i).toString();
-            if (MATCHER.test(columnText, text)) {
+            boolean contains = matchCase ?
+                    columnText.contains(text) :
+                    columnText.toLowerCase().contains(text.toLowerCase());
+            if (contains) {
                 return true;
             }
         }
         return false;
     }
 
-    private static final BiPredicate<String, String> MATCHER = (col, text) -> IGNORE_CASE ?
-            col.toLowerCase().contains(text.toLowerCase()) :
-            col.contains(text);
+    public enum Direction {
+        Forward,
+        Backward
+    }
+
 
 }

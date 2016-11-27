@@ -30,6 +30,7 @@ public class SearchComponent {
 
     private JComponent mainComponent;
     private MySearchTextField searchField;
+    private JCheckBox matchCaseBox;
 
     public SearchComponent(JComponent parent, TreeTable tree) {
         this.parent = parent;
@@ -60,7 +61,8 @@ public class SearchComponent {
         findPrev.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                //TODO
+                SearchHelper helper = new SearchHelper(searchField.getText(), matchCaseBox.isSelected());
+                helper.findPrev(tree);
             }
         });
 
@@ -69,7 +71,8 @@ public class SearchComponent {
         findNext.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                //TODO
+                SearchHelper helper = new SearchHelper(searchField.getText(), matchCaseBox.isSelected());
+                helper.findNext(tree);
             }
         });
 
@@ -78,7 +81,8 @@ public class SearchComponent {
         findAll.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                SearchHelper.findAll(tree, searchField.getText());
+                SearchHelper helper = new SearchHelper(searchField.getText(), matchCaseBox.isSelected());
+                helper.findAll(tree);
             }
         });
 
@@ -89,8 +93,8 @@ public class SearchComponent {
         leftPanel.add(findNext);
         leftPanel.add(findAll);
         leftPanel.add(new JSeparator());
-        leftPanel.add(new JCheckBox("Match Case")); //TODO
-        leftPanel.add(new JCheckBox("Regex")); //TODO
+        matchCaseBox = new JCheckBox("Match Case");
+        leftPanel.add(matchCaseBox);
 
         JPanel searchPanel = new NonOpaquePanel(new BorderLayout());
         searchPanel.add(leftPanel, BorderLayout.WEST);
@@ -148,7 +152,8 @@ public class SearchComponent {
         }
 
         protected void onTextEntered(String text) {
-            SearchHelper.findNext(tree, text);
+            SearchHelper helper = new SearchHelper(text, matchCaseBox.isSelected());
+            helper.findNext(tree);
         }
 
         private void addListeners() {
