@@ -101,7 +101,7 @@ public class BddTreeBuilder {
             String[] segments1 = PathUtil.split(p1.getParent());
             String[] segments2 = PathUtil.split(p2.getParent());
             for (int i = 0; i < Math.min(segments1.length, segments2.length); i++) {
-                int compare = segments1[1].compareTo(segments2[i]);
+                int compare = segments1[i].compareTo(segments2[i]);
                 if (compare != 0) {
                     return compare;
                 }
