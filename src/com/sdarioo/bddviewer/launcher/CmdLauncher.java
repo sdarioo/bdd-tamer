@@ -14,10 +14,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -43,20 +40,27 @@ public class CmdLauncher extends AbstractLauncher {
     protected void executeAll(List<Scenario> scenarios) {
         List<Path> paths = null;
         Path configPath = null;
+        LaunchMonitor monitor = new LaunchMonitor(scenarios);
         try {
             paths = createTempFiles(scenarios);
-            configPath = createConfigPath(paths);
+            monitor.setScenarioPaths(paths);
 
+            configPath = createConfigPath(paths);
             Path runDir = getRunDirectory(scenarios);
+            if (runDir == null) {
+                LOGGER.error("Cannot find run directory.");
+                return;
+            }
             String cmdLine = createCommandLine(configPath);
             notifyOutputLine("Running CmdLine: " + cmdLine);
 
-            LaunchMonitor monitor = new LaunchMonitor(scenarios, paths);
             int exitCode = runCmdLine(cmdLine, runDir, line -> processOutputLine(line, monitor));
             notifyOutputLine("Process finished with exit code: " + exitCode);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             LOGGER.error("Execution failed", e);
+            terminate();
         } finally {
+            monitor.notifySkipped();
             deleteFiles(paths);
             deleteFile(configPath);
         }
@@ -184,12 +188,22 @@ public class CmdLauncher extends AbstractLauncher {
     }
 
     private class LaunchMonitor {
+
+        private final List<Scenario> scenarios;
+        private final Set<Scenario> started = new HashSet<>();
+        private final Set<Scenario> finished = new HashSet<>();
+
         private final Map<Path, Scenario> scenarioByPath = new HashMap<>();
+
         private Path currentPath;
         private Scenario currentScenario;
         private long startTime;
 
-        LaunchMonitor(List<Scenario> scenarios, List<Path> paths) {
+        LaunchMonitor(List<Scenario> scenarios) {
+            this.scenarios = scenarios;
+        }
+
+        void setScenarioPaths(List<Path> paths) {
             for (int i = 0; i < scenarios.size(); i++) {
                 scenarioByPath.put(paths.get(i), scenarios.get(i));
             }
@@ -200,14 +214,30 @@ public class CmdLauncher extends AbstractLauncher {
             currentScenario = scenarioByPath.get(path);
             startTime = System.currentTimeMillis();
             notifyTestStarted(currentScenario);
+            started.add(currentScenario);
         }
 
         void scenarioFinished(RunStatus status) {
             long time = System.currentTimeMillis() - startTime;
             notifyTestFinished(currentScenario, new TestResult(status, time, ""));
+            finished.add(currentScenario);
 
             currentPath = null;
             currentScenario = null;
+        }
+
+        /**
+         * Send 'skipped' notifications for all scenarios that has not been completed yet.
+         */
+        void notifySkipped() {
+            scenarioByPath.values().stream().forEach(s -> {
+                if (!started.contains(s)) {
+                    notifyTestStarted(s);
+                }
+                if (!finished.contains(s)) {
+                    notifyTestFinished(s, TestResult.skipped(s));
+                }
+            });
         }
 
     }
