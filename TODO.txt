@@ -8,7 +8,7 @@ I. Console
 II. Tree
 
 1. Run indicator
-5. Duplicated scenarios (e.g from target)
+
 
 III. Launcher
 

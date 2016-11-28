@@ -60,7 +60,10 @@ public class ProjectStoryProvider implements StoryProvider {
     }
 
     private static boolean isOutputDir(VirtualFile file) {
-        return "target".equals(file.getName()) || "bin".equals(file.getName());
+        String name = file.getName();
+        return "target".equals(name) ||
+                "bin".equals(name) ||
+                "out".equals(name);
     }
 
 }
