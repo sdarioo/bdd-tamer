@@ -1,6 +1,5 @@
 package com.sdarioo.bddviewer.ui;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -13,7 +12,6 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
-import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
 import com.sdarioo.bddviewer.ui.console.actions.ConsoleActionManager;
@@ -43,8 +41,6 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         toolWindow.getContentManager().addContent(treeContent);
         toolWindow.getContentManager().addContent(consoleContent);
-
-        toolWindow.setIcon(AllIcons.Toolwindows.Documentation);
 
         Plugin.getInstance().getLauncher(project).addListener(new LauncherListenerAdapter() {
             @Override

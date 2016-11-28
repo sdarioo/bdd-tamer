@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class BddTree {
@@ -46,15 +45,20 @@ public class BddTree {
     private final StoryProvider storyProvider;
 
     private TreeTable tree;
+    private BddTreeBuilder builder;
+    private BddTreeColumns columns;
     private DefaultTreeModel treeModel;
     private BddTreeActionManager actionManager;
-    private final List<BddTreeColumns.ColumnInfo> columnInfos;
+
 
     public BddTree(Project project) {
         this.project = project;
         this.storyProvider = Plugin.getInstance().getStoryProvider(project);
         SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
-        this.columnInfos = BddTreeColumns.getColumns(sessionManager);
+
+        this.columns = new BddTreeColumns(sessionManager);
+        this.builder = new BddTreeBuilder(project, storyProvider, columns);
+
         initialize(sessionManager);
 
         addTreeListeners();
@@ -62,7 +66,7 @@ public class BddTree {
         addLauncherListener(launcher);
         addProjectListener();
 
-        for (BddTreeColumns.ColumnInfo column : columnInfos) {
+        for (BddTreeColumns.ColumnInfo column : columns.getColumns()) {
             tree.getColumn(column.getName()).setPreferredWidth(column.getPreferredWidth());
         }
     }
@@ -92,7 +96,7 @@ public class BddTree {
     public void reloadTree() {
         DefaultTreeTableNode root = (DefaultTreeTableNode)treeModel.getRoot();
         root.removeAllChildren();
-        addRootChildren(root);
+        builder.buildTreeStructure(root);
         treeModel.reload(root);
     }
 
@@ -106,10 +110,9 @@ public class BddTree {
     }
 
     private void initialize(SessionManager sessionManager) {
-        DefaultTreeTableNode root = createRoot();
-        treeModel = createTreeModel(root);
-        DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root,
-                columnInfos.stream().map(c -> c.toString()).collect(Collectors.toList()));
+        DefaultTreeTableNode root = builder.buildTree();
+        treeModel = new DefaultTreeModel(root);
+        DefaultTreeColumnModel columnModel = new DefaultTreeColumnModel(root, columns.getColumnNames());
         columnModel.setAllColumnsEditable(false);
 
         tree = new TreeTable(treeModel, columnModel);
@@ -124,58 +127,16 @@ public class BddTree {
         tree.setAutoCreateRowHeader(false);
     }
 
-    private DefaultTreeModel createTreeModel(DefaultTreeTableNode root) {
-        return new DefaultTreeModel(root);
-    }
-
-    private DefaultTreeTableNode createRoot() {
-        DefaultTreeTableNode root = createNode(project);
-        addRootChildren(root);
-        return root;
-    }
-
-    private void addRootChildren(DefaultTreeTableNode root) {
-
-        Map<Path, DefaultTreeTableNode> folderNodes = new HashMap<>();
-
-        List<Story> stories = storyProvider.getStories(project);
-        stories.forEach(story -> {
-            DefaultTreeTableNode storyNode = createNode(story);
-            Path dir = story.getLocation().getPath().getParent();
-            DefaultTreeTableNode parent = root;
-            if (!"stories".equals(dir.getFileName().toString())) {
-                parent = folderNodes.get(dir);
-                if (parent == null) {
-                    parent = createNode(dir.getFileName());
-                    folderNodes.put(dir, parent);
-                    root.add(parent);
-                }
-            }
-
-            parent.add(storyNode);
-            story.getScenarios().forEach(scenario -> storyNode.add(createNode(scenario)));
-        });
-    }
-
     private void reloadStoryNode(DefaultTreeTableNode node, Story story) {
         node.setUserObject(story);
         updateRowData(node);
         node.removeAllChildren();
-        story.getScenarios().forEach(scenario -> node.add(createNode(scenario)));
+        story.getScenarios().forEach(scenario -> node.add(builder.createNode(scenario)));
         treeModel.reload(node);
     }
 
-    private DefaultTreeTableNode createNode(Object modelObject) {
-        DefaultTreeTableNode node = new DefaultTreeTableNode(getRowData(modelObject));
-        node.setUserObject(modelObject);
-        return node;
-    }
-
     private Object[] getRowData(Object modelObject) {
-        return columnInfos.stream()
-                .map(c -> c.getValue(modelObject))
-                .collect(Collectors.toList())
-                .toArray(new Object[0]);
+        return columns.getColumnValues(modelObject).toArray();
     }
 
     private void updateRowData(DefaultTreeTableNode node) {

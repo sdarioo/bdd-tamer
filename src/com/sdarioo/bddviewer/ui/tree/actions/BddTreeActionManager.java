@@ -20,6 +20,8 @@ public class BddTreeActionManager {
     private final ActionBase runSelectedAction;
     private final ActionBase stopAction;
     private final ActionBase cleanResultsAction;
+    private final ActionBase nextResultAction;
+    private final ActionBase prevResultAction;
     private final ActionBase expandAllAction;
     private final ActionBase collapseAllAction;
     private final ActionBase reloadTreeAction;
@@ -31,10 +33,13 @@ public class BddTreeActionManager {
         SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
         Launcher launcher = Plugin.getInstance().getLauncher(project);
 
-        cleanResultsAction = new ClearResultsAction(tree, sessionManager);
         runSelectedAction = new RunSelectedAction(tree, launcher);
         stopAction = new StopAction(launcher);
         stopAction.setEnabled(false);
+
+        cleanResultsAction = new ClearResultsAction(tree, sessionManager);
+        nextResultAction = new NextResultAction(tree, sessionManager, true);
+        prevResultAction = new NextResultAction(tree, sessionManager, false);
 
         expandAllAction = new ExpandAction(tree.getTreeTable());
         collapseAllAction = new CollapseAction(tree.getTreeTable());
@@ -52,7 +57,10 @@ public class BddTreeActionManager {
     public List<AnAction> getToolbarActions() {
         return Arrays.asList(runSelectedAction,
                 stopAction,
+                Separator.getInstance(),
                 cleanResultsAction,
+                nextResultAction,
+                prevResultAction,
                 Separator.getInstance(),
                 expandAllAction,
                 collapseAllAction,
