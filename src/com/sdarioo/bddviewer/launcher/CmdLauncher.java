@@ -13,17 +13,23 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class CmdLauncher extends AbstractLauncher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdLauncher.class);
+    private static final String SCENARIOS_ARG = "--scenarios";
+    private static final String RUNNING_STORY_PREFIX = "Running story ";
+    private static final String GENERATING_REPORT_PREFIX = "Generating reports view to ";
+
 
     private Process runningProcess;
-    private long scenarioStartTime;
 
     @Override
     public void terminate() {
@@ -40,11 +46,12 @@ public class CmdLauncher extends AbstractLauncher {
             paths = createTempFiles(scenarios);
             configPath = createConfigPath(paths);
 
+            Path runDir = getRunDirectory(scenarios);
             String cmdLine = createCommandLine(configPath);
             notifyOutputLine("Running CmdLine: " + cmdLine);
 
-            Path runDir = getRunDirectory(scenarios);
-            int exitCode = runCmdLine(cmdLine, runDir, this::processOutputLine);
+            LaunchMonitor monitor = new LaunchMonitor(scenarios, paths);
+            int exitCode = runCmdLine(cmdLine, runDir, line -> processOutputLine(line, monitor));
             notifyOutputLine("Process finished with exit code: " + exitCode);
         } catch (IOException e) {
             LOGGER.error("Execution failed", e);
@@ -54,17 +61,20 @@ public class CmdLauncher extends AbstractLauncher {
         }
     }
 
-    private void processOutputLine(String line) {
-       if ("(Before Stories)".equals(line.trim())) {
-            //notifyTestStarted(scenario);
-            scenarioStartTime = System.currentTimeMillis();
-        }
-        if ("(After Stories)".equals(line.trim())) {
-            long executionTime = System.currentTimeMillis() - scenarioStartTime;
-            TestResult result = new TestResult(RunStatus.Passed, executionTime, "");
-            //notifyTestStarted(scenario, result);
-        }
+    private void processOutputLine(String line, LaunchMonitor monitor) {
         notifyOutputLine(line);
+        if (line.trim().startsWith(RUNNING_STORY_PREFIX)) {
+            String path = line.substring(RUNNING_STORY_PREFIX.length());
+            monitor.scenarioStarted(Paths.get(path));
+        }
+        if (line.trim().startsWith(GENERATING_REPORT_PREFIX)) {
+            int pathStart = line.indexOf('\'');
+            int pathEnd = line.indexOf('\'', pathStart + 1);
+            String reportsDir = line.substring(pathStart + 1, pathEnd);
+
+            RunStatus status = readStatusFromReportFile(Paths.get(reportsDir), monitor.currentPath);
+            monitor.scenarioFinished(status);
+        }
     }
 
     private int runCmdLine(String command, Path runDir, Consumer<String> out) {
@@ -110,7 +120,7 @@ public class CmdLauncher extends AbstractLauncher {
     private static String createCommandLine(Path configPath) {
         List<String> argsList = new ArrayList<>();
         argsList.add("launchCustomScenario");
-        argsList.add("--stories=" + normalizePath(configPath));
+        argsList.add(SCENARIOS_ARG + '=' + normalizePath(configPath));
         String args = argsList.stream().collect(Collectors.joining(" "));
         return "mvn.cmd exec:java -Dexec.classpathScope=test -Dexec.args=\"" + args + "\"";
     }
@@ -159,5 +169,46 @@ public class CmdLauncher extends AbstractLauncher {
                 LOGGER.warn(e.toString());
             }
         }
+    }
+
+    private static RunStatus readStatusFromReportFile(Path reportDirPath, Path scenarioPath) {
+        Path reportPath = reportDirPath.resolve(scenarioPath.getFileName() + ".stats");
+        try {
+            List<String> lines = Files.readAllLines(reportPath);
+            boolean success = lines.stream().map(String::trim).filter(l -> l.equals("scenariosSuccessful=1")).findFirst().isPresent();
+            return success ? RunStatus.Passed : RunStatus.Failed;
+        } catch (IOException e) {
+            LOGGER.error("Error while reading status file.", e);
+            return RunStatus.Failed;
+        }
+    }
+
+    private class LaunchMonitor {
+        private final Map<Path, Scenario> scenarioByPath = new HashMap<>();
+        private Path currentPath;
+        private Scenario currentScenario;
+        private long startTime;
+
+        LaunchMonitor(List<Scenario> scenarios, List<Path> paths) {
+            for (int i = 0; i < scenarios.size(); i++) {
+                scenarioByPath.put(paths.get(i), scenarios.get(i));
+            }
+        }
+
+        void scenarioStarted(Path path) {
+            currentPath = path;
+            currentScenario = scenarioByPath.get(path);
+            startTime = System.currentTimeMillis();
+            notifyTestStarted(currentScenario);
+        }
+
+        void scenarioFinished(RunStatus status) {
+            long time = System.currentTimeMillis() - startTime;
+            notifyTestFinished(currentScenario, new TestResult(status, time, ""));
+
+            currentPath = null;
+            currentScenario = null;
+        }
+
     }
 }
