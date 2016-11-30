@@ -2,7 +2,9 @@ package com.sdarioo.bddviewer.launcher;
 
 import com.sdarioo.bddviewer.model.Location;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.util.FileUtil;
 import com.sdarioo.bddviewer.util.PathUtil;
+import com.sdarioo.bddviewer.util.ProcessUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -21,7 +24,11 @@ import java.util.stream.Collectors;
 public class CmdLauncher extends AbstractLauncher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdLauncher.class);
+
+    private static final String CMD = "mvn.cmd exec:java -Dexec.classpathScope=test -Dexec.args={0}";
+    private static final String LAUNCH_ARG = "launchCustomScenario";
     private static final String SCENARIOS_ARG = "--scenarios";
+
     private static final String RUNNING_STORY_PREFIX = "Running story ";
     private static final String GENERATING_REPORT_PREFIX = "Generating reports view to ";
 
@@ -31,8 +38,11 @@ public class CmdLauncher extends AbstractLauncher {
     @Override
     public void terminate() {
         if ((runningProcess != null) && runningProcess.isAlive()) {
-            LOGGER.info("Terminating launcher process...");
-            runningProcess.destroyForcibly();
+            String message = "Killing launcher process...";
+            LOGGER.info(message);
+            notifyOutputLine(message);
+
+            ProcessUtil.kill(runningProcess, LAUNCH_ARG);
         }
     }
 
@@ -48,21 +58,24 @@ public class CmdLauncher extends AbstractLauncher {
             configPath = createConfigPath(paths);
             Path runDir = getRunDirectory(scenarios);
             if (runDir == null) {
-                LOGGER.error("Cannot find run directory.");
+                String message = "Cannot determine run directory. Launch aborted.";
+                LOGGER.error(message);
+                notifyOutputLine(message);
                 return;
             }
             String cmdLine = createCommandLine(configPath);
-            notifyOutputLine("Running CmdLine: " + cmdLine);
+            notifyOutputLine("Starting launcher process: " + cmdLine);
 
             int exitCode = runCmdLine(cmdLine, runDir, line -> processOutputLine(line, monitor));
-            notifyOutputLine("Process finished with exit code: " + exitCode);
+            notifyOutputLine("Launcher process finished with exit code: " + exitCode);
         } catch (Throwable e) {
             LOGGER.error("Execution failed", e);
             terminate();
         } finally {
             monitor.notifySkipped();
-            deleteFiles(paths);
-            deleteFile(configPath);
+            FileUtil.deleteFiles(paths);
+            FileUtil.deleteFile(configPath);
+            monitor.reportDirs.stream().forEach(FileUtil::deleteDir);
         }
     }
 
@@ -73,11 +86,14 @@ public class CmdLauncher extends AbstractLauncher {
             monitor.scenarioStarted(Paths.get(path));
         }
         if (line.trim().startsWith(GENERATING_REPORT_PREFIX)) {
-            int pathStart = line.indexOf('\'');
-            int pathEnd = line.indexOf('\'', pathStart + 1);
-            String reportsDir = line.substring(pathStart + 1, pathEnd);
+            int pathStartIdx = line.indexOf('\'') + 1;
+            int pathEndIdx = line.indexOf('\'', pathStartIdx);
+            String reportsDir = line.substring(pathStartIdx, pathEndIdx);
 
-            RunStatus status = readStatusFromReportFile(Paths.get(reportsDir), monitor.currentPath);
+            Path reportsDirPath = Paths.get(reportsDir);
+            RunStatus status = readStatusFromReportFile(reportsDirPath, monitor.currentScenarioPath);
+
+            monitor.reportDirs.add(reportsDirPath);
             monitor.scenarioFinished(status);
         }
     }
@@ -123,10 +139,10 @@ public class CmdLauncher extends AbstractLauncher {
 
     private static String createCommandLine(Path configPath) {
         List<String> argsList = new ArrayList<>();
-        argsList.add("launchCustomScenario");
+        argsList.add(LAUNCH_ARG);
         argsList.add(SCENARIOS_ARG + '=' + normalizePath(configPath));
-        String args = argsList.stream().collect(Collectors.joining(" "));
-        return "mvn.cmd exec:java -Dexec.classpathScope=test -Dexec.args=\"" + args + "\"";
+        String args = '"' + argsList.stream().collect(Collectors.joining(" ")) + '"';
+        return MessageFormat.format(CMD, args);
     }
 
     private static String normalizePath(Path path) {
@@ -159,22 +175,6 @@ public class CmdLauncher extends AbstractLauncher {
         return path;
     }
 
-    private static void deleteFiles(List<Path> paths) {
-        if (paths != null) {
-            paths.forEach(CmdLauncher::deleteFile);
-        }
-    }
-
-    private static void deleteFile(Path path) {
-        if (path != null) {
-            try {
-                Files.deleteIfExists(path);
-            } catch (IOException e) {
-                LOGGER.warn(e.toString());
-            }
-        }
-    }
-
     private static RunStatus readStatusFromReportFile(Path reportDirPath, Path scenarioPath) {
         Path reportPath = reportDirPath.resolve(scenarioPath.getFileName() + ".stats");
         try {
@@ -194,10 +194,12 @@ public class CmdLauncher extends AbstractLauncher {
         private final Set<Scenario> finished = new HashSet<>();
 
         private final Map<Path, Scenario> scenarioByPath = new HashMap<>();
+        private final List<Path> reportDirs = new ArrayList<>();
 
-        private Path currentPath;
         private Scenario currentScenario;
+        private Path currentScenarioPath;
         private long startTime;
+
 
         LaunchMonitor(List<Scenario> scenarios) {
             this.scenarios = scenarios;
@@ -210,7 +212,7 @@ public class CmdLauncher extends AbstractLauncher {
         }
 
         void scenarioStarted(Path path) {
-            currentPath = path;
+            currentScenarioPath = path;
             currentScenario = scenarioByPath.get(path);
             startTime = System.currentTimeMillis();
             notifyTestStarted(currentScenario);
@@ -222,8 +224,8 @@ public class CmdLauncher extends AbstractLauncher {
             notifyTestFinished(currentScenario, new TestResult(status, time, ""));
             finished.add(currentScenario);
 
-            currentPath = null;
             currentScenario = null;
+            currentScenarioPath = null;
         }
 
         /**

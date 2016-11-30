@@ -13,9 +13,10 @@ II. Tree
 III. Launcher
 
 1. Multiple scenarios in single command
-2. Killing process after timeout
+2. Launch scenarios in correct order (tree)
 3. Scenario launch status, output text
-4. Stop button - killing process
+
+
 
 IV. Other
 
