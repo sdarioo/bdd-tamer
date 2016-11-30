@@ -8,18 +8,17 @@ import java.util.List;
 
 public class ConsoleActionManager {
 
-    private final LauncherConsole console;
-
     private final ClearAction clearAction;
     private final ShowLogsAction showLogsAction;
+    private final ShowStepValuesAction showStepValuesAction;
 
     public ConsoleActionManager(LauncherConsole console) {
-        this.console = console;
         this.clearAction = new ClearAction(console);
         this.showLogsAction = new ShowLogsAction(console);
+        this.showStepValuesAction = new ShowStepValuesAction(console);
     }
 
     public List<AnAction> getToolbarActions() {
-        return Arrays.asList(clearAction, showLogsAction);
+        return Arrays.asList(clearAction, showLogsAction, showStepValuesAction);
     }
 }

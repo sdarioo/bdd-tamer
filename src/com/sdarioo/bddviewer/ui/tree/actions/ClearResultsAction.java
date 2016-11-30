@@ -27,7 +27,7 @@ public class ClearResultsAction extends ActionBase {
     private final SessionManager sessionManager;
 
     public ClearResultsAction(BddTree tree, SessionManager sessionManager) {
-        super(TEXT, AllIcons.General.Reset);
+        super(TEXT, AllIcons.General.Remove);
 
         this.tree = tree;
         this.sessionManager = sessionManager;

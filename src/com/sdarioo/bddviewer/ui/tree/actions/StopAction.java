@@ -15,7 +15,7 @@ public class StopAction extends ActionBase {
     private final Launcher launcher;
 
     public StopAction(Launcher launcher) {
-        super(TEXT, AllIcons.Debugger.KillProcess);
+        super(TEXT, AllIcons.Actions.Suspend);
         this.launcher = launcher;
     }
 

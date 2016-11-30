@@ -19,7 +19,6 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -34,13 +33,10 @@ public class CmdLauncher extends AbstractLauncher {
     private static final String RUNNING_STORY_PREFIX = "Running story ";
     private static final String GENERATING_REPORT_PREFIX = "Generating reports view to ";
 
-    private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r, "Launcher stream reader thread.");
-            t.setDaemon(true);
-            return t;
-        }
+    private final ExecutorService executor = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r, "Launcher stream reader thread.");
+        t.setDaemon(true);
+        return t;
     });
 
     private Process runningProcess;
@@ -210,9 +206,9 @@ public class CmdLauncher extends AbstractLauncher {
         private final Map<Path, Scenario> scenarioByPath = new HashMap<>();
         private final List<Path> reportDirs = new ArrayList<>();
 
+        private long startTime;
         private Scenario currentScenario;
         private Path currentScenarioPath;
-        private long startTime;
 
 
         LaunchMonitor(List<Scenario> scenarios) {

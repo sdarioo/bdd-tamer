@@ -39,7 +39,7 @@ public class BddIconMap implements IconMap {
             if (sessionManager.isPending(scenario)) {
                 icon = AllIcons.RunConfigurations.TestNotRan;
             } else if (sessionManager.isRunning(scenario)) {
-                icon = AllIcons.RunConfigurations.TestInProgress1;
+                icon = AllIcons.Diff.CurrentLine;
             } else {
                 TestResult result = sessionManager.getResult(scenario);
                 if (result != null) {
@@ -52,7 +52,8 @@ public class BddIconMap implements IconMap {
                     }
                 }
             }
-            return (icon != null) ? icon : AllIcons.General.Bullet;
+            //return (icon != null) ? icon : AllIcons.General.Bullet;
+            return (icon != null) ? icon : AllIcons.Ide.HectorOn;
         }
         return null;
     }
