@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.model.Story;
 import com.sdarioo.bddviewer.ui.actions.ActionBase;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
@@ -12,7 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class ClearResultsAction extends ActionBase {
@@ -37,9 +41,17 @@ public class ClearResultsAction extends ActionBase {
             return;
         }
         List<Scenario> scenariosToRefresh = new ArrayList<>(sessionManager.getFinishedScenarios());
+        Set<Story> storiesToRefresh = scenariosToRefresh.stream().map(Scenario::getStory).collect(Collectors.toSet());
+
         sessionManager.clear();
-        scenariosToRefresh.forEach(s -> {
-            DefaultTreeTableNode node = TreeUtil.findNode(tree.getModel(), s);
+
+        refreshNodes(scenariosToRefresh);
+        refreshNodes(storiesToRefresh);
+    }
+
+    private void refreshNodes(Collection<? extends Object> userObjects) {
+        userObjects.forEach(obj -> {
+            DefaultTreeTableNode node = TreeUtil.findNode(tree.getModel(), obj);
             if (node != null) {
                 tree.refreshNode(node);
             }

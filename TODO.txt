@@ -6,16 +6,11 @@ I. Console
 4. Compact mode (example line only)
 
 II. Tree
-
 1. Run indicator
 
 
 III. Launcher
-
-1. Multiple scenarios in single command
-2. Launch scenarios in correct order (tree)
-3. Scenario launch status, output text
-
+1. Launch scenarios in correct order (tree)
 
 
 IV. Other

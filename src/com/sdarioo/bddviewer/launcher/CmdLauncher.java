@@ -18,6 +18,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -32,6 +35,14 @@ public class CmdLauncher extends AbstractLauncher {
     private static final String RUNNING_STORY_PREFIX = "Running story ";
     private static final String GENERATING_REPORT_PREFIX = "Generating reports view to ";
 
+    private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r, "Launcher stream reader thread.");
+            t.setDaemon(true);
+            return t;
+        }
+    });
 
     private Process runningProcess;
 
@@ -116,13 +127,17 @@ public class CmdLauncher extends AbstractLauncher {
         }
     }
 
-    private static void readStream(InputStream inputStream, Consumer<String> consumer) throws IOException {
-        String line;
-        try (BufferedReader stdError = new BufferedReader(new InputStreamReader(inputStream))) {
-            while ((line = stdError.readLine()) != null) {
-                consumer.accept(line);
+    private void readStream(InputStream inputStream, Consumer<String> consumer) {
+        executor.submit(() -> {
+            String line;
+            try (BufferedReader stdError = new BufferedReader(new InputStreamReader(inputStream))) {
+                while ((line = stdError.readLine()) != null) {
+                    consumer.accept(line);
+                }
+            } catch (IOException e) {
+                consumer.accept("Error reading process output: " + e.toString());
             }
-        }
+        });
     }
 
     private static Path getRunDirectory(List<Scenario> scenarios) {

@@ -52,5 +52,6 @@ public class FileUtil {
                 return FileVisitResult.CONTINUE;
             }
         });
+        Files.delete(dir);
     }
 }

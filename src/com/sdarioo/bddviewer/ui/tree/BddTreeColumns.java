@@ -4,9 +4,12 @@ package com.sdarioo.bddviewer.ui.tree;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.model.Story;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 
@@ -57,13 +60,42 @@ public class BddTreeColumns {
                     Scenario scenario = (Scenario)userObject;
                     TestResult result = sessionManager.getResult(scenario);
                     if (result != null) {
-                        return String.valueOf(result.getTime()) + "ms";
+                        return formatTime(result.getTime());
+                    }
+                } else if (userObject instanceof Story) {
+                    List<Scenario> scenarios = ((Story) userObject).getScenarios();
+                    AtomicLong total = new AtomicLong();
+                    scenarios.forEach(s -> {
+                        TestResult result = sessionManager.getResult(s);
+                        if (result != null) {
+                            total.addAndGet(result.getTime());
+                        }
+                    });
+                    if (total.get() > 0) {
+                        return formatTime(total.get());
                     }
                 }
                 return "";
             }
         });
         return columns;
+    }
+
+    private static String formatTime(long millis) {
+        StringBuilder sb = new StringBuilder();
+
+        long min = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis = millis - min * 60000;
+        long sec = TimeUnit.MILLISECONDS.toSeconds(millis);
+        millis = millis - sec * 1000;
+        if (min > 0) {
+            sb.append(min + "m ");
+            sb.append(sec + "s ");
+        } else if (sec > 0) {
+            sb.append(sec + "s ");
+        }
+        sb.append(millis + "ms");
+        return sb.toString();
     }
 
     public static abstract class ColumnInfo {

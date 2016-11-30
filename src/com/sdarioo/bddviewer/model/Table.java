@@ -55,7 +55,14 @@ public class Table {
     }
 
     public static List<String> split(String line) {
-        return Arrays.stream(line.split("|"))
+        line = line.trim();
+        if (line.startsWith("|")) {
+            line = line.substring(1);
+        }
+        if (line.endsWith("|")) {
+            line = line.substring(0, line.length() - 1);
+        }
+        return Arrays.stream(line.split("\\|", -1))
                 .map(String::trim)
                 .collect(Collectors.toList());
     }

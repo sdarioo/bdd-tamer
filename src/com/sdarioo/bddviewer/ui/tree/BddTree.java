@@ -196,12 +196,16 @@ public class BddTree {
             }
             private void refreshScenario(Scenario scenario, boolean scrollTo) {
                 DefaultTreeTableNode node = TreeUtil.findNode(treeModel, scenario);
+                DefaultTreeTableNode parent = TreeUtil.findNode(treeModel, scenario.getStory());
                 if (node != null) {
                     SwingUtilities.invokeLater(() -> {
                         if (scrollTo) {
                             tree.scrollPathToVisible(TreeUtil.pathToRoot(node));
                         }
                         refreshNode(node);
+                        if (parent != null) {
+                            refreshNode(parent);
+                        }
                     });
                 } else {
                     LOGGER.warn("Cannot find node for scenario: " + scenario);
