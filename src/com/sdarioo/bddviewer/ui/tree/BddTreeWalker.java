@@ -1,9 +1,8 @@
 package com.sdarioo.bddviewer.ui.tree;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeTableNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -11,7 +10,7 @@ import javax.swing.tree.TreePath;
 
 public class BddTreeWalker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BddTreeWalker.class);
+    private static final Logger LOGGER = Logger.getInstance(BddTreeWalker.class);
 
     private BddTreeWalker() {}
 

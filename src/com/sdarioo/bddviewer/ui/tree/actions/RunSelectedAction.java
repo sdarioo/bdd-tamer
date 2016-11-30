@@ -3,6 +3,7 @@ package com.sdarioo.bddviewer.ui.tree.actions;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.LauncherException;
 import com.sdarioo.bddviewer.model.Scenario;
@@ -10,8 +11,6 @@ import com.sdarioo.bddviewer.model.Story;
 import com.sdarioo.bddviewer.ui.actions.ActionBase;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import java.util.Set;
 
 public class RunSelectedAction extends ActionBase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RunSelectedAction.class);
+    private static final Logger LOGGER = Logger.getInstance(RunSelectedAction.class);
 
     private static final String TEXT = "Run Selected Tests";
 

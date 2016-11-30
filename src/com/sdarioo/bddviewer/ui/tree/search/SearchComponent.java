@@ -6,12 +6,11 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonShortcuts;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.SearchTextField;
 import com.intellij.ui.components.panels.NonOpaquePanel;
 import de.sciss.treetable.j.TreeTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -21,7 +20,7 @@ import java.awt.event.*;
 
 public class SearchComponent {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SearchComponent.class);
+    private static final Logger LOGGER = Logger.getInstance(SearchComponent.class);
     private static final String CARD_FIND = "find";
     private static final String CARD_GENERAL = "general";
 

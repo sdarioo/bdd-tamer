@@ -1,5 +1,6 @@
 package com.sdarioo.bddviewer.provider;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.sdarioo.bddviewer.model.Location;
 import com.sdarioo.bddviewer.model.Meta;
 import com.sdarioo.bddviewer.model.Scenario;
@@ -8,8 +9,6 @@ import com.sdarioo.bddviewer.model.Step;
 import com.sdarioo.bddviewer.model.Story;
 import com.sdarioo.bddviewer.model.StoryBuilder;
 import com.sdarioo.bddviewer.model.Table;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +19,7 @@ import java.util.List;
 
 public class StoryParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StoryParser.class);
+    private static final Logger LOGGER = Logger.getInstance(StoryParser.class);
 
     private static final String SCENARIO_PREFIX = "Scenario:";
     private static final String META_PREFIX = "Meta:";

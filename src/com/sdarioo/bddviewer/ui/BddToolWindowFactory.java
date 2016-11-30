@@ -1,8 +1,10 @@
 package com.sdarioo.bddviewer.ui;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
@@ -19,8 +21,6 @@ import com.sdarioo.bddviewer.ui.console.LauncherConsole;
 import com.sdarioo.bddviewer.ui.tree.search.SearchComponent;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +30,7 @@ import java.util.List;
 //http://www.programcreek.com/java-api-examples/index.php?source_dir=platform_tools_adt_idea-master/android/src/com/android/tools/idea/editors/vmtrace/TraceViewPanel.java
 public class BddToolWindowFactory implements ToolWindowFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BddToolWindowFactory.class);
+    private static final Logger LOGGER = Logger.getInstance(BddToolWindowFactory.class);
     private static final String TREE_LABEL = "Tree";
     private static final String CONSOLE_LABEL = "Output";
 
@@ -46,6 +46,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
             @Override
             public void sessionStarted(List<Scenario> scope) {
                 toolWindow.getContentManager().setSelectedContent(consoleContent);
+                treeContent.setIcon(AllIcons.Actions.RunToCursor);
             }
         });
     }

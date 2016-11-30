@@ -1,13 +1,12 @@
 package com.sdarioo.bddviewer.ui.tree;
 
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.model.Story;
 import com.sdarioo.bddviewer.provider.StoryProvider;
 import com.sdarioo.bddviewer.util.PathUtil;
 import de.sciss.treetable.j.DefaultTreeTableNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class BddTreeBuilder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BddTreeBuilder.class);
+    private static final Logger LOGGER = Logger.getInstance(BddTreeBuilder.class);
 
     private final Project project;
     private final StoryProvider storyProvider;

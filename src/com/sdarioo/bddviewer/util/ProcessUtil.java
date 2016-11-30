@@ -1,13 +1,12 @@
 package com.sdarioo.bddviewer.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.intellij.openapi.diagnostic.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 
 public class ProcessUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessUtil.class);
+    private static final Logger LOGGER = Logger.getInstance(ProcessUtil.class);
 
     public static void kill(Process process, String cmdLineSubstring) {
         if (isWindows()) {

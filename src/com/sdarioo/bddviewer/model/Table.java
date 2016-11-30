@@ -1,8 +1,7 @@
 package com.sdarioo.bddviewer.model;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.intellij.openapi.diagnostic.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class Table {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Table.class);
+    private static final Logger LOGGER = Logger.getInstance(Table.class);
 
     private final List<String> header;
     private final List<List<String>> rows;

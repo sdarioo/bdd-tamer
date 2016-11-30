@@ -1,7 +1,7 @@
 package com.sdarioo.bddviewer.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.intellij.openapi.diagnostic.Logger;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -12,7 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
 public class FileUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
+    private static final Logger LOGGER = Logger.getInstance(FileUtil.class);
 
     public static void deleteFiles(List<Path> paths) {
         if (paths != null) {

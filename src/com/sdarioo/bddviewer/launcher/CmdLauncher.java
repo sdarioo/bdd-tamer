@@ -5,8 +5,7 @@ import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.util.FileUtil;
 import com.sdarioo.bddviewer.util.PathUtil;
 import com.sdarioo.bddviewer.util.ProcessUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.intellij.openapi.diagnostic.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class CmdLauncher extends AbstractLauncher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CmdLauncher.class);
+    private static final Logger LOGGER = Logger.getInstance(CmdLauncher.class);
 
     private static final String CMD = "mvn.cmd exec:java -Dexec.classpathScope=test -Dexec.args={0}";
     private static final String LAUNCH_ARG = "launchCustomScenario";

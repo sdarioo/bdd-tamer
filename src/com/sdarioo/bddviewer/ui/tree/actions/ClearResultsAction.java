@@ -2,6 +2,7 @@ package com.sdarioo.bddviewer.ui.tree.actions;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.model.Story;
@@ -9,8 +10,6 @@ import com.sdarioo.bddviewer.ui.actions.ActionBase;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeTableNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class ClearResultsAction extends ActionBase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClearResultsAction.class);
+    private static final Logger LOGGER = Logger.getInstance(ClearResultsAction.class);
     private static final String TEXT = "Clear Test Results";
 
     private final BddTree tree;

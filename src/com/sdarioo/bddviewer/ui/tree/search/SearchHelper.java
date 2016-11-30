@@ -1,12 +1,12 @@
 package com.sdarioo.bddviewer.ui.tree.search;
 
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.sdarioo.bddviewer.ui.tree.BddTreeWalker;
 import com.sdarioo.bddviewer.ui.util.TreeUtil;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.TreeTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 
 public class SearchHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SearchHelper.class);
+    private static final Logger LOGGER = Logger.getInstance(SearchHelper.class);
 
     private final Predicate<DefaultTreeTableNode> matcher;
 

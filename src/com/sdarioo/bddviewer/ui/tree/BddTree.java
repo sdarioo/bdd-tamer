@@ -1,5 +1,6 @@
 package com.sdarioo.bddviewer.ui.tree;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
@@ -22,8 +23,6 @@ import de.sciss.treetable.j.DefaultTreeColumnModel;
 import de.sciss.treetable.j.DefaultTreeTableNode;
 import de.sciss.treetable.j.TreeTable;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
@@ -39,7 +38,7 @@ import java.util.*;
 
 public class BddTree {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BddTree.class);
+    private static final Logger LOGGER = Logger.getInstance(BddTree.class);
 
     private final Project project;
     private final StoryProvider storyProvider;

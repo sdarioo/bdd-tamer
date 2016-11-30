@@ -1,11 +1,10 @@
 package com.sdarioo.bddviewer.provider;
 
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.sdarioo.bddviewer.model.Story;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -18,7 +17,7 @@ import java.util.List;
  */
 public class ProjectStoryProvider implements StoryProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectStoryProvider.class);
+    private static final Logger LOGGER = Logger.getInstance(ProjectStoryProvider.class);
 
     @Override
     public List<Story> getStories(Project project) {

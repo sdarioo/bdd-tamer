@@ -3,6 +3,7 @@ package com.sdarioo.bddviewer.ui.console;
 import com.intellij.execution.impl.ConsoleViewUtil;
 import com.intellij.execution.impl.EditorHyperlinkSupport;
 import com.intellij.execution.ui.ConsoleViewContentType;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
@@ -12,9 +13,6 @@ import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerAdapter;
-import com.intellij.ui.JBColor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +20,7 @@ import java.util.function.Consumer;
 
 
 public class AbstractConsole {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractConsole.class);
+    protected static final Logger LOGGER = Logger.getInstance(AbstractConsole.class);
     protected static final String LINE_SEPARATOR = "\n";
 
     private final EditorEx editor;

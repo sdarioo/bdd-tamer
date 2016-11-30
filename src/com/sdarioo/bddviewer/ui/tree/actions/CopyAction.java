@@ -2,11 +2,10 @@ package com.sdarioo.bddviewer.ui.tree.actions;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.sdarioo.bddviewer.ui.actions.ActionBase;
 import de.sciss.treetable.j.TreeColumnModel;
 import de.sciss.treetable.j.TreeTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -18,7 +17,7 @@ import java.text.MessageFormat;
 public class CopyAction extends ActionBase {
 
     private static final String TEXT = "Copy {0}";
-    private static final Logger LOGGER = LoggerFactory.getLogger(CopyAction.class);
+    private static final Logger LOGGER = Logger.getInstance(CopyAction.class);
 
     private final String column;
     private final TreeTable tree;

@@ -1,10 +1,9 @@
 package com.sdarioo.bddviewer.launcher;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.model.Scenario;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class SessionManager implements LauncherListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
+    private static final Logger LOGGER = Logger.getInstance(SessionManager.class);
 
     private final AtomicBoolean isRunning = new AtomicBoolean();
     private final Set<Scenario> pending = ConcurrentHashMap.newKeySet();

@@ -1,19 +1,14 @@
 I. Console
 
-1. Copy&Paste actions
-2. Context menu
 3. Links to failing steps
 4. Compact mode (example line only)
 
 II. Tree
 1. Run indicator
-
+2. Show output action
 
 III. Launcher
 1. Launch scenarios in correct order (tree)
 
-
 IV. Other
-
-1. Logging
-3. Open reports folder action
+1. Icons

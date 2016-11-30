@@ -1,6 +1,7 @@
 package com.sdarioo.bddviewer.ui.tree;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.diagnostic.Logger;
 import com.sdarioo.bddviewer.launcher.RunStatus;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.launcher.TestResult;
@@ -8,15 +9,13 @@ import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.model.Story;
 import de.sciss.treetable.j.IconMap;
 import de.sciss.treetable.j.TreeTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.nio.file.Path;
 
 public class BddIconMap implements IconMap {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BddIconMap.class);
+    private static final Logger LOGGER = Logger.getInstance(BddIconMap.class);
 
     private final SessionManager sessionManager;
 

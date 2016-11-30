@@ -2,14 +2,14 @@ package com.sdarioo.bddviewer.ui.tree.actions;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.ui.actions.ActionBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 public class StopAction extends ActionBase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StopAction.class);
+    private static final Logger LOGGER = Logger.getInstance(StopAction.class);
     private static final String TEXT = "Kill Process";
 
     private final Launcher launcher;
