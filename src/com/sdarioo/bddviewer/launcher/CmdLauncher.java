@@ -1,20 +1,17 @@
 package com.sdarioo.bddviewer.launcher;
 
-import com.sdarioo.bddviewer.model.Location;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.util.FileUtil;
-import com.sdarioo.bddviewer.util.PathUtil;
 import com.sdarioo.bddviewer.util.ProcessUtil;
 import com.intellij.openapi.diagnostic.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -28,10 +25,11 @@ public class CmdLauncher extends AbstractLauncher {
 
     private static final String CMD = "mvn.cmd exec:java -Dexec.classpathScope=test -Dexec.args={0}";
     private static final String LAUNCH_ARG = "launchCustomScenario";
-    private static final String SCENARIOS_ARG = "--scenarios";
+    private static final String SCENARIO_ARG = "--scenario";
+    private static final String REPORT_ARG = "--report";
 
-    private static final String RUNNING_STORY_PREFIX = "Running story ";
-    private static final String GENERATING_REPORT_PREFIX = "Generating reports view to ";
+    private static final String SCENARIO_PREFIX = "Scenario: ";
+    private static final String AFTER_STORIES_LINE = "(AfterStories)";
 
     private final ExecutorService executor = Executors.newCachedThreadPool(r -> {
         Thread t = new Thread(r, "Launcher stream reader thread.");
@@ -54,14 +52,12 @@ public class CmdLauncher extends AbstractLauncher {
 
     @Override
     protected void executeAll(List<Scenario> scenarios) {
-        List<Path> paths = null;
-        Path configPath = null;
+        Path tempWorkspace = null;
         LaunchMonitor monitor = new LaunchMonitor(scenarios);
         try {
-            paths = createTempFiles(scenarios);
-            monitor.setScenarioPaths(paths);
+            tempWorkspace = Files.createTempDirectory("bdd_launcher");
+            List<Path> paths = createTempStoryFiles(scenarios, tempWorkspace);
 
-            configPath = createConfigPath(paths);
             Path runDir = getRunDirectory(scenarios);
             if (runDir == null) {
                 String message = "Cannot determine run directory. Launch aborted.";
@@ -69,7 +65,7 @@ public class CmdLauncher extends AbstractLauncher {
                 notifyOutputLine(message);
                 return;
             }
-            String cmdLine = createCommandLine(configPath);
+            String cmdLine = createCommandLine(paths);
             notifyOutputLine("Starting launcher process: " + cmdLine);
 
             int exitCode = runCmdLine(cmdLine, runDir, line -> processOutputLine(line, monitor));
@@ -79,28 +75,30 @@ public class CmdLauncher extends AbstractLauncher {
             terminate();
         } finally {
             monitor.notifySkipped();
-            FileUtil.deleteFiles(paths);
-            FileUtil.deleteFile(configPath);
-            monitor.reportDirs.stream().forEach(FileUtil::deleteDir);
+            FileUtil.deleteDir(tempWorkspace);
         }
     }
 
     private void processOutputLine(String line, LaunchMonitor monitor) {
         notifyOutputLine(line);
-        if (line.trim().startsWith(RUNNING_STORY_PREFIX)) {
-            String path = line.substring(RUNNING_STORY_PREFIX.length());
-            monitor.scenarioStarted(Paths.get(path));
+        if (line.trim().endsWith("(FAILED)")) {
+            monitor.currentStatus = RunStatus.Failed;
         }
-        if (line.trim().startsWith(GENERATING_REPORT_PREFIX)) {
-            int pathStartIdx = line.indexOf('\'') + 1;
-            int pathEndIdx = line.indexOf('\'', pathStartIdx);
-            String reportsDir = line.substring(pathStartIdx, pathEndIdx);
+        if (line.trim().endsWith("(NOT PERFORMED)") && (monitor.currentStatus == null)) {
+            monitor.currentStatus = RunStatus.Skipped;
+        }
 
-            Path reportsDirPath = Paths.get(reportsDir);
-            RunStatus status = readStatusFromReportFile(reportsDirPath, monitor.currentScenarioPath);
-
-            monitor.reportDirs.add(reportsDirPath);
-            monitor.scenarioFinished(status);
+        if (line.trim().startsWith(SCENARIO_PREFIX)) {
+            if (monitor.currentScenario != null) {
+                monitor.scenarioFinished();
+            }
+            String name = line.substring(SCENARIO_PREFIX.length());
+            monitor.scenarioStarted(name);
+        }
+        if (line.trim().equals(AFTER_STORIES_LINE)) {
+            if (monitor.currentScenario != null) {
+                monitor.scenarioFinished();
+            }
         }
     }
 
@@ -147,10 +145,10 @@ public class CmdLauncher extends AbstractLauncher {
         return null;
     }
 
-    private static String createCommandLine(Path configPath) {
+    private static String createCommandLine(List<Path> paths) {
         List<String> argsList = new ArrayList<>();
         argsList.add(LAUNCH_ARG);
-        argsList.add(SCENARIOS_ARG + '=' + normalizePath(configPath));
+        paths.forEach(p -> argsList.add(SCENARIO_ARG + '=' + normalizePath(p)));
         String args = '"' + argsList.stream().collect(Collectors.joining(" ")) + '"';
         return MessageFormat.format(CMD, args);
     }
@@ -160,41 +158,19 @@ public class CmdLauncher extends AbstractLauncher {
         return result.replace(" ", "\\ ");
     }
 
-    private static Path createConfigPath(List<Path> paths) throws IOException {
-        Path config = File.createTempFile("config", ".story").toPath();
-        Files.write(config, paths.stream().map(Object::toString).collect(Collectors.toList()));
-        return config;
-    }
-
-    private static List<Path> createTempFiles(List<Scenario> scenarios) throws IOException {
+    private static List<Path> createTempStoryFiles(List<Scenario> scenarios, Path parentDir) throws IOException {
         List<Path> result = new ArrayList<>();
         for (Scenario scenario : scenarios) {
-            result.add(createTempFile(scenario));
+            Path path = scenario.getLocation().getPath();
+            Path tempPath = parentDir.resolve(path.getFileName());
+            if (Files.isRegularFile(tempPath)) {
+                Files.write(tempPath, scenario.readLines(), StandardOpenOption.APPEND);
+            } else {
+                Files.write(tempPath, scenario.readLines());
+            }
+            result.add(tempPath);
         }
         return result;
-    }
-
-    private static Path createTempFile(Scenario scenario) throws IOException {
-        Location location = scenario.getLocation();
-        List<String> allLines = Files.readAllLines(location.getPath());
-        List<String> scenarioLines = allLines.subList(location.getStartLine() - 1, location.getEndLine());
-
-        String name = PathUtil.getNameWithoutExtension(scenario.getLocation().getPath());
-        Path path = File.createTempFile(name, ".story").toPath();
-        Files.write(path, scenarioLines);
-        return path;
-    }
-
-    private static RunStatus readStatusFromReportFile(Path reportDirPath, Path scenarioPath) {
-        Path reportPath = reportDirPath.resolve(scenarioPath.getFileName() + ".stats");
-        try {
-            List<String> lines = Files.readAllLines(reportPath);
-            boolean success = lines.stream().map(String::trim).filter(l -> l.equals("scenariosSuccessful=1")).findFirst().isPresent();
-            return success ? RunStatus.Passed : RunStatus.Failed;
-        } catch (IOException e) {
-            LOGGER.error("Error while reading status file.", e);
-            return RunStatus.Failed;
-        }
     }
 
     private class LaunchMonitor {
@@ -203,46 +179,41 @@ public class CmdLauncher extends AbstractLauncher {
         private final Set<Scenario> started = new HashSet<>();
         private final Set<Scenario> finished = new HashSet<>();
 
-        private final Map<Path, Scenario> scenarioByPath = new HashMap<>();
-        private final List<Path> reportDirs = new ArrayList<>();
-
         private long startTime;
+        private RunStatus currentStatus;
         private Scenario currentScenario;
-        private Path currentScenarioPath;
 
 
         LaunchMonitor(List<Scenario> scenarios) {
             this.scenarios = scenarios;
         }
 
-        void setScenarioPaths(List<Path> paths) {
-            for (int i = 0; i < scenarios.size(); i++) {
-                scenarioByPath.put(paths.get(i), scenarios.get(i));
-            }
-        }
 
-        void scenarioStarted(Path path) {
-            currentScenarioPath = path;
-            currentScenario = scenarioByPath.get(path);
+        void scenarioStarted(String name) {
+            currentStatus = null;
             startTime = System.currentTimeMillis();
+            currentScenario = scenarios.stream().filter(s -> name.equals(s.getName())).findFirst().get();
+
             notifyTestStarted(currentScenario);
             started.add(currentScenario);
         }
 
-        void scenarioFinished(RunStatus status) {
+        void scenarioFinished() {
             long time = System.currentTimeMillis() - startTime;
-            notifyTestFinished(currentScenario, new TestResult(status, time, ""));
+            if (currentStatus == null) {
+                currentStatus = RunStatus.Passed;
+            }
+            notifyTestFinished(currentScenario, new TestResult(currentStatus, time, ""));
             finished.add(currentScenario);
 
             currentScenario = null;
-            currentScenarioPath = null;
         }
 
         /**
          * Send 'skipped' notifications for all scenarios that has not been completed yet.
          */
         void notifySkipped() {
-            scenarioByPath.values().stream().forEach(s -> {
+            scenarios.stream().forEach(s -> {
                 if (!started.contains(s)) {
                     notifyTestStarted(s);
                 }

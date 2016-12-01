@@ -52,8 +52,8 @@ public class BddIconMap implements IconMap {
                     }
                 }
             }
-            //return (icon != null) ? icon : AllIcons.General.Bullet;
-            return (icon != null) ? icon : AllIcons.Ide.HectorOn;
+            return (icon != null) ? icon : AllIcons.General.Bullet;
+            //return (icon != null) ? icon : AllIcons.Ide.HectorOn;
         }
         return null;
     }

@@ -1,6 +1,8 @@
 package com.sdarioo.bddviewer.model;
 
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +62,15 @@ public class Scenario implements LocationHolder {
             return false;
         }
         return story.isRunnable() && !meta.isSkip();
+    }
+
+    /**
+     * Read scenario content lines from story file
+     * @return scenario lines
+     */
+    public List<String> readLines() throws IOException {
+        List<String> allLines = Files.readAllLines(location.getPath());
+        return allLines.subList(location.getStartLine() - 1, location.getEndLine());
     }
 
     @Override
