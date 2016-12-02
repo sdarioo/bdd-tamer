@@ -26,4 +26,7 @@ public class LauncherListenerAdapter implements LauncherListener {
     public void outputLine(String line) {
     }
 
+    @Override
+    public void errorLine(String line) {
+    }
 }

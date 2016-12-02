@@ -66,4 +66,8 @@ public abstract class AbstractLauncher implements Launcher {
         listeners.forEach(l -> l.outputLine(line));
     }
 
+    protected void notifyErrorLine(String line) {
+        listeners.forEach(l -> l.errorLine(line));
+    }
+
 }

@@ -30,6 +30,8 @@ public class CmdLauncher extends AbstractLauncher {
 
     private static final String SCENARIO_PREFIX = "Scenario: ";
     private static final String AFTER_STORIES_LINE = "(AfterStories)";
+    private static final String FAILED = "(FAILED)";
+    private static final String NOT_PERFORMED = "(NOT PERFORMED)";
 
     private final ExecutorService executor = Executors.newCachedThreadPool(r -> {
         Thread t = new Thread(r, "Launcher stream reader thread.");
@@ -65,10 +67,10 @@ public class CmdLauncher extends AbstractLauncher {
                 notifyOutputLine(message);
                 return;
             }
-            String cmdLine = createCommandLine(paths);
+            String cmdLine = createCommandLine(tempWorkspace, paths);
             notifyOutputLine("Starting launcher process: " + cmdLine);
 
-            int exitCode = runCmdLine(cmdLine, runDir, line -> processOutputLine(line, monitor));
+            int exitCode = runCmdLine(cmdLine, runDir, line -> processOutputLine(line, monitor), this::processErrorLine);
             notifyOutputLine("Launcher process finished with exit code: " + exitCode);
         } catch (Throwable e) {
             LOGGER.error("Execution failed", e);
@@ -81,10 +83,11 @@ public class CmdLauncher extends AbstractLauncher {
 
     private void processOutputLine(String line, LaunchMonitor monitor) {
         notifyOutputLine(line);
-        if (line.trim().endsWith("(FAILED)")) {
+
+        if (line.trim().endsWith(FAILED)) {
             monitor.currentStatus = RunStatus.Failed;
         }
-        if (line.trim().endsWith("(NOT PERFORMED)") && (monitor.currentStatus == null)) {
+        if (line.trim().endsWith(NOT_PERFORMED) && (monitor.currentStatus == null)) {
             monitor.currentStatus = RunStatus.Skipped;
         }
 
@@ -102,13 +105,17 @@ public class CmdLauncher extends AbstractLauncher {
         }
     }
 
-    private int runCmdLine(String command, Path runDir, Consumer<String> out) {
+    private void processErrorLine(String line) {
+        notifyErrorLine(line);
+    }
+
+    private int runCmdLine(String command, Path runDir, Consumer<String> out, Consumer<String> err) {
         try {
             Runtime runtime = Runtime.getRuntime();
             runningProcess = runtime.exec(command, null, runDir.toFile());
 
-            readStream(runningProcess.getInputStream(), out);
-            readStream(runningProcess.getErrorStream(), out);
+            readStreamAsync(runningProcess.getInputStream(), out);
+            readStreamAsync(runningProcess.getErrorStream(), err);
             return runningProcess.waitFor();
 
         } catch (IOException | InterruptedException e) {
@@ -120,7 +127,7 @@ public class CmdLauncher extends AbstractLauncher {
         }
     }
 
-    private void readStream(InputStream inputStream, Consumer<String> consumer) {
+    private void readStreamAsync(InputStream inputStream, Consumer<String> consumer) {
         executor.submit(() -> {
             String line;
             try (BufferedReader stdError = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -145,10 +152,11 @@ public class CmdLauncher extends AbstractLauncher {
         return null;
     }
 
-    private static String createCommandLine(List<Path> paths) {
+    private static String createCommandLine(Path tempWorkplace, List<Path> paths) {
         List<String> argsList = new ArrayList<>();
         argsList.add(LAUNCH_ARG);
         paths.forEach(p -> argsList.add(SCENARIO_ARG + '=' + normalizePath(p)));
+        argsList.add(REPORT_ARG + '=' + normalizePath(tempWorkplace.resolve("reports")));
         String args = '"' + argsList.stream().collect(Collectors.joining(" ")) + '"';
         return MessageFormat.format(CMD, args);
     }
@@ -183,11 +191,9 @@ public class CmdLauncher extends AbstractLauncher {
         private RunStatus currentStatus;
         private Scenario currentScenario;
 
-
         LaunchMonitor(List<Scenario> scenarios) {
             this.scenarios = scenarios;
         }
-
 
         void scenarioStarted(String name) {
             currentStatus = null;

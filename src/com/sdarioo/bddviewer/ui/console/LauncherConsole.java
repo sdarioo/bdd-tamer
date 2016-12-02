@@ -76,15 +76,20 @@ public class LauncherConsole extends AbstractConsole implements LauncherListener
 
     @Override
     public void outputLine(String line) {
-        processLine(line);
+        processOutputLine(line);
+    }
+
+    @Override
+    public void errorLine(String line) {
+        appendText(line + LINE_SEPARATOR, ContentType.ERROR);
     }
 
     private void processOutput(String text) {
         List<String> lines = toLines(text);
-        lines.forEach(this::processLine);
+        lines.forEach(this::processOutputLine);
     }
 
-    private void processLine(String line) {
+    private void processOutputLine(String line) {
         if (line.trim().length() == 0) {
             return;
         }
