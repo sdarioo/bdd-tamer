@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
@@ -31,13 +32,21 @@ import java.util.List;
 public class BddToolWindowFactory implements ToolWindowFactory {
 
     private static final Logger LOGGER = Logger.getInstance(BddToolWindowFactory.class);
-    private static final String TREE_LABEL = "Tree";
-    private static final String CONSOLE_LABEL = "Output";
 
+    /** IMPORTANT: make sure that this value is in sync with tool window id registered in plugin.xml */
+    public static final String TOOL_WINDOW_ID = "BDD";
+
+    public static final String TREE_CONTENT_ID = "Tree";
+    public static final String CONSOLE_CONTENT_ID = "Output";
+
+    @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
-        Content treeContent = createTreeContent(project);
-        Content consoleContent = createConsoleContent(project);
+        BddTree tree = new BddTree(project);
+        LauncherConsole console = new LauncherConsole(project);
+
+        Content treeContent = createTreeContent(project, tree, console);
+        Content consoleContent = createConsoleContent(project, console);
 
         toolWindow.getContentManager().addContent(treeContent);
         toolWindow.getContentManager().addContent(consoleContent);
@@ -51,11 +60,29 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         });
     }
 
-    private static Content createTreeContent(Project project) {
-        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
-        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, TREE_LABEL, false);
+    /**
+     * Select BDD tool window content with given identifier.
+     * @param project current project
+     * @param contentId content identifier
+     */
+    public static void selectContent(Project project, String contentId) {
+        ToolWindowManager manager = ToolWindowManager.getInstance(project);
+        ToolWindow toolWindow = manager.getToolWindow(BddToolWindowFactory.TOOL_WINDOW_ID);
+        if (toolWindow != null) {
+            Content content = toolWindow.getContentManager().findContent(contentId);
+            if (content != null) {
+                toolWindow.getContentManager().setSelectedContent(content);
+            } else {
+                LOGGER.warn("Cannot find Content:" + contentId);
+            }
+        } else {
+            LOGGER.warn("Cannot find ToolWindow: " + BddToolWindowFactory.TOOL_WINDOW_ID);
+        }
+    }
 
-        BddTree tree = new BddTree(project);
+    private static Content createTreeContent(Project project, BddTree tree, LauncherConsole console) {
+        SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
+        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, TREE_CONTENT_ID, false);
 
         JPanel treePanel = new JPanel(new BorderLayout());
         SearchComponent searchPanel = new SearchComponent(treePanel, tree.getTreeTable());
@@ -64,7 +91,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         content.setPreferredFocusableComponent(tree.getTreeTable());
 
-        BddTreeActionManager actionManager = new BddTreeActionManager(tree, project);
+        BddTreeActionManager actionManager = new BddTreeActionManager(project, tree, console);
         tree.setActionManager(actionManager);
         DefaultActionGroup actionGroup = new DefaultActionGroup();
         actionGroup.addAll(actionManager.getToolbarActions());
@@ -76,11 +103,9 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         return content;
     }
 
-    private static Content createConsoleContent(Project project) {
+    private static Content createConsoleContent(Project project, LauncherConsole console) {
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, false);
-        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, CONSOLE_LABEL, false);
-
-        LauncherConsole console = new LauncherConsole(project);
+        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, CONSOLE_CONTENT_ID, false);
 
         ConsoleActionManager actionManager = new ConsoleActionManager(console);
         DefaultActionGroup actionGroup = new DefaultActionGroup();

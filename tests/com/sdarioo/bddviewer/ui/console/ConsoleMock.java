@@ -15,6 +15,11 @@ public class ConsoleMock implements Console {
     }
 
     @Override
+    public int getTextLength() {
+        return content.length();
+    }
+
+    @Override
     public void print(String text) {
         content.append(text);
     }

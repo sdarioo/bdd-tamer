@@ -13,6 +13,8 @@ public interface Console {
 
     void clear();
 
+    int getTextLength();
+
     void print(String text);
 
     void print(String text, ContentType contentType);

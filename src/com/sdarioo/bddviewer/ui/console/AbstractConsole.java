@@ -8,7 +8,10 @@ import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.editor.ex.DocumentEx;
 import com.intellij.openapi.editor.ex.EditorEx;
-import com.intellij.openapi.editor.markup.*;
+import com.intellij.openapi.editor.markup.HighlighterTargetArea;
+import com.intellij.openapi.editor.markup.MarkupModel;
+import com.intellij.openapi.editor.markup.RangeHighlighter;
+import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerAdapter;
@@ -22,7 +25,7 @@ public class AbstractConsole implements Console {
     protected static final Logger LOGGER = Logger.getInstance(AbstractConsole.class);
 
 
-    private final EditorEx editor;
+    protected final EditorEx editor;
     private final EditorHyperlinkSupport hyperlinkSupport;
 
     public AbstractConsole(Project project) {
@@ -74,6 +77,11 @@ public class AbstractConsole implements Console {
         SwingUtilities.invokeLater(() ->  {
             editor.getDocument().deleteString(0, editor.getDocument().getTextLength());
         });
+    }
+
+    @Override
+    public int getTextLength() {
+        return editor.getDocument().getTextLength();
     }
 
     private void print(String text, ContentType contentType, FontStyle fontStyle, Color color) {

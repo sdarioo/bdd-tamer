@@ -9,6 +9,7 @@ import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.ui.actions.ActionBase;
+import com.sdarioo.bddviewer.ui.console.LauncherConsole;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
 import com.sdarioo.bddviewer.ui.tree.BddTreeColumns;
 
@@ -26,9 +27,10 @@ public class BddTreeActionManager {
     private final ActionBase collapseAllAction;
     private final ActionBase reloadTreeAction;
     private final ActionBase copyL2Action;
+    private final ActionBase showConsoleOutputAction;
 
 
-    public BddTreeActionManager(BddTree tree, Project project) {
+    public BddTreeActionManager(Project project, BddTree tree, LauncherConsole console) {
 
         SessionManager sessionManager = Plugin.getInstance().getSessionManager(project);
         Launcher launcher = Plugin.getInstance().getLauncher(project);
@@ -45,13 +47,16 @@ public class BddTreeActionManager {
         collapseAllAction = new CollapseAction(tree.getTreeTable());
         reloadTreeAction = new ReloadAction(tree);
         copyL2Action = new CopyAction(tree.getTreeTable(), BddTreeColumns.L2_COLUMN);
+        showConsoleOutputAction = new ShowOutputAction(project, tree, console);
 
         addLauncherListener(launcher);
 
     }
 
     public List<AnAction> getContextMenuActions() {
-        return Arrays.asList(runSelectedAction, copyL2Action);
+        return Arrays.asList(runSelectedAction,
+                copyL2Action,
+                showConsoleOutputAction);
     }
 
     public List<AnAction> getToolbarActions() {

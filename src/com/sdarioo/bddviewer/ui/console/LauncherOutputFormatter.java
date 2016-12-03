@@ -74,7 +74,7 @@ public class LauncherOutputFormatter implements LauncherListener {
         }
         if (line.startsWith("Scenario:")) {
             String[] pair = splitFirstToken(line);
-            console.print(pair[0], Console.FontStyle.BOLD, JBColor.ORANGE);
+            console.print(pair[0] + ' ', Console.FontStyle.BOLD, JBColor.ORANGE);
             Location location = currentScenario.getLocation();
             console.printHyperlink(pair[1], project -> {
                 IdeUtil.openInEditor(project, location);
@@ -84,7 +84,7 @@ public class LauncherOutputFormatter implements LauncherListener {
         }
         if (line.startsWith("Meta:") || line.startsWith("@")) {
             String[] pair = splitFirstToken(line);
-            console.print(pair[0], Console.FontStyle.BOLD, JBColor.ORANGE);
+            console.print(pair[0] + ' ', Console.FontStyle.BOLD, JBColor.ORANGE);
             console.println(pair[1]);
             return;
         }
@@ -162,7 +162,7 @@ public class LauncherOutputFormatter implements LauncherListener {
                 (formatterMode.value < FormatterMode.Extended.value);
 
         String[] stepText = splitFirstToken(output.lines.get(0));
-        console.print(stepText[0], Console.FontStyle.BOLD, JBColor.ORANGE);
+        console.print(stepText[0] + ' ', Console.FontStyle.BOLD, JBColor.ORANGE);
         console.print(stepText[1]);
         if (hideValues) {
             console.print(" [...]", null, JBColor.GRAY);
@@ -181,7 +181,7 @@ public class LauncherOutputFormatter implements LauncherListener {
             return;
         }
         Status status = getOverallStatus(bufferedSteps);
-        if ((formatterMode == FormatterMode.Compact) && (status == Status.PASSED)) {
+        if ((formatterMode == FormatterMode.Compact) && (status != Status.FAILED)) {
             console.print("[...] ", null, JBColor.GRAY);
             console.println(status.text, Console.FontStyle.BOLD, status.color);
         } else {
@@ -204,7 +204,7 @@ public class LauncherOutputFormatter implements LauncherListener {
     private static String[] splitFirstToken(String line) {
         int index = line.indexOf(' ');
         if (index > 0) {
-            return new String[] { line.substring(0, index), line.substring(index)};
+            return new String[] { line.substring(0, index), line.substring(index + 1)};
         }
         return new String[] { line, ""};
     }

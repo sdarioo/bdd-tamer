@@ -5,7 +5,6 @@ I. Console
 
 II. Tree
 1. Run indicator
-2. Show output action
 
 III. Launcher
 1. Launch scenarios in correct order (tree)

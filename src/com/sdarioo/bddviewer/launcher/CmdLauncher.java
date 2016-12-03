@@ -222,6 +222,8 @@ public class CmdLauncher extends AbstractLauncher {
                     notifyTestStarted(s);
                 }
                 if (!finished.contains(s)) {
+                    notifyOutputLine(SCENARIO_PREFIX + s.getName());
+                    notifyOutputLine(s.getSteps().get(0).getText() + ' ' + NOT_PERFORMED);
                     notifyTestFinished(s, TestResult.skipped(s));
                 }
             });
