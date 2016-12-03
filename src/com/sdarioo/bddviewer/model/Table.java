@@ -53,6 +53,10 @@ public class Table {
         return Collections.unmodifiableList(rows.get(rows.size() - 1));
     }
 
+    public static String format(String... values) {
+        return "| " + Arrays.stream(values).collect(Collectors.joining(" | ")) + " |";
+    }
+
     public static List<String> split(String line) {
         line = line.trim();
         if (line.startsWith("|")) {

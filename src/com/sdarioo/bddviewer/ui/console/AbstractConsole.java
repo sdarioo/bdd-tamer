@@ -2,7 +2,6 @@ package com.sdarioo.bddviewer.ui.console;
 
 import com.intellij.execution.impl.ConsoleViewUtil;
 import com.intellij.execution.impl.EditorHyperlinkSupport;
-import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
@@ -19,9 +18,9 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 
-public class AbstractConsole {
+public class AbstractConsole implements Console {
     protected static final Logger LOGGER = Logger.getInstance(AbstractConsole.class);
-    protected static final String LINE_SEPARATOR = "\n";
+
 
     private final EditorEx editor;
     private final EditorHyperlinkSupport hyperlinkSupport;
@@ -43,19 +42,41 @@ public class AbstractConsole {
         return editor.getComponent();
     }
 
-    public void appendText(String text) {
-        appendText(text, null, null);
+    @Override
+    public void print(String text) {
+        print(text, null, null);
     }
 
-    public void appendText(String text, ContentType contentType) {
-        appendText(text, contentType, null, null);
+    @Override
+    public void print(String text, ContentType contentType) {
+        print(text, contentType, null, null);
     }
 
-    public void appendText(String text, FontStyle fontStyle, Color color) {
-        appendText(text, null, fontStyle, color);
+    @Override
+    public void print(String text, FontStyle fontStyle, Color color) {
+        print(text, null, fontStyle, color);
     }
 
-    public void appendText(String text, ContentType contentType, FontStyle fontStyle, Color color) {
+    @Override
+    public void printHyperlink(String text, Consumer<Project> onClick) {
+        SwingUtilities.invokeLater(() -> {
+            DocumentEx document = editor.getDocument();
+            int offset = document.getTextLength();
+            document.insertString(offset, fixLineSeparators(text));
+            hyperlinkSupport.createHyperlink(offset, document.getTextLength(), null, project -> {
+                onClick.accept(project);
+            });
+        });
+    }
+
+    @Override
+    public void clear() {
+        SwingUtilities.invokeLater(() ->  {
+            editor.getDocument().deleteString(0, editor.getDocument().getTextLength());
+        });
+    }
+
+    private void print(String text, ContentType contentType, FontStyle fontStyle, Color color) {
         if (text.length() == 0) {
             return;
         }
@@ -72,23 +93,6 @@ public class AbstractConsole {
                 highlight(offset, document.getTextLength(), fontStyle, color);
             }
             scrollToEnd();
-        });
-    }
-
-    public void appendHyperlink(String text, Consumer<Project> onClick) {
-        SwingUtilities.invokeLater(() -> {
-            DocumentEx document = editor.getDocument();
-            int offset = document.getTextLength();
-            document.insertString(offset, fixLineSeparators(text));
-            hyperlinkSupport.createHyperlink(offset, document.getTextLength(), null, project -> {
-                onClick.accept(project);
-            });
-        });
-    }
-
-    public void clear() {
-        SwingUtilities.invokeLater(() ->  {
-            editor.getDocument().deleteString(0, editor.getDocument().getTextLength());
         });
     }
 
@@ -117,27 +121,4 @@ public class AbstractConsole {
         return text.replace("\r\n", "\n");
     }
 
-    public enum ContentType {
-        NORMAL(ConsoleViewContentType.NORMAL_OUTPUT_KEY),
-        WARNING(ConsoleViewContentType.LOG_WARNING_OUTPUT_KEY),
-        ERROR(ConsoleViewContentType.ERROR_OUTPUT_KEY),
-        GRAY(ConsoleViewContentType.LOG_EXPIRED_ENTRY);
-
-        TextAttributesKey key;
-        ContentType(TextAttributesKey key) {
-            this.key = key;
-        }
-    }
-
-    public enum FontStyle {
-        PLAIN(0),
-        BOLD(1),
-        ITALIC(2),
-        BOLD_ITALIC(3);
-
-        int value;
-        FontStyle(int value) {
-            this.value = value;
-        }
-    }
 }

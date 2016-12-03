@@ -27,9 +27,9 @@ public class DummyLauncher extends AbstractLauncher {
                 List<String> lines = Files.readAllLines(Paths.get("D:\\Temp\\out2.txt"));
                 lines.forEach(l -> notifyOutputLine(l));
 
-                result = new TestResult(RunStatus.Passed, time, scenario.getName() + " SUCCESS");
+                result = new TestResult(RunStatus.Passed, time);
             } catch (Exception e) {
-                result = new TestResult(RunStatus.Failed, 0L, scenario.getName() + " FAILED");
+                result = new TestResult(RunStatus.Failed, 0L);
             }
         } else {
             result = TestResult.skipped(scenario);

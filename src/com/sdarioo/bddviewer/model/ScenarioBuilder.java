@@ -22,24 +22,27 @@ public class ScenarioBuilder {
         return name;
     }
 
-    public void setName(String name) {
+    public ScenarioBuilder setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Meta getMeta() {
         return meta;
     }
 
-    public void setMeta(Meta meta) {
+    public ScenarioBuilder setMeta(Meta meta) {
         this.meta = meta;
+        return this;
     }
 
     public Location getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public ScenarioBuilder setLocation(Location location) {
         this.location = location;
+        return this;
     }
 
     public Table getExamples() {
@@ -50,8 +53,9 @@ public class ScenarioBuilder {
         this.examples = examples;
     }
 
-    public void addStep(Step step) {
+    public ScenarioBuilder addStep(Step step) {
         steps.add(step);
+        return this;
     }
 
     public Step lastStep() {

@@ -64,13 +64,13 @@ public class CmdLauncher extends AbstractLauncher {
             if (runDir == null) {
                 String message = "Cannot determine run directory. Launch aborted.";
                 LOGGER.error(message);
-                notifyOutputLine(message);
+                notifyErrorLine(message);
                 return;
             }
             String cmdLine = createCommandLine(tempWorkspace, paths);
             notifyOutputLine("Starting launcher process: " + cmdLine);
 
-            int exitCode = runCmdLine(cmdLine, runDir, line -> processOutputLine(line, monitor), this::processErrorLine);
+            int exitCode = runCmdLine(cmdLine, runDir, line -> notifyOutputLine(line, monitor), this::notifyErrorLine);
             notifyOutputLine("Launcher process finished with exit code: " + exitCode);
         } catch (Throwable e) {
             LOGGER.error("Execution failed", e);
@@ -81,32 +81,30 @@ public class CmdLauncher extends AbstractLauncher {
         }
     }
 
-    private void processOutputLine(String line, LaunchMonitor monitor) {
-        notifyOutputLine(line);
+    private void notifyOutputLine(String line, LaunchMonitor monitor) {
+        String trimmedLine = line.trim();
 
-        if (line.trim().endsWith(FAILED)) {
+        if (trimmedLine.endsWith(FAILED)) {
             monitor.currentStatus = RunStatus.Failed;
         }
-        if (line.trim().endsWith(NOT_PERFORMED) && (monitor.currentStatus == null)) {
+        if (trimmedLine.endsWith(NOT_PERFORMED) && (monitor.currentStatus == null)) {
             monitor.currentStatus = RunStatus.Skipped;
         }
-
-        if (line.trim().startsWith(SCENARIO_PREFIX)) {
+        // scenario: name
+        if (trimmedLine.startsWith(SCENARIO_PREFIX)) {
             if (monitor.currentScenario != null) {
                 monitor.scenarioFinished();
             }
-            String name = line.substring(SCENARIO_PREFIX.length());
+            String name = trimmedLine.substring(SCENARIO_PREFIX.length());
             monitor.scenarioStarted(name);
         }
+        // (AfterStories)
         if (line.trim().equals(AFTER_STORIES_LINE)) {
             if (monitor.currentScenario != null) {
                 monitor.scenarioFinished();
             }
         }
-    }
-
-    private void processErrorLine(String line) {
-        notifyErrorLine(line);
+        notifyOutputLine(line);
     }
 
     private int runCmdLine(String command, Path runDir, Consumer<String> out, Consumer<String> err) {
@@ -209,7 +207,7 @@ public class CmdLauncher extends AbstractLauncher {
             if (currentStatus == null) {
                 currentStatus = RunStatus.Passed;
             }
-            notifyTestFinished(currentScenario, new TestResult(currentStatus, time, ""));
+            notifyTestFinished(currentScenario, new TestResult(currentStatus, time));
             finished.add(currentScenario);
 
             currentScenario = null;

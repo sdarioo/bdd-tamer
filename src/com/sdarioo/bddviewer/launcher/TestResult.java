@@ -6,16 +6,15 @@ public class TestResult {
 
     private final RunStatus status;
     private final long time;
-    private final String output;
 
-    public TestResult(RunStatus status, long time, String output) {
+
+    public TestResult(RunStatus status, long time) {
         this.status = status;
         this.time = time;
-        this.output = output;
     }
 
     public static TestResult skipped(Scenario scenario) {
-        return new TestResult(RunStatus.Skipped, 0L, "Scenario skipped: " + scenario.getName());
+        return new TestResult(RunStatus.Skipped, 0L);
     }
 
     public RunStatus getStatus() {
@@ -24,10 +23,6 @@ public class TestResult {
 
     public long getTime() {
         return time;
-    }
-
-    public String getOutput() {
-        return output;
     }
 
 }

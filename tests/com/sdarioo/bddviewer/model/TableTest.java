@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class TableTest {
@@ -15,6 +16,14 @@ public class TableTest {
         assertEquals(11, values.size());
         assertEquals("a", values.get(0));
         assertEquals("k", values.get(10));
+    }
+
+    @Test
+    public void testFormatting() throws Exception {
+        String[] values = {"a", "b", "c"};
+        String line = Table.format(values);
+        assertEquals("| a | b | c |", line);
+        assertArrayEquals(values, Table.split(line).toArray(new String[0]));
     }
 
     @Test
