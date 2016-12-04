@@ -35,39 +35,41 @@ public class LauncherConsole extends AbstractConsole {
         navigator.clear();
     }
 
-    public boolean isShowLogs() {
+    public boolean isVerboseMode() {
         return formatter.getFormatterMode() == LauncherOutputFormatter.FormatterMode.Full;
     }
 
-    public void setShowLogs(boolean value) {
+    public void setVerboseMode(boolean value) {
         if (value) {
             formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Full);
         } else {
-            formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Full);
+            formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Normal);
         }
     }
 
-    public boolean isShowStepValues() {
-        return formatter.getFormatterMode().value >= LauncherOutputFormatter.FormatterMode.Extended.value;
+    public boolean isCompactMode() {
+        return formatter.getFormatterMode() == LauncherOutputFormatter.FormatterMode.Compact;
     }
 
-    public void setShowStepValues(boolean showStepValues) {
-        formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Extended);
+    public void setCompactMode(boolean value) {
+        if (value) {
+            formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Compact);
+        } else {
+            formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Normal);
+        }
     }
 
     public void scrollTo(Scenario scenario) {
-        Integer offset = navigator.getOffset(scenario);
-        if (offset == null) {
-            LOGGER.warn("There is no recorded console offset for scenario:  " + scenario.getName());
-            return;
-        }
-        if (offset >= getTextLength()) {
-            LOGGER.warn("Invalid scenario offset:  " + offset.intValue() + ". Text length: " + getTextLength());
-            return;
-        }
-        LogicalPosition startPosition = editor.offsetToLogicalPosition(offset);
-        LogicalPosition endPosition = new LogicalPosition(startPosition.line, Integer.MAX_VALUE);
+        LogicalPosition startPosition = editor.offsetToLogicalPosition(0);
+        LogicalPosition endPosition = startPosition;
 
+        Integer offset = navigator.getOffset(scenario);
+        if ((offset != null) && (offset < getTextLength())) {
+            startPosition = editor.offsetToLogicalPosition(offset);
+            endPosition = new LogicalPosition(startPosition.line, Integer.MAX_VALUE);
+        } else {
+            LOGGER.warn("Missing or invalid offset for scenario:  " + scenario.getName());
+        }
         editor.getScrollingModel().scrollTo(startPosition, ScrollType.CENTER_UP);
         editor.getSelectionModel().setBlockSelection(startPosition, endPosition);
     }

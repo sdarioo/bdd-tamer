@@ -39,7 +39,7 @@ public class BddIconMap implements IconMap {
             if (sessionManager.isPending(scenario)) {
                 icon = AllIcons.RunConfigurations.TestNotRan;
             } else if (sessionManager.isRunning(scenario)) {
-                icon = AllIcons.Diff.CurrentLine;
+                icon = AllIcons.Actions.Forward;
             } else {
                 TestResult result = sessionManager.getResult(scenario);
                 if (result != null) {

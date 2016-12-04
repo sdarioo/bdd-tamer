@@ -1,7 +1,5 @@
 I. Console
-
-3. Links to failing steps
-4. Compact mode (example line only)
+1. Links to failing steps
 
 II. Tree
 1. Run indicator
@@ -10,4 +8,4 @@ III. Launcher
 1. Launch scenarios in correct order (tree)
 
 IV. Other
-1. Icons
+

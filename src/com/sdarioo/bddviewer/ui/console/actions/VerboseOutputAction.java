@@ -5,23 +5,23 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.sdarioo.bddviewer.ui.console.LauncherConsole;
 
-public class ShowStepValuesAction extends ToggleAction {
+public class VerboseOutputAction extends ToggleAction {
 
-    private static final String TEXT = "View step values";
+    private static final String TEXT = "Verbose output";
     private final LauncherConsole console;
 
-    public ShowStepValuesAction(LauncherConsole console) {
-        super(TEXT, TEXT, AllIcons.Nodes.DataTables);
+    public VerboseOutputAction(LauncherConsole console) {
+        super(TEXT, TEXT, AllIcons.Actions.PreviewDetails);
         this.console = console;
     }
 
     @Override
     public boolean isSelected(AnActionEvent anActionEvent) {
-        return console.isShowStepValues();
+        return console.isVerboseMode();
     }
 
     @Override
     public void setSelected(AnActionEvent anActionEvent, boolean value) {
-        console.setShowStepValues(value);
+        console.setVerboseMode(value);
     }
 }

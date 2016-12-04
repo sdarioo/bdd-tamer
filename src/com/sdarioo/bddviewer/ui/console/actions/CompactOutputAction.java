@@ -5,23 +5,23 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.sdarioo.bddviewer.ui.console.LauncherConsole;
 
-public class ShowLogsAction extends ToggleAction {
+public class CompactOutputAction extends ToggleAction {
 
-    private static final String TEXT = "View logs";
+    private static final String TEXT = "Compacted output";
     private final LauncherConsole console;
 
-    public ShowLogsAction(LauncherConsole console) {
-        super(TEXT, TEXT, AllIcons.General.Warning);
+    public CompactOutputAction(LauncherConsole console) {
+        super(TEXT, TEXT, AllIcons.ObjectBrowser.CompactEmptyPackages);
         this.console = console;
     }
 
     @Override
     public boolean isSelected(AnActionEvent anActionEvent) {
-        return console.isShowLogs();
+        return console.isCompactMode();
     }
 
     @Override
     public void setSelected(AnActionEvent anActionEvent, boolean value) {
-        console.setShowLogs(value);
+        console.setCompactMode(value);
     }
 }

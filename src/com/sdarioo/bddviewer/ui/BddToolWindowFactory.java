@@ -28,7 +28,6 @@ import java.awt.*;
 import java.util.List;
 
 
-//http://www.programcreek.com/java-api-examples/index.php?source_dir=platform_tools_adt_idea-master/android/src/com/android/tools/idea/editors/vmtrace/TraceViewPanel.java
 public class BddToolWindowFactory implements ToolWindowFactory {
 
     private static final Logger LOGGER = Logger.getInstance(BddToolWindowFactory.class);
@@ -37,7 +36,7 @@ public class BddToolWindowFactory implements ToolWindowFactory {
     public static final String TOOL_WINDOW_ID = "BDD";
 
     public static final String TREE_CONTENT_ID = "Tree";
-    public static final String CONSOLE_CONTENT_ID = "Output";
+    public static final String CONSOLE_CONTENT_ID = "Console";
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
