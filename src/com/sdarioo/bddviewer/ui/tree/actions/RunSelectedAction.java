@@ -21,7 +21,7 @@ public class RunSelectedAction extends ActionBase {
 
     private static final Logger LOGGER = Logger.getInstance(RunSelectedAction.class);
 
-    private static final String TEXT = "Run Selected Tests";
+    private static final String TEXT = "Run Selected Scenarios";
 
     private final BddTree tree;
     private final Launcher launcher;

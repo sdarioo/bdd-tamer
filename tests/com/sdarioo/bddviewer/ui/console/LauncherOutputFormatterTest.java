@@ -4,6 +4,7 @@ import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.model.*;
 import org.junit.Test;
 
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -16,6 +17,9 @@ public class LauncherOutputFormatterTest {
     private static final Step STEP3 = newStep("Then there is nothing left", 0);
 
     private static final Scenario SCENARIO = new ScenarioBuilder().setName("Test scenario")
+                .addExamples("|example1|")
+                .addExamples("|example2|")
+                .setExamplesLocation(new Location(Paths.get("/"), 1))
                 .addStep(STEP1)
                 .addStep(STEP2)
                 .addStep(STEP3).build();
@@ -66,23 +70,23 @@ public class LauncherOutputFormatterTest {
         assertEquals("[INFO] running stories\n" +
                 "(BeforeStory)\n" +
                 "Scenario: Test scenario\n" +
-                "Meta:\n" +
+                "Meta: \n" +
                 "@Requirement A-1, B-2\n" +
                 "@DomainObject Car\n" +
-                "Example: {value=1}\n" +
-                "Given input1 with values (PASSED)\n" +
+                "Example: {value=1} >>\n" +
+                "Given input1 with values (PASSED) >>\n" +
                 "|v1|\n" +
-                "Given input2 with values (PASSED)\n" +
-                "|v1|\n" +
-                "|v2|\n" +
-                "Then there is nothing left (PASSED)\n" +
-                "Example: {value=2}\n" +
-                "Given input1 with values (PASSED)\n" +
-                "|v1|\n" +
-                "Given input2 with values (FAILED)\n" +
+                "Given input2 with values (PASSED) >>\n" +
                 "|v1|\n" +
                 "|v2|\n" +
-                "Then there is nothing left (NOT PERFORMED)\n" +
+                "Then there is nothing left (PASSED) >>\n" +
+                "Example: {value=2} >>\n" +
+                "Given input1 with values (PASSED) >>\n" +
+                "|v1|\n" +
+                "Given input2 with values (FAILED) >>\n" +
+                "|v1|\n" +
+                "|v2|\n" +
+                "Then there is nothing left (NOT PERFORMED) >>\n" +
                 "[DEBUG] stopping\n" +
                 "(AfterStory)\n", text);
     }
@@ -95,23 +99,23 @@ public class LauncherOutputFormatterTest {
 
         String text = CONSOLE.getContent();
         assertEquals("Scenario: Test scenario\n" +
-                "Meta:\n" +
+                "Meta: \n" +
                 "@Requirement A-1, B-2\n" +
                 "@DomainObject Car\n" +
-                "Example: {value=1}\n" +
-                "Given input1 with values (PASSED)\n" +
+                "Example: {value=1} >>\n" +
+                "Given input1 with values (PASSED) >>\n" +
                 "|v1|\n" +
-                "Given input2 with values (PASSED)\n" +
-                "|v1|\n" +
-                "|v2|\n" +
-                "Then there is nothing left (PASSED)\n" +
-                "Example: {value=2}\n" +
-                "Given input1 with values (PASSED)\n" +
-                "|v1|\n" +
-                "Given input2 with values (FAILED)\n" +
+                "Given input2 with values (PASSED) >>\n" +
                 "|v1|\n" +
                 "|v2|\n" +
-                "Then there is nothing left (NOT PERFORMED)\n", text);
+                "Then there is nothing left (PASSED) >>\n" +
+                "Example: {value=2} >>\n" +
+                "Given input1 with values (PASSED) >>\n" +
+                "|v1|\n" +
+                "Given input2 with values (FAILED) >>\n" +
+                "|v1|\n" +
+                "|v2|\n" +
+                "Then there is nothing left (NOT PERFORMED) >>\n", text);
     }
 
     @Test
@@ -122,17 +126,17 @@ public class LauncherOutputFormatterTest {
 
         String text = CONSOLE.getContent();
         assertEquals("Scenario: Test scenario\n" +
-                "Meta:\n" +
+                "Meta: \n" +
                 "@Requirement A-1, B-2\n" +
                 "@DomainObject Car\n" +
-                "Example: {value=1}\n" +
-                "Given input1 with values [...] (PASSED)\n" +
-                "Given input2 with values [...] (PASSED)\n" +
-                "Then there is nothing left (PASSED)\n" +
-                "Example: {value=2}\n" +
-                "Given input1 with values [...] (PASSED)\n" +
-                "Given input2 with values [...] (FAILED)\n" +
-                "Then there is nothing left (NOT PERFORMED)\n", text);
+                "Example: {value=1} >>\n" +
+                "Given input1 with values [...] (PASSED) >>\n" +
+                "Given input2 with values [...] (PASSED) >>\n" +
+                "Then there is nothing left (PASSED) >>\n" +
+                "Example: {value=2} >>\n" +
+                "Given input1 with values [...] (PASSED) >>\n" +
+                "Given input2 with values [...] (FAILED) >>\n" +
+                "Then there is nothing left (NOT PERFORMED) >>\n", text);
     }
 
     @Test
@@ -143,15 +147,15 @@ public class LauncherOutputFormatterTest {
 
         String text = CONSOLE.getContent();
         assertEquals("Scenario: Test scenario\n" +
-                "Meta:\n" +
+                "Meta: \n" +
                 "@Requirement A-1, B-2\n" +
                 "@DomainObject Car\n" +
-                "Example: {value=1}\n" +
+                "Example: {value=1} >>\n" +
                 "[...] (PASSED)\n" +
-                "Example: {value=2}\n" +
-                "Given input1 with values [...] (PASSED)\n" +
-                "Given input2 with values [...] (FAILED)\n" +
-                "Then there is nothing left (NOT PERFORMED)\n", text);
+                "Example: {value=2} >>\n" +
+                "Given input1 with values [...] (PASSED) >>\n" +
+                "Given input2 with values [...] (FAILED) >>\n" +
+                "Then there is nothing left (NOT PERFORMED) >>\n", text);
     }
 
     private static void simulateSession(LauncherOutputFormatter formatter) {
@@ -167,10 +171,10 @@ public class LauncherOutputFormatterTest {
     }
 
     private static Step newStep(String text, int valuesCount) {
-        Step step = new Step(text);
+        StepBuilder builder = new StepBuilder(text);
         for (int i = 0; i < valuesCount; i++) {
-            step.getValues().add(Arrays.asList("v" + i));
+            builder.addValues(String.format("|v%d|", i));
         }
-        return step;
+        return builder.build();
     }
 }

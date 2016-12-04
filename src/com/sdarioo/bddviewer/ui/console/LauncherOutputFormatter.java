@@ -1,5 +1,6 @@
 package com.sdarioo.bddviewer.ui.console;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.sdarioo.bddviewer.launcher.LauncherListener;
 import com.sdarioo.bddviewer.launcher.TestResult;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class LauncherOutputFormatter implements LauncherListener {
@@ -22,6 +24,7 @@ public class LauncherOutputFormatter implements LauncherListener {
 
     private Scenario currentScenario;
     private StepOutput currentStep;
+    private int exampleCounter;
     private final List<StepOutput> bufferedSteps = new ArrayList<>();
 
     private final Console console;
@@ -50,6 +53,7 @@ public class LauncherOutputFormatter implements LauncherListener {
     @Override
     public void scenarioStarted(Scenario scenario) {
         currentStep = null;
+        exampleCounter = 0;
         currentScenario = scenario;
     }
 
@@ -75,10 +79,7 @@ public class LauncherOutputFormatter implements LauncherListener {
         if (line.startsWith("Scenario:")) {
             String[] pair = splitFirstToken(line);
             console.print(pair[0] + ' ', Console.FontStyle.BOLD, JBColor.ORANGE);
-            Location location = currentScenario.getLocation();
-            console.printHyperlink(pair[1], project -> {
-                IdeUtil.openInEditor(project, location);
-            });
+            console.printHyperlink(pair[1], gotoAction(currentScenario.getLocation()));
             console.println();
             return;
         }
@@ -96,7 +97,11 @@ public class LauncherOutputFormatter implements LauncherListener {
             hideOutput = false;
             stepFinished();
             flushBufferedSteps();
-            console.println(line, Console.FontStyle.BOLD, JBColor.MAGENTA);
+            exampleCounter += 1;
+            console.print(line + ' ', Console.FontStyle.BOLD, JBColor.MAGENTA);
+            Location startLocation = currentScenario.getExamples().getLocation();
+            console.printHyperlink(">>", gotoAction(new Location(startLocation.getPath(), startLocation.getStartLine() + exampleCounter)));
+            console.println();
             return;
         }
         if (hideOutput) {
@@ -167,7 +172,9 @@ public class LauncherOutputFormatter implements LauncherListener {
         if (hideValues) {
             console.print(" [...]", null, JBColor.GRAY);
         }
-        console.println(' ' + output.status.text, Console.FontStyle.BOLD, output.status.color);
+        console.print(' ' + output.status.text + ' ', Console.FontStyle.BOLD, output.status.color);
+        console.printHyperlink(">>", gotoAction(output.step.getLocation()));
+        console.println();
 
         if (!hideValues) {
             output.values.forEach(line -> console.println(line, null, JBColor.GRAY));
@@ -207,6 +214,12 @@ public class LauncherOutputFormatter implements LauncherListener {
             return new String[] { line.substring(0, index), line.substring(index + 1)};
         }
         return new String[] { line, ""};
+    }
+
+    private static Consumer<Project> gotoAction(Location location) {
+        return project -> {
+            IdeUtil.openInEditor(project, location);
+        };
     }
 
     private static boolean isStep(String line) {

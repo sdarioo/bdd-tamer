@@ -9,13 +9,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Table {
+public class Table implements LocationHolder {
 
     private static final Logger LOGGER = Logger.getInstance(Table.class);
 
     private final List<String> header;
     private final List<List<String>> rows;
-
+    private Location location;
 
     public Table() {
         this.header = new ArrayList<>();
@@ -41,8 +41,21 @@ public class Table {
         return Collections.unmodifiableList(header);
     }
 
+    public boolean isEmpty() {
+        return rows.isEmpty();
+    }
+
     public int getRowsCount() {
         return rows.size();
+    }
+
+    @Override
+    public Location getLocation() {
+        return location;
+    }
+
+    void setLocation(Location location) {
+        this.location = location;
     }
 
     public List<String> getRow(int index) {

@@ -9,8 +9,9 @@ public class ScenarioBuilder {
     private String name;
     private Meta meta;
     private Location location;
-    private Table examples;
-    List<Step> steps = new ArrayList<>();
+
+    private final Table examples = new Table();
+    private final List<Step> steps = new ArrayList<>();
 
     public Scenario build() {
         Objects.nonNull(name);
@@ -45,12 +46,14 @@ public class ScenarioBuilder {
         return this;
     }
 
-    public Table getExamples() {
-        return examples;
+    public ScenarioBuilder setExamplesLocation(Location location) {
+        examples.setLocation(location);
+        return this;
     }
 
-    public void setExamples(Table examples) {
-        this.examples = examples;
+    public ScenarioBuilder addExamples(String line) {
+        examples.add(line);
+        return this;
     }
 
     public ScenarioBuilder addStep(Step step) {
@@ -58,7 +61,4 @@ public class ScenarioBuilder {
         return this;
     }
 
-    public Step lastStep() {
-        return steps.isEmpty() ? null : steps.get(steps.size() - 1);
-    }
 }

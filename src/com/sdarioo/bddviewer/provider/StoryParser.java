@@ -1,14 +1,7 @@
 package com.sdarioo.bddviewer.provider;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.sdarioo.bddviewer.model.Location;
-import com.sdarioo.bddviewer.model.Meta;
-import com.sdarioo.bddviewer.model.Scenario;
-import com.sdarioo.bddviewer.model.ScenarioBuilder;
-import com.sdarioo.bddviewer.model.Step;
-import com.sdarioo.bddviewer.model.Story;
-import com.sdarioo.bddviewer.model.StoryBuilder;
-import com.sdarioo.bddviewer.model.Table;
+import com.sdarioo.bddviewer.model.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,48 +53,60 @@ public class StoryParser {
     private static Scenario parseScenario(List<String> scenarioLines, Path path, int lineNumber) {
 
         Location location = new Location(path, lineNumber, lineNumber + scenarioLines.size() - 1);
-        ScenarioBuilder builder = new ScenarioBuilder();
-        builder.setLocation(location);
+        ScenarioBuilder scenarioBuilder = new ScenarioBuilder();
+        scenarioBuilder.setLocation(location);
 
-        for (String line : scenarioLines) {
+        String header = scenarioLines.get(0);
+        if (header.startsWith(SCENARIO_PREFIX)) {
+            scenarioBuilder.setName(header.substring(SCENARIO_PREFIX.length()).trim());
+        }
+        boolean isExamples = false;
+        StepBuilder currentStep = null;
+
+        for (int i = 1; i < scenarioLines.size(); i++) {
+            String line = scenarioLines.get(i);
             if (line.length() == 0) {
                 continue;
             }
-            if (line.startsWith(SCENARIO_PREFIX)) {
-                builder.setName(line.substring(SCENARIO_PREFIX.length()).trim());
-                continue;
-            }
             if (line.startsWith(META_PREFIX)) {
-                builder.setMeta(new Meta());
+                scenarioBuilder.setMeta(new Meta());
                 continue;
             }
-            if (line.startsWith("@") && (builder.getMeta() != null)) {
+            if (line.startsWith("@") && (scenarioBuilder.getMeta() != null)) {
                 int index = line.indexOf(' ', 1);
                 if (index > 1) {
-                    builder.getMeta().add(line.substring(1, index), line.substring(index + 1));
+                    scenarioBuilder.getMeta().add(line.substring(1, index), line.substring(index + 1));
                 } else {
-                    builder.getMeta().add(line.substring(1), "");
+                    scenarioBuilder.getMeta().add(line.substring(1), "");
                 }
                 continue;
             }
             if (line.startsWith(EXAMPLES_PREFIX)) {
-                builder.setExamples(new Table());
+                scenarioBuilder.setExamplesLocation(new Location(path, lineNumber + 1));
+                isExamples = true;
                 continue;
             }
             if (line.startsWith("|")) {
                 if (!line.startsWith("|--")) {
-                    if (builder.getExamples() != null) {
-                        builder.getExamples().add(line);
-                    } else if (builder.lastStep() != null) {
-                        builder.lastStep().getValues().add(line);
+                    if (isExamples) {
+                        scenarioBuilder.addExamples(line);
+                    } else if (currentStep != null) {
+                        currentStep.addValues(line);
                     }
                 }
             } else {
-                builder.addStep(new Step(line));
+                if (currentStep != null) {
+                    scenarioBuilder.addStep(currentStep.build());
+                }
+                currentStep = new StepBuilder(line);
+                currentStep.setLocation(new Location(path, lineNumber + i));
             }
-
         }
-        return builder.build();
+        if (currentStep != null) {
+            scenarioBuilder.addStep(currentStep.build());
+        }
+
+        return scenarioBuilder.build();
     }
 
 }

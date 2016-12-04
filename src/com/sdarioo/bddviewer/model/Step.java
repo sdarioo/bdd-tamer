@@ -1,13 +1,15 @@
 package com.sdarioo.bddviewer.model;
 
-public class Step {
+public class Step implements LocationHolder {
 
     private final String text;
+    private final Table values;
+    private final Location location;
 
-    private Table values = new Table();
-
-    public Step(String text) {
+    Step(String text, Location location, Table values) {
         this.text = text;
+        this.values = values;
+        this.location = location;
     }
 
     public boolean hasValues() {
@@ -20,6 +22,11 @@ public class Step {
 
     public String getText() {
         return text;
+    }
+
+    @Override
+    public Location getLocation() {
+        return location;
     }
 
     /**

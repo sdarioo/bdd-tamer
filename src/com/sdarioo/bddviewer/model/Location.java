@@ -13,6 +13,10 @@ public class Location {
     /** Last line (inclusive) starting from 1 */
     private final int endLine;
 
+    public Location(Path path, int startLine) {
+        this(path, startLine, startLine);
+    }
+
     public Location(Path path, int startLine, int endLine) {
         this.path = path;
         this.startLine = startLine;

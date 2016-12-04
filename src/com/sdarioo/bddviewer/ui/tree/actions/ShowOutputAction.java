@@ -16,7 +16,7 @@ import javax.swing.tree.TreePath;
 public class ShowOutputAction extends ActionBase {
 
     private static final Logger LOGGER = Logger.getInstance(ShowOutputAction.class);
-    private static final String TEXT = "Show console output";
+    private static final String TEXT = "Show Output";
 
     private final Project project;
     private final BddTree tree;
