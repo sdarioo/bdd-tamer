@@ -82,7 +82,7 @@ public class StoryParser {
                 continue;
             }
             if (line.startsWith(EXAMPLES_PREFIX)) {
-                scenarioBuilder.setExamplesLocation(new Location(path, lineNumber + 1));
+                scenarioBuilder.setExamplesLocation(new Location(path, lineNumber + i + 1));
                 isExamples = true;
                 continue;
             }

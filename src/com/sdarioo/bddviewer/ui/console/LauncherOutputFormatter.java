@@ -111,14 +111,14 @@ public class LauncherOutputFormatter implements LauncherListener {
         line = trimStatus(line, statusHolder);
 
         if (isStep(line)) {
-            stepFinished();
-
             List<Step> steps = currentScenario.getSteps();
-            Step step = (currentStep == null) ?
-                    steps.get(0) :
-                    steps.get(steps.indexOf(currentStep.step) + 1);
-            currentStep = new StepOutput(step, line);
-
+            if (currentStep != null) {
+                Step step = steps.get(steps.indexOf(currentStep.step) + 1);
+                stepFinished();
+                currentStep = new StepOutput(step, line);
+            } else {
+                currentStep = new StepOutput(steps.get(0), line);
+            }
         } else if (isStepValue(line)) {
             // Step value line e.g '| value1 | value2 |'
             currentStep.values.add(line);
@@ -173,7 +173,8 @@ public class LauncherOutputFormatter implements LauncherListener {
             console.print(" [...]", null, JBColor.GRAY);
         }
         console.print(' ' + output.status.text + ' ', Console.FontStyle.BOLD, output.status.color);
-        console.printHyperlink(">>", gotoAction(output.step.getLocation()));
+        Location location = output.step.getLocation();
+        console.printHyperlink(">>", gotoAction(location));
         console.println();
 
         if (!hideValues) {

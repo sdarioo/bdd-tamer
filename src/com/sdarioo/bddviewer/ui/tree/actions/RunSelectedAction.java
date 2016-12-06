@@ -44,7 +44,8 @@ public class RunSelectedAction extends ActionBase {
         for (TreePath path : paths) {
             Object userObject = TreeUtil.getUserObject(path);
             if (userObject instanceof Story) {
-                scope.addAll(((Story) userObject).getScenarios());
+                Story story = (Story)userObject;
+                scope.addAll(story.getScenarios());
             } else if (userObject instanceof Scenario) {
                 scope.add((Scenario)userObject);
             }

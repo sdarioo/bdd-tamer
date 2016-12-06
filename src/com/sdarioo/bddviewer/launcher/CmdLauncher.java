@@ -25,7 +25,7 @@ public class CmdLauncher extends AbstractLauncher {
 
     private static final String CMD = "mvn.cmd exec:java -Dexec.classpathScope=test -Dexec.args={0}";
     private static final String LAUNCH_ARG = "launchCustomScenario";
-    private static final String SCENARIO_ARG = "--scenario";
+    private static final String STORY_ARG = "--story";
     private static final String REPORT_ARG = "--report";
 
     private static final String SCENARIO_PREFIX = "Scenario: ";
@@ -153,7 +153,7 @@ public class CmdLauncher extends AbstractLauncher {
     private static String createCommandLine(Path tempWorkplace, List<Path> paths) {
         List<String> argsList = new ArrayList<>();
         argsList.add(LAUNCH_ARG);
-        paths.forEach(p -> argsList.add(SCENARIO_ARG + '=' + normalizePath(p)));
+        paths.forEach(p -> argsList.add(STORY_ARG + '=' + normalizePath(p)));
         argsList.add(REPORT_ARG + '=' + normalizePath(tempWorkplace.resolve("reports")));
         String args = '"' + argsList.stream().collect(Collectors.joining(" ")) + '"';
         return MessageFormat.format(CMD, args);
@@ -165,7 +165,7 @@ public class CmdLauncher extends AbstractLauncher {
     }
 
     private static List<Path> createTempStoryFiles(List<Scenario> scenarios, Path parentDir) throws IOException {
-        List<Path> result = new ArrayList<>();
+        Set<Path> result = new LinkedHashSet<>();
         for (Scenario scenario : scenarios) {
             Path path = scenario.getLocation().getPath();
             Path tempPath = parentDir.resolve(path.getFileName());
@@ -176,7 +176,7 @@ public class CmdLauncher extends AbstractLauncher {
             }
             result.add(tempPath);
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     private class LaunchMonitor {

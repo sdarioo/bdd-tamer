@@ -1,11 +1,11 @@
 I. Console
-1. Links to failing steps
 
 II. Tree
-1. Run indicator
+1. Run indicator on tab
+2. Run animator
 
 III. Launcher
-1. Launch scenarios in correct order (tree)
+1. Launch scenarios in correct order (tree) (?)
 
 IV. Other
 
