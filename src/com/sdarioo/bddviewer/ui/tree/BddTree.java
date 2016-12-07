@@ -117,7 +117,7 @@ public class BddTree {
         tree = new TreeTable(treeModel, columnModel);
         tree.setRootVisible(false);
         tree.setShowsRootHandles(true);
-        tree.setIconMap(new BddIconMap(sessionManager));
+        tree.setIconMap(new BddIconMap(this, sessionManager));
 
         BddTreeSorter sorter = new BddTreeSorter(treeModel, columnModel);
         tree.setRowSorter(sorter);

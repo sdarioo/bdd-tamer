@@ -17,10 +17,14 @@ public class BddIconMap implements IconMap {
 
     private static final Logger LOGGER = Logger.getInstance(BddIconMap.class);
 
+    private final BddTree tree;
     private final SessionManager sessionManager;
+    private final ProgressIconAnimator progressAnimator;
 
-    public BddIconMap(SessionManager sessionManager) {
+    public BddIconMap(BddTree tree, SessionManager sessionManager) {
+        this.tree = tree;
         this.sessionManager = sessionManager;
+        progressAnimator = new ProgressIconAnimator();
     }
 
     @Override
@@ -30,6 +34,9 @@ public class BddIconMap implements IconMap {
             return AllIcons.Nodes.Folder;
         }
         if (userObject instanceof Story) {
+            if (sessionManager.isRunning((Story)userObject)) {
+                return progressAnimator.getProgressIcon();
+            }
             return AllIcons.Nodes.Class;
         }
         if (userObject instanceof Scenario) {
@@ -39,7 +46,9 @@ public class BddIconMap implements IconMap {
             if (sessionManager.isPending(scenario)) {
                 icon = AllIcons.RunConfigurations.TestNotRan;
             } else if (sessionManager.isRunning(scenario)) {
-                icon = AllIcons.Actions.Forward;
+                icon = progressAnimator.getProgressIcon();
+                progressAnimator.animate(tree, scenario);
+
             } else {
                 TestResult result = sessionManager.getResult(scenario);
                 if (result != null) {

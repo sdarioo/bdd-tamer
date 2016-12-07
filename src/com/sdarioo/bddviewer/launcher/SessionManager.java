@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.model.Story;
 
 import java.util.Collection;
 import java.util.List;
@@ -71,6 +72,10 @@ public class SessionManager implements LauncherListener {
 
     public boolean isPending(Scenario scenario) {
         return pending.contains(scenario);
+    }
+
+    public boolean isRunning(Story story) {
+        return story.getScenarios().stream().anyMatch(this::isRunning);
     }
 
     public boolean isRunning(Scenario scenario) {
