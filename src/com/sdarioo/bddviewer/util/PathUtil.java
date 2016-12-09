@@ -14,6 +14,10 @@ public final class PathUtil {
     private static final Logger LOGGER = Logger.getInstance(PathUtil.class);
     private PathUtil() {}
 
+    public static String getName(Path path) {
+        return path.getFileName().toString();
+    }
+
     public static String getNameWithoutExtension(Path path) {
         String name = path.getFileName().toString();
         int index = name.lastIndexOf('.');

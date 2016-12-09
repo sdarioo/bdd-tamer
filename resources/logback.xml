@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds" debug="true">
+
+    <appender name="rootLogger" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %-40.40logger{39} : %msg%n</pattern>
+        </encoder>
+        <target>System.out</target>
+    </appender>
+
+    <appender name="A1" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/pcm.log</file>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>UTF-8</charset>
+            <layout class="com.motorolasolutions.pcm.util.AuthenticationPatternLayout">
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [USER:%u] %-40.40logger{39} : %msg%n</pattern>
+            </layout>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/pcm.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="AUDIT_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/pcm_audit.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS};%msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/pcm_audit.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="ACTMQAPPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/activemq.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %-40.40logger{39} : %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/activemq.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="DISTAPPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/distribution.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %-40.40logger{39} : %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/distribution.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="org.apache.activemq">
+        <level value="ERROR" />
+        <appender-ref ref="ACTMQAPPENDER" />
+    </logger>
+
+    <logger name="org.apache.activemq.spring">
+        <level value="ERROR" />
+        <appender-ref ref="ACTMQAPPENDER" />
+    </logger>
+
+    <logger name="atomikos">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="com.atomikos">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.springframework">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.apache.activemq.transport.InactivityMonitor">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.apache.activemq.store.kahadb.MessageDatabase">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.apache.wicket.util.watch.ModificationWatcher">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.apache.wicket.util.thread.Task">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.apache.wicket.Page">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.apache.wicket.MarkupContainer">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.apache.wicket.Component">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.apache.wicket">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="org.directwebremoting.util.CommonsLoggingOutput">
+        <level value="WARN" />
+    </logger>
+
+    <logger name="org.hibernate">
+        <level value="ERROR" />
+    </logger>
+
+    <logger name="com.motorolasolutions.pcm" additivity="false">
+        <level value="INFO" />
+        <appender-ref ref="A1" />
+        <appender-ref ref="rootLogger" />
+    </logger>
+
+    <logger name="com.motorolasolutions.pcm.util.JmsMessageLogger" additivity="false">
+        <level value="ERROR" />
+        <appender-ref ref="DISTAPPENDER" />
+    </logger>
+
+    <logger name="com.motorolasolutions.pcm.system.logging.AuditFileLogger" additivity="false">
+        <level value="DEBUG" />
+        <appender-ref ref="AUDIT_LOG" />
+    </logger>
+    
+    <logger name="org.flywaydb">
+        <level value="INFO" />
+    </logger>
+
+    <logger name="org.apache.http">
+        <level value="WARN"/>
+    </logger>
+
+    <root>
+        <priority value="INFO" />
+        <appender-ref ref="rootLogger" />
+        <appender-ref ref="A1" />
+    </root>
+
+</configuration>
