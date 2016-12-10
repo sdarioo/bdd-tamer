@@ -74,6 +74,6 @@ public class Plugin implements ApplicationComponent {
 
     public Launcher getLauncher(Project project) {
         Path path = Paths.get(project.getProjectFilePath());
-        return launchers.computeIfAbsent(path, p -> new CmdLauncher());
+        return launchers.computeIfAbsent(path, p -> new CmdLauncher(project));
     }
 }

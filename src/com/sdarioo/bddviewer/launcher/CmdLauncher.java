@@ -1,21 +1,19 @@
 package com.sdarioo.bddviewer.launcher;
 
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.sdarioo.bddviewer.launcher.app.Main;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.util.FileUtil;
 import com.sdarioo.bddviewer.util.ProcessUtil;
-import com.intellij.openapi.diagnostic.Logger;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -23,23 +21,20 @@ public class CmdLauncher extends AbstractLauncher {
 
     private static final Logger LOGGER = Logger.getInstance(CmdLauncher.class);
 
-    private static final String CMD = "mvn.cmd exec:java -Dexec.classpathScope=test -Dexec.args={0}";
-    private static final String LAUNCH_ARG = "launchCustomScenario";
-    private static final String STORY_ARG = "--story";
-    private static final String REPORT_ARG = "--report";
+    private static final String PROCESS_ID = "BddLauncher";
+    private static final String STORY_ARG = Main.STORY_ARG;
+    private static final String REPORT_ARG = Main.REPORT_ARG;
 
     private static final String SCENARIO_PREFIX = "Scenario: ";
     private static final String AFTER_STORIES_LINE = "(AfterStories)";
     private static final String FAILED = "(FAILED)";
     private static final String NOT_PERFORMED = "(NOT PERFORMED)";
 
-    private final ExecutorService executor = Executors.newCachedThreadPool(r -> {
-        Thread t = new Thread(r, "Launcher stream reader thread.");
-        t.setDaemon(true);
-        return t;
-    });
-
     private Process runningProcess;
+
+    public CmdLauncher(Project project) {
+        super(project);
+    }
 
     @Override
     public void terminate() {
@@ -48,7 +43,7 @@ public class CmdLauncher extends AbstractLauncher {
             LOGGER.info(message);
             notifyOutputLine(message);
 
-            ProcessUtil.kill(runningProcess, LAUNCH_ARG);
+            ProcessUtil.kill(runningProcess, PROCESS_ID);
         }
     }
 
@@ -57,20 +52,22 @@ public class CmdLauncher extends AbstractLauncher {
         Path tempWorkspace = null;
         LaunchMonitor monitor = new LaunchMonitor(scenarios);
         try {
-            tempWorkspace = Files.createTempDirectory("bdd_launcher");
-            List<Path> paths = createTempStoryFiles(scenarios, tempWorkspace);
+            tempWorkspace = Files.createTempDirectory(PROCESS_ID);
+            List<Path> tempStoryFiles = createTempStoryFiles(scenarios, tempWorkspace);
 
-            Path runDir = getRunDirectory(scenarios);
-            if (runDir == null) {
-                String message = "Cannot determine run directory. Launch aborted.";
+            Path scenariosModuleDir = findModuleDir(scenarios);
+            if (scenariosModuleDir == null) {
+                String message = "Cannot determine bdd module directory. Launch aborted.";
                 LOGGER.error(message);
                 notifyErrorLine(message);
                 return;
             }
-            String cmdLine = createCommandLine(tempWorkspace, paths);
-            notifyOutputLine("Starting launcher process: " + cmdLine);
 
-            int exitCode = runCmdLine(cmdLine, runDir, line -> notifyOutputLine(line, monitor), this::notifyErrorLine);
+            Path reportsDir = tempWorkspace.resolve("reports");
+            String[] cmdLine = createCmdLine(scenariosModuleDir, reportsDir, tempStoryFiles);
+            notifyOutputLine("Starting launcher process...");
+
+            int exitCode = runCmdLine(cmdLine, line -> notifyOutputLine(line, monitor), this::notifyErrorLine);
             notifyOutputLine("Launcher process finished with exit code: " + exitCode);
         } catch (Throwable e) {
             LOGGER.error("Execution failed", e);
@@ -107,15 +104,10 @@ public class CmdLauncher extends AbstractLauncher {
         notifyOutputLine(line);
     }
 
-    private int runCmdLine(String command, Path runDir, Consumer<String> out, Consumer<String> err) {
+    private int runCmdLine(String[] command, Consumer<String> out, Consumer<String> err) {
         try {
-            Runtime runtime = Runtime.getRuntime();
-            runningProcess = runtime.exec(command, null, runDir.toFile());
-
-            readStreamAsync(runningProcess.getInputStream(), out);
-            readStreamAsync(runningProcess.getErrorStream(), err);
+            runningProcess = ProcessUtil.exec(command, null, out, err);
             return runningProcess.waitFor();
-
         } catch (IOException | InterruptedException e) {
             out.accept(e.toString());
             terminate();
@@ -125,38 +117,21 @@ public class CmdLauncher extends AbstractLauncher {
         }
     }
 
-    private void readStreamAsync(InputStream inputStream, Consumer<String> consumer) {
-        executor.submit(() -> {
-            String line;
-            try (BufferedReader stdError = new BufferedReader(new InputStreamReader(inputStream))) {
-                while ((line = stdError.readLine()) != null) {
-                    consumer.accept(line);
-                }
-            } catch (IOException e) {
-                consumer.accept("Error reading process output: " + e.toString());
-            }
-        });
-    }
+    private String[] createCmdLine(Path scenariosModuleDir, Path reportsDir, List<Path> tempStoryFiles) {
+        Path rootDir = Paths.get(project.getBasePath());
+        Set<Path> cp = CmdLauncherClasspath.buildClasspath(rootDir, this::notifyOutputLine, this::notifyErrorLine);
 
-    private static Path getRunDirectory(List<Scenario> scenarios) {
-        Scenario scenario = scenarios.get(0);
-        Path path = scenario.getLocation().getPath();
-        while (path != null) {
-            if (Files.isDirectory(path) && Files.isRegularFile(path.resolve("pom.xml"))) {
-                return path;
-            }
-            path = path.getParent();
-        }
-        return null;
-    }
+        List<String> cmd = new ArrayList<>();
+        cmd.add("java");
+        cmd.add("-cp");
+        cmd.add(cp.stream().map(Path::toString).collect(Collectors.joining(File.pathSeparator)));
+        cmd.add("-D" + PROCESS_ID); // used only for killing purpose
+        cmd.add(Main.class.getName());
 
-    private static String createCommandLine(Path tempWorkplace, List<Path> paths) {
-        List<String> argsList = new ArrayList<>();
-        argsList.add(LAUNCH_ARG);
-        paths.forEach(p -> argsList.add(STORY_ARG + '=' + normalizePath(p)));
-        argsList.add(REPORT_ARG + '=' + normalizePath(tempWorkplace.resolve("reports")));
-        String args = '"' + argsList.stream().collect(Collectors.joining(" ")) + '"';
-        return MessageFormat.format(CMD, args);
+        cmd.add(normalizePath(scenariosModuleDir));
+        cmd.add(REPORT_ARG + normalizePath(reportsDir));
+        tempStoryFiles.forEach(p -> cmd.add(STORY_ARG + normalizePath(p)));
+        return cmd.toArray(new String[0]);
     }
 
     private static String normalizePath(Path path) {
@@ -177,6 +152,18 @@ public class CmdLauncher extends AbstractLauncher {
             result.add(tempPath);
         }
         return new ArrayList<>(result);
+    }
+
+    private static Path findModuleDir(List<Scenario> scenarios) {
+        Scenario scenario = scenarios.get(0);
+        Path path = scenario.getLocation().getPath();
+        while (path != null) {
+            if (Files.isDirectory(path) && Files.isRegularFile(path.resolve("pom.xml"))) {
+                return path;
+            }
+            path = path.getParent();
+        }
+        return null;
     }
 
     private class LaunchMonitor {

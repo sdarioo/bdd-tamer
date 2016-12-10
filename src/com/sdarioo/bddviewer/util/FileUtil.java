@@ -52,6 +52,8 @@ public class FileUtil {
                 return FileVisitResult.CONTINUE;
             }
         });
-        Files.delete(dir);
+        if (Files.exists(dir)) {
+            Files.delete(dir);
+        }
     }
 }

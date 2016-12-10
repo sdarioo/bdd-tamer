@@ -1,90 +1,60 @@
 package com.sdarioo.bddviewer.launcher.app;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Main {
 
+    public static final String STORY_ARG = "--story=";
+    public static final String REPORT_ARG = "--report=";
+
     public static void main(String[] args) throws Exception {
-
-        Path rootDir = Paths.get("C:\\Dev\\pcm_ij\\cm\\app\\cm");
-//        ScenarioRunner runner = new ScenarioRunner(rootDir);
-//        runner.run(
-//                Paths.get("c:\\Temp\\device_box_test.story"),
-//                Paths.get("c:\\Temp\\device_box_test_story"));
-//
-//        System.exit(0);
-
-
-//        String text = new String(Files.readAllBytes(Paths.get("c:\\Dev\\pcm_ij\\cm\\app\\cm\\pscm_bdd\\cp.txt")));
-//        String[] cp = text.split(";");
-//
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("SET CLASSPATH=c:\\Dev\\pcm_ij\\cm\\app\\cm\\pscm_bdd\\target\\test-classes");
-//        sb.append(LS);
-//        sb.append("SET CLASSPATH=%CLASSPATH%;C:\\Temp\\lib\\bddviewer.jar");
-//        sb.append(LS);
-//
-//        Arrays.stream(cp).forEach(s -> {
-//            sb.append("SET CLASSPATH=%CLASSPATH%;" + s);
-//            sb.append(LS);
-//        });
-//        sb.append("java -cp %CLASSPATH% com.sdarioo.bddviewer.launcher.app.Main");
-//        sb.append(LS);
-//
-//        Files.write(Paths.get("C:\\Temp\\cp.bat"), sb.toString().getBytes());
-
-
-        String cp = ClasspathBuilder.pcmClasspathBuilder(rootDir).toString();
-
-        cp += ";C:\\Temp\\lib\\bddviewer.jar";
-
-        String[] cmd = { "java", "-cp", cp, "com.sdarioo.bddviewer.launcher.app.Main" };
-
-        runCmdLine(cmd, s -> System.out.println(s));
-    }
-
-    private static void runCmdLine(String[] command, Consumer<String> out) {
-        try {
-            Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec(command, null, new File("C:\\Dev\\pcm_ij\\cm\\app\\cm\\"));
-
-            readStreamAsync(process.getInputStream(), out);
-            readStreamAsync(process.getErrorStream(), out);
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        if (args.length == 0) {
+            System.err.println("Invalid number of program arguments.");
+            System.exit(1);
         }
-    }
 
-    private static void readStreamAsync(InputStream inputStream, Consumer<String> consumer) {
-        ExecutorService executor = Executors.newCachedThreadPool();
+        Path moduleDir = Paths.get(args[0]);
+        if (!Files.isDirectory(moduleDir)) {
+            System.err.println("BDD project directory doesn't exists: " + moduleDir);
+            System.exit(1);
+        }
 
-        executor.submit(() -> {
-            String line;
-            try (BufferedReader stdError = new BufferedReader(new InputStreamReader(inputStream))) {
-                while ((line = stdError.readLine()) != null) {
-                    consumer.accept(line);
-                }
-            } catch (IOException e) {
-                consumer.accept("Error reading process output: " + e.toString());
+        ScenarioRunner runner = new ScenarioRunner(moduleDir);
+        Path reportDir = getReportDir(args);
+        List<Path> stories = getSorties(args);
+        for (Path story : stories) {
+            try {
+                runner.run(story, reportDir);
+            } catch (Throwable thr) {
+                System.err.println("Exception while executing story: " + story.getFileName());
+                System.err.println(thr);
             }
-        });
+        }
+        System.exit(0);
     }
 
+    private static List<Path> getSorties(String[] args) {
+        List<Path> result = new ArrayList<>();
+        for (String arg : args) {
+            if (arg.startsWith(STORY_ARG)) {
+                result.add(Paths.get(arg.substring(STORY_ARG.length())));
+            }
+        }
+        return result;
+    }
 
+    private static Path getReportDir(String[] args) {
+        for (String arg : args) {
+            if (arg.startsWith(REPORT_ARG)) {
+                return Paths.get(arg.substring(REPORT_ARG.length()));
+            }
+        }
+        return null;
+    }
 
-
-    private static final String LS = System.getProperty("line.separator");
 }

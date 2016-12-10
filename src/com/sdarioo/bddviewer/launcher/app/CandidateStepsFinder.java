@@ -1,18 +1,20 @@
 package com.sdarioo.bddviewer.launcher.app;
 
+import com.sdarioo.bddviewer.util.ClasspathDirectory;
+
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 
-public class CandidateStepsFinder {
+final class CandidateStepsFinder {
 
-    private static final String BDD_CLASSES_PATH = "pscm_bdd/target/test-classes";
+    private CandidateStepsFinder() {}
 
-    public static Object[] getCandidateSteps(Path rootDir, Path storyFile) {
+    public static Object[] getCandidateSteps(Path moduleDir, Path storyFile) {
 
-        ClasspathDirectory bddClasses = new ClasspathDirectory(rootDir.resolve(BDD_CLASSES_PATH));
+        ClasspathDirectory bddClasses = new ClasspathDirectory(moduleDir.resolve("target/test-classes"));
 
         String storyName = storyFile.getFileName().toString();
         String storyClassName = toJavaClassName(storyName);

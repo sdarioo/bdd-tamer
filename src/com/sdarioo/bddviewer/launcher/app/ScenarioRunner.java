@@ -1,6 +1,5 @@
 package com.sdarioo.bddviewer.launcher.app;
 
-import org.apache.commons.io.IOUtils;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.embedder.Embedder;
@@ -16,17 +15,19 @@ import org.jbehave.core.steps.ParameterControls;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScenarioRunner {
+class ScenarioRunner {
 
     private final long timeoutInSecs = 600;
-    private final Path rootDir;
+    private final Path moduleDir;
 
-    public ScenarioRunner(Path rootDir) {
-        this.rootDir = rootDir;
+    public ScenarioRunner(Path moduleDir) {
+        this.moduleDir = moduleDir;
     }
 
     public void run(Path storyFile, Path reportsDir) {
@@ -55,7 +56,7 @@ public class ScenarioRunner {
     }
 
     private List<CandidateSteps> getCandidateSteps(Configuration configuration, Path storyFile) {
-        Object[] steps = CandidateStepsFinder.getCandidateSteps(rootDir, storyFile);
+        Object[] steps = CandidateStepsFinder.getCandidateSteps(moduleDir, storyFile);
         return new InstanceStepsFactory(configuration, steps).createCandidateSteps();
     }
 
@@ -63,12 +64,10 @@ public class ScenarioRunner {
         @Override
         public String loadStoryAsText(String storyPath) {
             try {
-                try (final FileInputStream inputStream = new FileInputStream(storyPath)) {
-                    return IOUtils.toString(inputStream);
-                }
+                byte[] bytes = Files.readAllBytes(Paths.get(storyPath));
+                return new String(bytes);
             } catch (IOException exception) {
-                exception.printStackTrace();
-                return null;
+                throw new RuntimeException(exception.getMessage());
             }
         }
     }

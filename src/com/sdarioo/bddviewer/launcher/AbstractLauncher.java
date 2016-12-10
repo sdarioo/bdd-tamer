@@ -1,5 +1,6 @@
 package com.sdarioo.bddviewer.launcher;
 
+import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.model.Scenario;
 
 import java.util.List;
@@ -9,10 +10,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AbstractLauncher implements Launcher {
 
+    protected final Project project;
     private final AtomicBoolean isRunning = new AtomicBoolean();
     private final List<LauncherListener> listeners = new CopyOnWriteArrayList<>();
 
-    protected AbstractLauncher() {
+    protected AbstractLauncher(Project project) {
+        this.project = project;
     }
 
     @Override

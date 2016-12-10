@@ -1,4 +1,4 @@
-package com.sdarioo.bddviewer.launcher.app;
+package com.sdarioo.bddviewer.util;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Represents root classes directory.
+ */
 public class ClasspathDirectory {
 
     private final Path directory;

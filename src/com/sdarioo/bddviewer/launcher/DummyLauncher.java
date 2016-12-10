@@ -1,5 +1,6 @@
 package com.sdarioo.bddviewer.launcher;
 
+import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.model.Scenario;
 
 import java.nio.file.Files;
@@ -9,6 +10,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class DummyLauncher extends AbstractLauncher {
 
+
+    public DummyLauncher(Project project) {
+        super(project);
+    }
 
     @Override
     protected void executeAll(List<Scenario> scenario) {

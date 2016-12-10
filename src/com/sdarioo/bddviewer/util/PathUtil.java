@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +13,13 @@ import java.util.stream.Collectors;
 public final class PathUtil {
 
     private static final Logger LOGGER = Logger.getInstance(PathUtil.class);
+    public static final Path TEMP_DIR = Paths.get(System.getProperty("java.io.tmpdir"));
+
     private PathUtil() {}
+
+    public static String getName(String path) {
+        return getName(Paths.get(path));
+    }
 
     public static String getName(Path path) {
         return path.getFileName().toString();
