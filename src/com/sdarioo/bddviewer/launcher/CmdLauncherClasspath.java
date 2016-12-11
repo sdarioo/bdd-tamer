@@ -31,7 +31,7 @@ public final class CmdLauncherClasspath {
         Map<String, Path> cpPathByName = new HashMap<>();
         for (Path path : cp) {
             String name = stripVersion(PathUtil.getName(path));
-            cpPathByName.put(name, path);
+            cpPathByName.put(name.toLowerCase(), path);
         }
 
         // Classes and test classes from project
@@ -43,6 +43,7 @@ public final class CmdLauncherClasspath {
                     .filter(CmdLauncherClasspath::isJarFile)
                     .map(PathUtil::getName)
                     .map(CmdLauncherClasspath::stripVersion)
+                    .map(String::toLowerCase)
                     .forEach(name -> {
                         if (cpPathByName.containsKey(name)) {
                             cpPathByName.remove(name);
@@ -68,20 +69,16 @@ public final class CmdLauncherClasspath {
         }
     }
 
-    private static String stripVersion(String name) {
-        if (name.endsWith(".jar")) {
-            int rIdx = name.length() - ".jar".length();
-            if (name.endsWith("-SNAPSHOT.jar")) {
-                rIdx = name.length() - "-SNAPSHOT.jar".length();
-            }
-            int lIdx = name.lastIndexOf('-', rIdx);
-            if (lIdx > 0) {
-                if (isVersion(name.substring(lIdx + 1, rIdx))) {
-                    return name.substring(0, lIdx) + ".jar";
-                }
-            }
+    protected static String stripVersion(String name) {
+        String ext = ".jar";
+        if (!name.endsWith(ext)) {
+            return name;
         }
-        return name;
+        name = name.substring(0, name.length() - ext.length());
+        return Arrays.stream(name.split("-"))
+                .filter(n -> !isVersion(n))
+                .filter(n -> !"SNAPSHOT".equals(n))
+                .collect(Collectors.joining("-")) + ext;
     }
 
     private static boolean isVersion(String text) {
@@ -106,6 +103,9 @@ public final class CmdLauncherClasspath {
         Path outputPath = moduleDir.resolve(outputFileName);
 
         String[] cmd = { "mvn.cmd", "dependency:build-classpath", "-Dmdep.outputFile=" + outputFileName };
+
+        consoleLog("Running cmd: " + Arrays.stream(cmd).collect(Collectors.joining()) + " in: " + moduleDir, out);
+
         try {
             Process process = ProcessUtil.exec(cmd, moduleDir.toFile(), out, err);
             process.waitFor();
@@ -118,11 +118,15 @@ public final class CmdLauncherClasspath {
                     .toArray(new Path[0]);
 
         } catch (IOException | InterruptedException e) {
-            out.accept("Running mvn dependency:build-classpath failed.\n" + e.toString());
+            consoleLog("Running mvn dependency:build-classpath failed.\n" + e.toString(), err);
         } finally {
             FileUtil.deleteFile(outputPath);
         }
         return new Path[0];
     }
 
+    private static void consoleLog(String msg, Consumer<String> console) {
+        LOGGER.debug(msg);
+        console.accept(msg);
+    }
 }

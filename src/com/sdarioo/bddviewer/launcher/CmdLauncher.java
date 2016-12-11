@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.function.Consumer;
@@ -118,8 +117,8 @@ public class CmdLauncher extends AbstractLauncher {
     }
 
     private String[] createCmdLine(Path scenariosModuleDir, Path reportsDir, List<Path> tempStoryFiles) {
-        Path rootDir = Paths.get(project.getBasePath());
-        Set<Path> cp = CmdLauncherClasspath.buildClasspath(rootDir, this::notifyOutputLine, this::notifyErrorLine);
+        Set<Path> cp = CmdLauncherClasspath.buildClasspath(scenariosModuleDir,
+                this::notifyOutputLine, this::notifyErrorLine);
 
         List<String> cmd = new ArrayList<>();
         cmd.add("java");
