@@ -1,14 +1,9 @@
 1. Console
- - Add message severity
  - Context menu + clear
  - Different color schemes for dark and white theme
 
 2. Tree
  - Run indicator on tab
- - clear action should also clear console
-
-3. Run animator
- - fix scenario animations
- - add story animations
+ - clear action should also clear console (?)
 
 

@@ -98,6 +98,11 @@ public class BddTreeColumns {
         return sb.toString();
     }
 
+    private static String padLeft(String text, int n) {
+        n = Math.max(n, 0);
+        return String.format("%1$" + n + "s", text);
+    }
+
     public static abstract class ColumnInfo {
         private final String name;
         private final int preferredWidth;
