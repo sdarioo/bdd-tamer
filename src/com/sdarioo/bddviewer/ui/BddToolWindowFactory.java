@@ -1,5 +1,6 @@
 package com.sdarioo.bddviewer.ui;
 
+import com.intellij.execution.runners.ExecutionUtil;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -71,6 +72,15 @@ public class BddToolWindowFactory implements ToolWindowFactory {
             Content content = toolWindow.getContentManager().findContent(contentId);
             if (content != null) {
                 toolWindow.getContentManager().setSelectedContent(content);
+
+                ////TODO - test//////
+                Icon icon = AllIcons.Nodes.TabAlert;
+                content.setIcon(ExecutionUtil.getLiveIndicator(icon));
+
+                icon = toolWindow.getIcon();
+                toolWindow.setIcon(ExecutionUtil.getLiveIndicator(icon));
+                ///////////////////
+
             } else {
                 LOGGER.warn("Cannot find Content:" + contentId);
             }
