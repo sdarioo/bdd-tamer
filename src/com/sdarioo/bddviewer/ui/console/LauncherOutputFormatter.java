@@ -65,13 +65,12 @@ public class LauncherOutputFormatter implements LauncherListener {
     }
 
     @Override
-    public void outputLine(String line) {
-        if (isLoggerError(line)) {
-            errorLine(line);
-            return;
-        }
+    public void outputLine(String line, Severity severity) {
+
         if (currentScenario == null) {
-            if (formatterMode == FormatterMode.Full) {
+            if (isLoggerError(line) || (severity == Severity.Error)) {
+                console.println(line, Console.ContentType.ERROR);
+            } else if ((severity == Severity.Info) || (formatterMode == FormatterMode.Full)) {
                 console.println(line);
             }
             return;
@@ -125,19 +124,14 @@ public class LauncherOutputFormatter implements LauncherListener {
 
         } else if (currentStep != null) {
             // Other line within step e.g logger
-            currentStep.lines.add(line);
+            if (isLoggerError(line) || (severity == Severity.Error)) {
+                currentStep.errors.add(line);
+            } else {
+                currentStep.lines.add(line);
+            }
         }
         if ((currentStep != null) && (statusHolder.get() != null)) {
             currentStep.status = statusHolder.get();
-        }
-    }
-
-    @Override
-    public void errorLine(String line) {
-        if (currentStep != null) {
-            currentStep.errors.add(line);
-        } else {
-            console.println(line, Console.ContentType.ERROR);
         }
     }
 

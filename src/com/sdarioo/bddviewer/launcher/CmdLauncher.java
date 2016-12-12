@@ -38,10 +38,9 @@ public class CmdLauncher extends AbstractLauncher {
     @Override
     public void terminate() {
         if ((runningProcess != null) && runningProcess.isAlive()) {
-            String message = "Killing launcher process...";
-            LOGGER.info(message);
-            notifyOutputLine(message);
-
+            String msg = "Killing launcher process...";
+            LOGGER.info(msg);
+            notifyInfo(msg);
             ProcessUtil.kill(runningProcess, PROCESS_ID);
         }
     }
@@ -56,20 +55,22 @@ public class CmdLauncher extends AbstractLauncher {
 
             Path scenariosModuleDir = findModuleDir(scenarios);
             if (scenariosModuleDir == null) {
-                String message = "Cannot determine bdd module directory. Launch aborted.";
-                LOGGER.error(message);
-                notifyErrorLine(message);
+                String msg = "Cannot determine bdd module directory. Launch aborted.";
+                LOGGER.error(msg);
+                notifyError(msg);
                 return;
             }
 
             Path reportsDir = tempWorkspace.resolve("reports");
             String[] cmdLine = createCmdLine(scenariosModuleDir, reportsDir, tempStoryFiles);
-            notifyOutputLine("Starting launcher process...");
+            notifyInfo("Starting launcher process...");
 
-            int exitCode = runCmdLine(cmdLine, line -> notifyOutputLine(line, monitor), this::notifyErrorLine);
-            notifyOutputLine("Launcher process finished with exit code: " + exitCode);
+            int exitCode = runCmdLine(cmdLine, line -> processOutputLine(line, monitor), this::notifyError);
+            notifyInfo("Launcher process finished with exit code: " + exitCode);
         } catch (Throwable e) {
-            LOGGER.error("Execution failed", e);
+            String msg = "Execution failed: " + e.toString();
+            LOGGER.error(msg, e);
+            notifyError(msg);
             terminate();
         } finally {
             monitor.notifySkipped();
@@ -77,7 +78,7 @@ public class CmdLauncher extends AbstractLauncher {
         }
     }
 
-    private void notifyOutputLine(String line, LaunchMonitor monitor) {
+    private void processOutputLine(String line, LaunchMonitor monitor) {
         String trimmedLine = line.trim();
 
         if (trimmedLine.endsWith(FAILED)) {
@@ -100,7 +101,7 @@ public class CmdLauncher extends AbstractLauncher {
                 monitor.scenarioFinished();
             }
         }
-        notifyOutputLine(line);
+        notifyOutput(line);
     }
 
     private int runCmdLine(String[] command, Consumer<String> out, Consumer<String> err) {
@@ -116,9 +117,11 @@ public class CmdLauncher extends AbstractLauncher {
         }
     }
 
-    private String[] createCmdLine(Path scenariosModuleDir, Path reportsDir, List<Path> tempStoryFiles) {
-        Set<Path> cp = CmdLauncherClasspath.buildClasspath(scenariosModuleDir,
-                this::notifyOutputLine, this::notifyErrorLine);
+    private String[] createCmdLine(Path scenariosModuleDir,
+                                   Path reportsDir, List<Path> tempStoryFiles) throws IOException {
+
+        notifyInfo("Building launcher classpath. It may take few minutes...");
+        Set<Path> cp = CmdLauncherClasspath.buildClasspath(scenariosModuleDir, this::notifyOutput, this::notifyError);
 
         List<String> cmd = new ArrayList<>();
         cmd.add("java");
@@ -208,8 +211,8 @@ public class CmdLauncher extends AbstractLauncher {
                     notifyTestStarted(s);
                 }
                 if (!finished.contains(s)) {
-                    notifyOutputLine(SCENARIO_PREFIX + s.getName());
-                    notifyOutputLine(s.getSteps().get(0).getText() + ' ' + NOT_PERFORMED);
+                    notifyOutput(SCENARIO_PREFIX + s.getName());
+                    notifyOutput(s.getSteps().get(0).getText() + ' ' + NOT_PERFORMED);
                     notifyTestFinished(s, TestResult.skipped(s));
                 }
             });

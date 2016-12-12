@@ -1,5 +1,6 @@
 package com.sdarioo.bddviewer.ui.console;
 
+import com.sdarioo.bddviewer.launcher.LauncherListener;
 import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.model.*;
 import org.junit.Test;
@@ -160,14 +161,14 @@ public class LauncherOutputFormatterTest {
 
     private static void simulateSession(LauncherOutputFormatter formatter) {
         formatter.sessionStarted(Collections.singletonList(SCENARIO));
-        Arrays.asList(BEFORE_SCENARIO_OUTPUT).forEach(formatter::outputLine);
+        Arrays.asList(BEFORE_SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
 
         formatter.scenarioStarted(SCENARIO);
-        Arrays.asList(SCENARIO_OUTPUT).forEach(formatter::outputLine);
+        Arrays.asList(SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
         formatter.scenarioFinished(SCENARIO, TestResult.skipped(SCENARIO));
         formatter.sessionFinished();
 
-        Arrays.asList(AFTER_SCENARIO_OUTPUT).forEach(formatter::outputLine);
+        Arrays.asList(AFTER_SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
     }
 
     private static Step newStep(String text, int valuesCount) {

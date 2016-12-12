@@ -23,10 +23,6 @@ public class LauncherListenerAdapter implements LauncherListener {
     }
 
     @Override
-    public void outputLine(String line) {
-    }
-
-    @Override
-    public void errorLine(String line) {
+    public void outputLine(String line, Severity severity) {
     }
 }

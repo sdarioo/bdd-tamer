@@ -30,7 +30,7 @@ public class DummyLauncher extends AbstractLauncher {
                 Thread.sleep(time);
 
                 List<String> lines = Files.readAllLines(Paths.get("D:\\Temp\\out2.txt"));
-                lines.forEach(l -> notifyOutputLine(l));
+                lines.forEach(l -> notifyOutput(l));
 
                 result = new TestResult(RunStatus.Passed, time);
             } catch (Exception e) {

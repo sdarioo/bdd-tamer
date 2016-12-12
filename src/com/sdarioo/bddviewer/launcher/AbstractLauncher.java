@@ -65,12 +65,15 @@ public abstract class AbstractLauncher implements Launcher {
         listeners.forEach(l -> l.scenarioFinished(scenario, result));
     }
 
-    protected void notifyOutputLine(String line) {
-        listeners.forEach(l -> l.outputLine(line));
+    protected void notifyInfo(String line) {
+        listeners.forEach(l -> l.outputLine(line, LauncherListener.Severity.Info));
     }
 
-    protected void notifyErrorLine(String line) {
-        listeners.forEach(l -> l.errorLine(line));
+    protected void notifyError(String line) {
+        listeners.forEach(l -> l.outputLine(line, LauncherListener.Severity.Error));
     }
 
+    protected void notifyOutput(String line) {
+        listeners.forEach(l -> l.outputLine(line, LauncherListener.Severity.Normal));
+    }
 }

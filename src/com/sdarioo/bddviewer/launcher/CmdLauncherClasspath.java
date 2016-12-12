@@ -23,7 +23,7 @@ public final class CmdLauncherClasspath {
 
     public static Set<Path> buildClasspath(Path moduleDir,
                                            Consumer<String> out,
-                                           Consumer<String> err) {
+                                           Consumer<String> err) throws IOException {
         Set<Path> result = new LinkedHashSet<>();
 
         Path[] cp = getMavenClasspath(moduleDir, out, err);
@@ -106,13 +106,12 @@ public final class CmdLauncherClasspath {
         return Files.isRegularFile(path) && path.toString().endsWith(".jar");
     }
 
-    private static Path[] getMavenClasspath(Path moduleDir, Consumer<String> out, Consumer<String> err) {
+    private static Path[] getMavenClasspath(Path moduleDir,
+                                            Consumer<String> out, Consumer<String> err) throws IOException {
         String outputFileName = "cp.txt";
         Path outputPath = moduleDir.resolve(outputFileName);
 
-        String[] cmd = { "mvn.cmd",
-                "dependency:build-classpath",
-                "-DincludeScope=test",
+        String[] cmd = { "mvn.cmd", "dependency:build-classpath", "-DincludeScope=test",
                 "-Dmdep.outputFile=" + outputFileName };
 
         consoleLog("Running cmd: " + Arrays.stream(cmd).collect(Collectors.joining(" ")) + " in: " + moduleDir, out);
@@ -130,10 +129,10 @@ public final class CmdLauncherClasspath {
 
         } catch (IOException | InterruptedException e) {
             consoleLog("Running mvn dependency:build-classpath failed.\n" + e.toString(), err);
+            throw (e instanceof IOException) ? (IOException)e : new IOException(e);
         } finally {
             FileUtil.deleteFile(outputPath);
         }
-        return new Path[0];
     }
 
     private static void consoleLog(String msg, Consumer<String> console) {
