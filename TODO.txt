@@ -1,11 +1,15 @@
-I. Console
+1. Console
+ - Add message severity
+ - Context menu + clear
+ - Only one button - show all output
+ - Different color schemes for dark and white theme
 
-II. Tree
-1. Run indicator on tab
-2. Run animator
+2. Tree
+ - Run indicator on tab
+ - clear action should also clear console
 
-III. Launcher
-1. Launch scenarios in correct order (tree) (?)
+3. Run animator
+ - fix scenario animations
+ - add story animations
 
-IV. Other
 

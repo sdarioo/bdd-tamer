@@ -34,9 +34,17 @@ public final class CmdLauncherClasspath {
             cpPathByName.put(name.toLowerCase(), path);
         }
 
-        // Classes and test classes from project
+        // Module classes first
+        result.add(moduleDir.resolve("target\\classes"));
+        result.add(moduleDir.resolve("target\\test-classes"));
+
+        // Classes and test classes from parent project
         Path rootDir = moduleDir.getParent();
         list(rootDir).forEach(path -> {
+            if (path.getFileName().endsWith("cm-control-panel")) {
+                // TODO - this should be detected automatically
+                return;
+            }
             Path targetDir = path.resolve("target");
             if (Files.isDirectory(targetDir)) {
                 list(targetDir)
@@ -53,7 +61,7 @@ public final class CmdLauncherClasspath {
                     });
             }
         });
-        // Maven dependencies for which are not part of workspace
+        // Maven dependencies for which we have no sources in project
         cpPathByName.values().forEach(result::add);
 
         // Launcher jar
@@ -102,9 +110,12 @@ public final class CmdLauncherClasspath {
         String outputFileName = "cp.txt";
         Path outputPath = moduleDir.resolve(outputFileName);
 
-        String[] cmd = { "mvn.cmd", "dependency:build-classpath", "-Dmdep.outputFile=" + outputFileName };
+        String[] cmd = { "mvn.cmd",
+                "dependency:build-classpath",
+                "-DincludeScope=test",
+                "-Dmdep.outputFile=" + outputFileName };
 
-        consoleLog("Running cmd: " + Arrays.stream(cmd).collect(Collectors.joining()) + " in: " + moduleDir, out);
+        consoleLog("Running cmd: " + Arrays.stream(cmd).collect(Collectors.joining(" ")) + " in: " + moduleDir, out);
 
         try {
             Process process = ProcessUtil.exec(cmd, moduleDir.toFile(), out, err);
