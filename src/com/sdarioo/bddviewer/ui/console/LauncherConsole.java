@@ -15,13 +15,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class LauncherConsole extends AbstractConsole {
 
+    private static final LauncherOutputFormatter.FormatterMode DEFAULT_FORMAT_MODE =
+            LauncherOutputFormatter.FormatterMode.Compact;
+
     private final LauncherOutputFormatter formatter;
     private final ConsoleNavigator navigator;
 
     public LauncherConsole(Project project) {
         super(project);
         formatter = new LauncherOutputFormatter(this);
-        formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Compact);
+        formatter.setFormatterMode(DEFAULT_FORMAT_MODE);
         navigator = new ConsoleNavigator();
 
         Launcher launcher = Plugin.getInstance().getLauncher(project);
@@ -43,19 +46,7 @@ public class LauncherConsole extends AbstractConsole {
         if (value) {
             formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Full);
         } else {
-            formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Normal);
-        }
-    }
-
-    public boolean isCompactMode() {
-        return formatter.getFormatterMode() == LauncherOutputFormatter.FormatterMode.Compact;
-    }
-
-    public void setCompactMode(boolean value) {
-        if (value) {
-            formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Compact);
-        } else {
-            formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Normal);
+            formatter.setFormatterMode(DEFAULT_FORMAT_MODE);
         }
     }
 

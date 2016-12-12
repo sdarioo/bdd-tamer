@@ -1,7 +1,6 @@
 1. Console
  - Add message severity
  - Context menu + clear
- - Only one button - show all output
  - Different color schemes for dark and white theme
 
 2. Tree

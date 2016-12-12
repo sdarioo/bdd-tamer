@@ -5,23 +5,23 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.sdarioo.bddviewer.ui.console.LauncherConsole;
 
-public class CompactOutputAction extends ToggleAction {
+public class ShowDetailsAction extends ToggleAction {
 
-    private static final String TEXT = "Compacted output";
+    private static final String TEXT = "Show Details";
     private final LauncherConsole console;
 
-    public CompactOutputAction(LauncherConsole console) {
-        super(TEXT, TEXT, AllIcons.ObjectBrowser.CompactEmptyPackages);
+    public ShowDetailsAction(LauncherConsole console) {
+        super(TEXT, TEXT, AllIcons.Actions.PreviewDetails);
         this.console = console;
     }
 
     @Override
     public boolean isSelected(AnActionEvent anActionEvent) {
-        return console.isCompactMode();
+        return console.isVerboseMode();
     }
 
     @Override
     public void setSelected(AnActionEvent anActionEvent, boolean value) {
-        console.setCompactMode(value);
+        console.setVerboseMode(value);
     }
 }

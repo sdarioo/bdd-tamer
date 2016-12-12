@@ -9,16 +9,14 @@ import java.util.List;
 public class ConsoleActionManager {
 
     private final ClearAction clearAction;
-    private final VerboseOutputAction verboseOutputAction;
-    private final CompactOutputAction compactOutputAction;
+    private final ShowDetailsAction showDetailsAction;
 
     public ConsoleActionManager(LauncherConsole console) {
         this.clearAction = new ClearAction(console);
-        this.verboseOutputAction = new VerboseOutputAction(console);
-        this.compactOutputAction = new CompactOutputAction(console);
+        this.showDetailsAction = new ShowDetailsAction(console);
     }
 
     public List<AnAction> getToolbarActions() {
-        return Arrays.asList(clearAction, verboseOutputAction, compactOutputAction);
+        return Arrays.asList(clearAction, showDetailsAction);
     }
 }
