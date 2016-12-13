@@ -14,8 +14,10 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import com.intellij.util.ui.UIUtil;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
+import com.sdarioo.bddviewer.launcher.SessionContext;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
 import com.sdarioo.bddviewer.ui.console.actions.ConsoleActionManager;
@@ -39,6 +41,9 @@ public class BddToolWindowFactory implements ToolWindowFactory {
     public static final String TREE_CONTENT_ID = "Tree";
     public static final String CONSOLE_CONTENT_ID = "Console";
 
+    private static final String TOOL_WINDOW_ICON_KEY = "ToolWindow.Icon";
+    private static final String TREE_CONTENT_ICON_KEY = "TreeContent.Icon";
+
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
@@ -53,9 +58,30 @@ public class BddToolWindowFactory implements ToolWindowFactory {
 
         Plugin.getInstance().getLauncher(project).addListener(new LauncherListenerAdapter() {
             @Override
-            public void sessionStarted(List<Scenario> scope) {
-                toolWindow.getContentManager().setSelectedContent(consoleContent);
-                treeContent.setIcon(AllIcons.Actions.RunToCursor);
+            public void sessionStarted(List<Scenario> scope, SessionContext context) {
+
+                UIUtil.invokeLaterIfNeeded(() -> {
+                    toolWindow.getContentManager().setSelectedContent(consoleContent);
+
+                    Icon icon = toolWindow.getIcon();
+                    context.addProperty(TOOL_WINDOW_ICON_KEY, icon);
+                    toolWindow.setIcon(ExecutionUtil.getLiveIndicator(icon));
+
+                    icon = treeContent.getIcon();
+                    context.addProperty(TREE_CONTENT_ICON_KEY, icon);
+                    treeContent.setIcon(ExecutionUtil.getLiveIndicator(icon));
+                });
+            }
+
+            @Override
+            public void sessionFinished(SessionContext context) {
+                UIUtil.invokeLaterIfNeeded(() -> {
+                    Icon icon = (Icon)context.getProperty(TOOL_WINDOW_ICON_KEY);
+                    toolWindow.setIcon(icon);
+
+                    icon = (Icon)context.getProperty(TREE_CONTENT_ICON_KEY);
+                    treeContent.setIcon(icon);
+                });
             }
         });
     }
@@ -72,15 +98,6 @@ public class BddToolWindowFactory implements ToolWindowFactory {
             Content content = toolWindow.getContentManager().findContent(contentId);
             if (content != null) {
                 toolWindow.getContentManager().setSelectedContent(content);
-
-                ////TODO - test//////
-                Icon icon = AllIcons.Nodes.TabAlert;
-                content.setIcon(ExecutionUtil.getLiveIndicator(icon));
-
-                icon = toolWindow.getIcon();
-                toolWindow.setIcon(ExecutionUtil.getLiveIndicator(icon));
-                ///////////////////
-
             } else {
                 LOGGER.warn("Cannot find Content:" + contentId);
             }
@@ -99,6 +116,8 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         treePanel.add(new JBScrollPane(tree.getTreeTable()), BorderLayout.CENTER);
 
         content.setPreferredFocusableComponent(tree.getTreeTable());
+        content.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
+        content.setIcon(AllIcons.Actions.ShowAsTree);
 
         BddTreeActionManager actionManager = new BddTreeActionManager(project, tree, console);
         tree.setActionManager(actionManager);

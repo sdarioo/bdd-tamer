@@ -15,6 +15,7 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerAdapter;
+import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,7 +63,7 @@ public class AbstractConsole implements Console {
 
     @Override
     public void printHyperlink(String text, Consumer<Project> onClick) {
-        SwingUtilities.invokeLater(() -> {
+        UIUtil.invokeLaterIfNeeded(() -> {
             DocumentEx document = editor.getDocument();
             int offset = document.getTextLength();
             document.insertString(offset, fixLineSeparators(text));
@@ -74,7 +75,7 @@ public class AbstractConsole implements Console {
 
     @Override
     public void clear() {
-        SwingUtilities.invokeLater(() ->  {
+        UIUtil.invokeLaterIfNeeded(() ->  {
             editor.getDocument().deleteString(0, editor.getDocument().getTextLength());
         });
     }
@@ -88,8 +89,7 @@ public class AbstractConsole implements Console {
         if (text.length() == 0) {
             return;
         }
-        SwingUtilities.invokeLater(() -> {
-
+        UIUtil.invokeLaterIfNeeded(() -> {
             DocumentEx document = editor.getDocument();
             int offset = document.getTextLength();
             document.insertString(offset, fixLineSeparators(text));

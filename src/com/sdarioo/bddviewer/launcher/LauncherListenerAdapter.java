@@ -15,11 +15,11 @@ public class LauncherListenerAdapter implements LauncherListener {
     }
 
     @Override
-    public void sessionStarted(List<Scenario> scope) {
+    public void sessionStarted(List<Scenario> scope, SessionContext context) {
     }
 
     @Override
-    public void sessionFinished() {
+    public void sessionFinished(SessionContext context) {
     }
 
     @Override

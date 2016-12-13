@@ -3,6 +3,7 @@ package com.sdarioo.bddviewer.ui.console;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.sdarioo.bddviewer.launcher.LauncherListener;
+import com.sdarioo.bddviewer.launcher.SessionContext;
 import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.model.Location;
 import com.sdarioo.bddviewer.model.Scenario;
@@ -42,12 +43,12 @@ public class LauncherOutputFormatter implements LauncherListener {
     }
 
     @Override
-    public void sessionStarted(List<Scenario> scope) {
+    public void sessionStarted(List<Scenario> scope, SessionContext context) {
         console.clear();
     }
 
     @Override
-    public void sessionFinished() {
+    public void sessionFinished(SessionContext context) {
     }
 
     @Override

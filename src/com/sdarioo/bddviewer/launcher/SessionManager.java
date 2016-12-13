@@ -49,7 +49,7 @@ public class SessionManager implements LauncherListener {
     }
 
     @Override
-    public void sessionStarted(List<Scenario> scope) {
+    public void sessionStarted(List<Scenario> scope, SessionContext context) {
         LOGGER.info("Session started.");
         clear();
         isRunning.set(true);
@@ -57,7 +57,7 @@ public class SessionManager implements LauncherListener {
     }
 
     @Override
-    public void sessionFinished() {
+    public void sessionFinished(SessionContext context) {
         LOGGER.info("Session finished.");
         isRunning.set(false);
     }

@@ -3,7 +3,6 @@
  - Different color schemes for dark and white theme
 
 2. Tree
- - Run indicator on tab
  - clear action should also clear console (?)
 
 

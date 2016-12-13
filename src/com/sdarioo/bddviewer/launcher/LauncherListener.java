@@ -10,9 +10,9 @@ public interface LauncherListener {
 
     void scenarioFinished(Scenario scenario, TestResult result);
 
-    void sessionStarted(List<Scenario> scope);
+    void sessionStarted(List<Scenario> scope, SessionContext context);
 
-    void sessionFinished();
+    void sessionFinished(SessionContext context);
 
     void outputLine(String line, Severity severity);
 

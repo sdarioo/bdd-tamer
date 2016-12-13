@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.util.messages.MessageBusConnection;
+import com.intellij.util.ui.UIUtil;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.*;
 import com.sdarioo.bddviewer.provider.ProjectStoryProvider;
@@ -190,14 +191,14 @@ public class BddTree {
                 refreshScenario(scenario, false);
             }
             @Override
-            public void sessionStarted(List<Scenario> scope) {
+            public void sessionStarted(List<Scenario> scope, SessionContext context) {
                 scope.forEach( scenario -> refreshScenario(scenario, false));
             }
             private void refreshScenario(Scenario scenario, boolean scrollTo) {
                 DefaultTreeTableNode node = TreeUtil.findNode(treeModel, scenario);
                 DefaultTreeTableNode parent = TreeUtil.findNode(treeModel, scenario.getStory());
                 if (node != null) {
-                    SwingUtilities.invokeLater(() -> {
+                    UIUtil.invokeLaterIfNeeded(() -> {
                         if (scrollTo) {
                             tree.scrollPathToVisible(TreeUtil.pathToRoot(node));
                         }

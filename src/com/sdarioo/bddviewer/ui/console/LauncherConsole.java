@@ -3,6 +3,7 @@ package com.sdarioo.bddviewer.ui.console;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.ui.UIUtil;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
@@ -70,7 +71,7 @@ public class LauncherConsole extends AbstractConsole {
 
         @Override
         public void scenarioStarted(Scenario scenario) {
-            SwingUtilities.invokeLater(() -> {
+            UIUtil.invokeLaterIfNeeded(() -> {
                 scenarioLocations.put(scenario, getTextLength());
             });
         }

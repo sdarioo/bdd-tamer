@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
+import com.sdarioo.bddviewer.launcher.SessionContext;
 import com.sdarioo.bddviewer.launcher.SessionManager;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.ui.actions.ActionBase;
@@ -96,14 +97,14 @@ public class BddTreeActionManager {
     private void addLauncherListener(Launcher launcher) {
         launcher.addListener(new LauncherListenerAdapter() {
             @Override
-            public void sessionStarted(List<Scenario> scope) {
+            public void sessionStarted(List<Scenario> scope, SessionContext context) {
                 setEnabled(runSelectedAction, false);
                 setEnabled(cleanResultsAction, false);
                 setEnabled(reloadTreeAction, false);
                 setEnabled(stopAction, true);
             }
             @Override
-            public void sessionFinished() {
+            public void sessionFinished(SessionContext context) {
                 setEnabled(runSelectedAction, true);
                 setEnabled(cleanResultsAction, true);
                 setEnabled(reloadTreeAction, true);

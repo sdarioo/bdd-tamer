@@ -23,11 +23,12 @@ public abstract class AbstractLauncher implements Launcher {
         if (!isRunning.compareAndSet(false, true)) {
             throw new LauncherException("There is other run in progress.");
         }
-        notifySessionStarted(scenarios);
+        SessionContext context = new SessionContext();
+        notifySessionStarted(scenarios, context);
 
         executeAsync(scenarios, () -> {
             isRunning.set(false);
-            notifySessionFinished();
+            notifySessionFinished(context);
         });
     }
 
@@ -49,12 +50,12 @@ public abstract class AbstractLauncher implements Launcher {
         listeners.remove(listener);
     }
 
-    protected void notifySessionStarted(List<Scenario> scope) {
-        listeners.forEach(l -> l.sessionStarted(scope));
+    protected void notifySessionStarted(List<Scenario> scope, SessionContext context) {
+        listeners.forEach(l -> l.sessionStarted(scope, context));
     }
 
-    protected void notifySessionFinished() {
-        listeners.forEach(LauncherListener::sessionFinished);
+    protected void notifySessionFinished(SessionContext context) {
+        listeners.forEach(l -> l.sessionFinished(context));
     }
 
     protected void notifyTestStarted(Scenario scenario) {

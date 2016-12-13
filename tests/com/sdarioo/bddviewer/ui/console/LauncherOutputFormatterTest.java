@@ -1,6 +1,7 @@
 package com.sdarioo.bddviewer.ui.console;
 
 import com.sdarioo.bddviewer.launcher.LauncherListener;
+import com.sdarioo.bddviewer.launcher.SessionContext;
 import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.model.*;
 import org.junit.Test;
@@ -160,13 +161,14 @@ public class LauncherOutputFormatterTest {
     }
 
     private static void simulateSession(LauncherOutputFormatter formatter) {
-        formatter.sessionStarted(Collections.singletonList(SCENARIO));
+        SessionContext context = new SessionContext();
+        formatter.sessionStarted(Collections.singletonList(SCENARIO), context);
         Arrays.asList(BEFORE_SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
 
         formatter.scenarioStarted(SCENARIO);
         Arrays.asList(SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
         formatter.scenarioFinished(SCENARIO, TestResult.skipped(SCENARIO));
-        formatter.sessionFinished();
+        formatter.sessionFinished(context);
 
         Arrays.asList(AFTER_SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
     }
