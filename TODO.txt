@@ -5,4 +5,8 @@
 2. Tree
  - clear action should also clear console (?)
 
+3. Other
+ - app icon
+
+
 

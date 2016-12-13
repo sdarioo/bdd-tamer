@@ -175,6 +175,7 @@ public class CmdLauncher extends AbstractLauncher {
         private final Set<Scenario> finished = new HashSet<>();
 
         private long startTime;
+        private int scenarioIndex;
         private RunStatus currentStatus;
         private Scenario currentScenario;
 
@@ -185,8 +186,15 @@ public class CmdLauncher extends AbstractLauncher {
         void scenarioStarted(String name) {
             currentStatus = null;
             startTime = System.currentTimeMillis();
-            currentScenario = scenarios.stream().filter(s -> name.equals(s.getName())).findFirst().get();
 
+            currentScenario = scenarios.get(scenarioIndex);
+            scenarioIndex += 1;
+
+            if (!currentScenario.getName().equals(name)) {
+                // Is it even possible?
+                LOGGER.warn("Unexpected run order deteced!");
+                currentScenario = scenarios.stream().filter(s -> name.equals(s.getName())).findFirst().get();
+            }
             notifyTestStarted(currentScenario);
             started.add(currentScenario);
         }
