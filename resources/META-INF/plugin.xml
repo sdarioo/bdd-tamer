@@ -1,17 +1,19 @@
 <idea-plugin version="2">
   <id>com.sdarioo.bddviewer</id>
-  <name>BDD Viewer</name>
+  <name>BDD Support</name>
   <version>1.0</version>
-  <vendor email="sdarioo@github.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <vendor email="sdarioo@github.com" url="https://github.com/sdarioo">sdarioo</vendor>
 
   <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      <p>This plugin provides extended support for BDD tests:</p>
+      <ul>
+      <li>presenting stories and scenarios as searchable tree</li>
+      <li>running whole stories or individual scenarios</li>
+      </ul>
     ]]></description>
 
   <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+
     ]]>
   </change-notes>
 

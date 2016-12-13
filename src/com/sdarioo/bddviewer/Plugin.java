@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Plugin implements ApplicationComponent {
 
     private static final Logger LOGGER = Logger.getInstance(Plugin.class);
-    private static final String NAME = "BDD Viewer";
+    private static final String NAME = "BDD Support";
 
     private static Plugin INSTANCE;
 
