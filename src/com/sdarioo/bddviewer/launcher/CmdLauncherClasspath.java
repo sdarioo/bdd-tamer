@@ -47,7 +47,7 @@ public final class CmdLauncherClasspath {
             }
             Path targetDir = path.resolve("target");
             if (Files.isDirectory(targetDir)) {
-                list(targetDir)
+                list(targetDir).stream()
                     .filter(CmdLauncherClasspath::isJarFile)
                     .map(PathUtil::getName)
                     .map(CmdLauncherClasspath::stripVersion)
@@ -93,12 +93,12 @@ public final class CmdLauncherClasspath {
         return text.chars().allMatch(c -> Character.isDigit(c) || (c == '.'));
     }
 
-    private static Stream<Path> list(Path dir) {
-        try {
-            return Files.list(dir);
+    private static List<Path> list(Path dir) {
+        try (Stream<Path> stream = Files.list(dir)){
+            return stream.collect(Collectors.toList());
         } catch (IOException e) {
             LOGGER.warn("Failed to list directory: " + dir, e);
-            return Stream.of();
+            return Collections.emptyList();
         }
     }
 
