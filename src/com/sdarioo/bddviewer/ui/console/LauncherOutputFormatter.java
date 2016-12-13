@@ -8,8 +8,10 @@ import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.model.Location;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.model.Step;
+import com.sdarioo.bddviewer.ui.console.actions.ShowDetailsAction;
 import com.sdarioo.bddviewer.ui.util.IdeUtil;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,10 +47,16 @@ public class LauncherOutputFormatter implements LauncherListener {
     @Override
     public void sessionStarted(List<Scenario> scope, SessionContext context) {
         console.clear();
+        console.println("Session started at " + Instant.now(), Console.FontStyle.ITALIC, JBColor.GRAY);
+        if (formatterMode != FormatterMode.Full) {
+            console.println(String.format("To see more console output press '%s' button.", ShowDetailsAction.TEXT),
+                    Console.FontStyle.ITALIC, JBColor.GRAY);
+        }
     }
 
     @Override
     public void sessionFinished(SessionContext context) {
+        console.println("Session finished at " + Instant.now(), Console.FontStyle.ITALIC, JBColor.GRAY);
     }
 
     @Override

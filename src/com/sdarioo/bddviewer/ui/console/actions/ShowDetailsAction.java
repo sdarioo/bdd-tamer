@@ -7,7 +7,7 @@ import com.sdarioo.bddviewer.ui.console.LauncherConsole;
 
 public class ShowDetailsAction extends ToggleAction {
 
-    private static final String TEXT = "Show Details";
+    public static final String TEXT = "Show Details";
     private final LauncherConsole console;
 
     public ShowDetailsAction(LauncherConsole console) {

@@ -120,7 +120,7 @@ public class CmdLauncher extends AbstractLauncher {
     private String[] createCmdLine(Path scenariosModuleDir,
                                    Path reportsDir, List<Path> tempStoryFiles) throws IOException {
 
-        notifyInfo("Building launcher classpath. It may take few minutes...");
+        notifyInfo("Building launcher classpath. This may take some time...");
         Set<Path> cp = CmdLauncherClasspath.buildClasspath(scenariosModuleDir, this::notifyOutput, this::notifyError);
 
         List<String> cmd = new ArrayList<>();
