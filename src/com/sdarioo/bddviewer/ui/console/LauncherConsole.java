@@ -9,27 +9,18 @@ import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
 import com.sdarioo.bddviewer.model.Scenario;
 
-import javax.swing.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 public class LauncherConsole extends AbstractConsole {
-
-    private static final LauncherOutputFormatter.FormatterMode DEFAULT_FORMAT_MODE =
-            LauncherOutputFormatter.FormatterMode.Compact;
-
-    private final LauncherOutputFormatter formatter;
+    private boolean isShowDetails = false;
     private final ConsoleNavigator navigator;
 
     public LauncherConsole(Project project) {
         super(project);
-        formatter = new LauncherOutputFormatter(this);
-        formatter.setFormatterMode(DEFAULT_FORMAT_MODE);
         navigator = new ConsoleNavigator();
-
         Launcher launcher = Plugin.getInstance().getLauncher(project);
-        launcher.addListener(formatter);
         launcher.addListener(navigator);
     }
 
@@ -39,16 +30,12 @@ public class LauncherConsole extends AbstractConsole {
         navigator.clear();
     }
 
-    public boolean isVerboseMode() {
-        return formatter.getFormatterMode() == LauncherOutputFormatter.FormatterMode.Full;
+    public boolean isShowDetails() {
+        return isShowDetails;
     }
 
-    public void setVerboseMode(boolean value) {
-        if (value) {
-            formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Full);
-        } else {
-            formatter.setFormatterMode(DEFAULT_FORMAT_MODE);
-        }
+    public void setShowDetails(boolean value) {
+        isShowDetails = value;
     }
 
     public void scrollTo(Scenario scenario) {

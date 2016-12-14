@@ -1,9 +1,14 @@
-package com.sdarioo.bddviewer.launcher;
+package com.sdarioo.bddviewer.launcher.cmd;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.sdarioo.bddviewer.launcher.app.Main;
+import com.sdarioo.bddviewer.launcher.AbstractLauncher;
+import com.sdarioo.bddviewer.launcher.LauncherOutputFormatter;
+import com.sdarioo.bddviewer.launcher.RunStatus;
+import com.sdarioo.bddviewer.launcher.TestResult;
+import com.sdarioo.bddviewer.launcher.cmd.app.Main;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.ui.console.Console;
 import com.sdarioo.bddviewer.util.FileUtil;
 import com.sdarioo.bddviewer.util.ProcessUtil;
 
@@ -14,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CmdLauncher extends AbstractLauncher {
@@ -31,8 +37,13 @@ public class CmdLauncher extends AbstractLauncher {
 
     private Process runningProcess;
 
-    public CmdLauncher(Project project) {
-        super(project);
+    public CmdLauncher(Project project, Function<Project, Console> console) {
+        super(project, console);
+    }
+
+    @Override
+    protected LauncherOutputFormatter createOutputFormatter(Console console) {
+        return new CmdLauncherOutputFormatter(console);
     }
 
     @Override

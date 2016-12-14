@@ -1,6 +1,7 @@
-package com.sdarioo.bddviewer.ui.console;
+package com.sdarioo.bddviewer.launcher.cmd;
 
 import com.intellij.openapi.project.Project;
+import com.sdarioo.bddviewer.ui.console.Console;
 
 import java.awt.*;
 import java.util.function.Consumer;
@@ -8,6 +9,11 @@ import java.util.function.Consumer;
 public class ConsoleMock implements Console {
 
     private final StringBuilder content = new StringBuilder();
+
+    @Override
+    public boolean isShowDetails() {
+        return true;
+    }
 
     @Override
     public void clear() {

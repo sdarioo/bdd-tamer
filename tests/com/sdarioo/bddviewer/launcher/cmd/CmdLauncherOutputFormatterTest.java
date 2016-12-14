@@ -1,18 +1,20 @@
-package com.sdarioo.bddviewer.ui.console;
+package com.sdarioo.bddviewer.launcher.cmd;
 
-import com.sdarioo.bddviewer.launcher.LauncherListener;
+import com.sdarioo.bddviewer.launcher.LauncherOutputFormatter;
 import com.sdarioo.bddviewer.launcher.SessionContext;
 import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.model.*;
+import com.sdarioo.bddviewer.ui.console.Console;
 import org.junit.Test;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class LauncherOutputFormatterTest {
+public class CmdLauncherOutputFormatterTest {
 
     private static final Step STEP1 = newStep("Given input1 with values", 1);
     private static final Step STEP2 = newStep("Given input2 with values", 2);
@@ -64,8 +66,8 @@ public class LauncherOutputFormatterTest {
     @Test
     public void testFullMode() {
 
-        LauncherOutputFormatter formatter = new LauncherOutputFormatter(CONSOLE);
-        formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Full);
+        CmdLauncherOutputFormatter formatter = new UnderTest(CONSOLE);
+        formatter.setFormatterMode(CmdLauncherOutputFormatter.FormatterMode.Full);
         simulateSession(formatter);
 
         String text = CONSOLE.getContent();
@@ -95,8 +97,8 @@ public class LauncherOutputFormatterTest {
 
     @Test
     public void testExtendedMode() {
-        LauncherOutputFormatter formatter = new LauncherOutputFormatter(CONSOLE);
-        formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Extended);
+        CmdLauncherOutputFormatter formatter = new UnderTest(CONSOLE);
+        formatter.setFormatterMode(CmdLauncherOutputFormatter.FormatterMode.Extended);
         simulateSession(formatter);
 
         String text = CONSOLE.getContent();
@@ -122,8 +124,8 @@ public class LauncherOutputFormatterTest {
 
     @Test
     public void testNormalMode() {
-        LauncherOutputFormatter formatter = new LauncherOutputFormatter(CONSOLE);
-        formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Normal);
+        CmdLauncherOutputFormatter formatter = new UnderTest(CONSOLE);
+        formatter.setFormatterMode(CmdLauncherOutputFormatter.FormatterMode.Normal);
         simulateSession(formatter);
 
         String text = CONSOLE.getContent();
@@ -143,8 +145,8 @@ public class LauncherOutputFormatterTest {
 
     @Test
     public void testCompactMode() {
-        LauncherOutputFormatter formatter = new LauncherOutputFormatter(CONSOLE);
-        formatter.setFormatterMode(LauncherOutputFormatter.FormatterMode.Compact);
+        CmdLauncherOutputFormatter formatter = new UnderTest(CONSOLE);
+        formatter.setFormatterMode(CmdLauncherOutputFormatter.FormatterMode.Compact);
         simulateSession(formatter);
 
         String text = CONSOLE.getContent();
@@ -160,17 +162,17 @@ public class LauncherOutputFormatterTest {
                 "Then there is nothing left (NOT PERFORMED) >>\n", text);
     }
 
-    private static void simulateSession(LauncherOutputFormatter formatter) {
+    private static void simulateSession(CmdLauncherOutputFormatter formatter) {
         SessionContext context = new SessionContext();
         formatter.sessionStarted(Collections.singletonList(SCENARIO), context);
-        Arrays.asList(BEFORE_SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
+        Arrays.asList(BEFORE_SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherOutputFormatter.Severity.Normal));
 
         formatter.scenarioStarted(SCENARIO);
-        Arrays.asList(SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
+        Arrays.asList(SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherOutputFormatter.Severity.Normal));
         formatter.scenarioFinished(SCENARIO, TestResult.skipped(SCENARIO));
         formatter.sessionFinished(context);
 
-        Arrays.asList(AFTER_SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherListener.Severity.Normal));
+        Arrays.asList(AFTER_SCENARIO_OUTPUT).forEach(l -> formatter.outputLine(l, LauncherOutputFormatter.Severity.Normal));
     }
 
     private static Step newStep(String text, int valuesCount) {
@@ -179,5 +181,25 @@ public class LauncherOutputFormatterTest {
             builder.addValues(String.format("|v%d|", i));
         }
         return builder.build();
+    }
+
+    private static class UnderTest extends CmdLauncherOutputFormatter {
+
+        private final Console console;
+        public UnderTest(Console console) {
+            super(console);
+            this.console = console;
+        }
+
+        @Override
+        public void sessionStarted(List<Scenario> scope, SessionContext context) {
+            // Suppress console header (time dependant)
+            console.clear();
+        }
+
+        @Override
+        public void sessionFinished(SessionContext context) {
+            // Suppress console footer (time dependant)
+        }
     }
 }

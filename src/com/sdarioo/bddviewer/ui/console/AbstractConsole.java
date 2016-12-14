@@ -22,7 +22,7 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 
-public class AbstractConsole implements Console {
+public abstract class AbstractConsole implements Console {
     protected static final Logger LOGGER = Logger.getInstance(AbstractConsole.class);
 
 

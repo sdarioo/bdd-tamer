@@ -22,7 +22,4 @@ public class LauncherListenerAdapter implements LauncherListener {
     public void sessionFinished(SessionContext context) {
     }
 
-    @Override
-    public void outputLine(String line, Severity severity) {
-    }
 }

@@ -1,4 +1,4 @@
-package com.sdarioo.bddviewer.launcher.app;
+package com.sdarioo.bddviewer.launcher.cmd.app;
 
 import com.sdarioo.bddviewer.util.ClasspathDirectory;
 

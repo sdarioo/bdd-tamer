@@ -1,13 +1,14 @@
-package com.sdarioo.bddviewer.ui.console;
+package com.sdarioo.bddviewer.launcher.cmd;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-import com.sdarioo.bddviewer.launcher.LauncherListener;
+import com.sdarioo.bddviewer.launcher.LauncherOutputFormatter;
 import com.sdarioo.bddviewer.launcher.SessionContext;
 import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.model.Location;
 import com.sdarioo.bddviewer.model.Scenario;
 import com.sdarioo.bddviewer.model.Step;
+import com.sdarioo.bddviewer.ui.console.Console;
 import com.sdarioo.bddviewer.ui.console.actions.ShowDetailsAction;
 import com.sdarioo.bddviewer.ui.util.IdeUtil;
 
@@ -20,11 +21,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class LauncherOutputFormatter implements LauncherListener {
+public class CmdLauncherOutputFormatter implements LauncherOutputFormatter {
+
+    private static final CmdLauncherOutputFormatter.FormatterMode DEFAULT_FORMAT_MODE =
+            CmdLauncherOutputFormatter.FormatterMode.Compact;
+
+    private FormatterMode formatterMode = DEFAULT_FORMAT_MODE;
 
     private boolean hideOutput;
-    private FormatterMode formatterMode = FormatterMode.Normal;
-
     private Scenario currentScenario;
     private StepOutput currentStep;
     private int exampleCounter;
@@ -32,12 +36,9 @@ public class LauncherOutputFormatter implements LauncherListener {
 
     private final Console console;
 
-    public LauncherOutputFormatter(Console console) {
+    public CmdLauncherOutputFormatter(Console console) {
         this.console = console;
-    }
-
-    public FormatterMode getFormatterMode() {
-        return formatterMode;
+        this.formatterMode = console.isShowDetails() ? FormatterMode.Full : DEFAULT_FORMAT_MODE;
     }
 
     public void setFormatterMode(FormatterMode formatterMode) {

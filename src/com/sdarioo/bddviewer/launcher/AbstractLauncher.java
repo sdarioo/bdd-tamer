@@ -2,19 +2,26 @@ package com.sdarioo.bddviewer.launcher;
 
 import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.ui.console.Console;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 public abstract class AbstractLauncher implements Launcher {
 
     protected final Project project;
+    protected final Function<Project, Console> consoleProvider;
+
     private final AtomicBoolean isRunning = new AtomicBoolean();
     private final List<LauncherListener> listeners = new CopyOnWriteArrayList<>();
 
-    protected AbstractLauncher(Project project) {
+    private LauncherOutputFormatter outputFormatter;
+
+    protected AbstractLauncher(Project project, Function<Project, Console> consoleProvider) {
+        this.consoleProvider = consoleProvider;
         this.project = project;
     }
 
@@ -23,12 +30,18 @@ public abstract class AbstractLauncher implements Launcher {
         if (!isRunning.compareAndSet(false, true)) {
             throw new LauncherException("There is other run in progress.");
         }
+        outputFormatter = createOutputFormatter(consoleProvider.apply(project));
+        addListener(outputFormatter);
+
         SessionContext context = new SessionContext();
         notifySessionStarted(scenarios, context);
 
         executeAsync(scenarios, () -> {
             isRunning.set(false);
             notifySessionFinished(context);
+
+            removeListener(outputFormatter);
+            outputFormatter = null;
         });
     }
 
@@ -37,6 +50,8 @@ public abstract class AbstractLauncher implements Launcher {
                 .runAsync(() -> executeAll(scenarios))
                 .thenRun(finishCallback);
     }
+
+    protected abstract LauncherOutputFormatter createOutputFormatter(Console console);
 
     protected abstract void executeAll(List<Scenario> scenario);
 
@@ -67,14 +82,14 @@ public abstract class AbstractLauncher implements Launcher {
     }
 
     protected void notifyInfo(String line) {
-        listeners.forEach(l -> l.outputLine(line, LauncherListener.Severity.Info));
+        outputFormatter.outputLine(line, LauncherOutputFormatter.Severity.Info);
     }
 
     protected void notifyError(String line) {
-        listeners.forEach(l -> l.outputLine(line, LauncherListener.Severity.Error));
+        outputFormatter.outputLine(line, LauncherOutputFormatter.Severity.Error);
     }
 
     protected void notifyOutput(String line) {
-        listeners.forEach(l -> l.outputLine(line, LauncherListener.Severity.Normal));
+        outputFormatter.outputLine(line, LauncherOutputFormatter.Severity.Normal);
     }
 }

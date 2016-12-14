@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -19,11 +20,12 @@ import com.sdarioo.bddviewer.Plugin;
 import com.sdarioo.bddviewer.launcher.LauncherListenerAdapter;
 import com.sdarioo.bddviewer.launcher.SessionContext;
 import com.sdarioo.bddviewer.model.Scenario;
-import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
-import com.sdarioo.bddviewer.ui.console.actions.ConsoleActionManager;
+import com.sdarioo.bddviewer.ui.console.Console;
 import com.sdarioo.bddviewer.ui.console.LauncherConsole;
-import com.sdarioo.bddviewer.ui.tree.search.SearchComponent;
+import com.sdarioo.bddviewer.ui.console.actions.ConsoleActionManager;
 import com.sdarioo.bddviewer.ui.tree.BddTree;
+import com.sdarioo.bddviewer.ui.tree.actions.BddTreeActionManager;
+import com.sdarioo.bddviewer.ui.tree.search.SearchComponent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -44,6 +46,9 @@ public class BddToolWindowFactory implements ToolWindowFactory {
     private static final String TOOL_WINDOW_ICON_KEY = "ToolWindow.Icon";
     private static final String TREE_CONTENT_ICON_KEY = "TreeContent.Icon";
 
+    private static final Key<BddTree> TREE_KEY = Key.create(TREE_CONTENT_ID);
+    private static final Key<LauncherConsole> CONSOLE_KEY = Key.create(CONSOLE_CONTENT_ID);
+
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
@@ -51,7 +56,10 @@ public class BddToolWindowFactory implements ToolWindowFactory {
         LauncherConsole console = new LauncherConsole(project);
 
         Content treeContent = createTreeContent(project, tree, console);
+        treeContent.putUserData(TREE_KEY, tree);
+
         Content consoleContent = createConsoleContent(project, console);
+        consoleContent.putUserData(CONSOLE_KEY, console);
 
         toolWindow.getContentManager().addContent(treeContent);
         toolWindow.getContentManager().addContent(consoleContent);
@@ -87,23 +95,52 @@ public class BddToolWindowFactory implements ToolWindowFactory {
     }
 
     /**
+     * @param project current project
+     * @return console
+     */
+    public static Console getConsole(Project project) {
+        ToolWindow toolWindow = getToolWindow(project);
+        if (toolWindow == null) {
+            return null;
+        }
+        Content content = toolWindow.getContentManager().findContent(CONSOLE_CONTENT_ID);
+        return (content != null) ? content.getUserData(CONSOLE_KEY) : null;
+    }
+
+    public static BddTree getTree(Project project) {
+        ToolWindow toolWindow = getToolWindow(project);
+        if (toolWindow == null) {
+            return null;
+        }
+        Content content = toolWindow.getContentManager().findContent(TREE_CONTENT_ID);
+        return (content != null) ? content.getUserData(TREE_KEY) : null;
+    }
+
+    /**
      * Select BDD tool window content with given identifier.
      * @param project current project
      * @param contentId content identifier
      */
     public static void selectContent(Project project, String contentId) {
+        ToolWindow toolWindow = getToolWindow(project);
+        if (toolWindow == null) {
+            return;
+        }
+        Content content = toolWindow.getContentManager().findContent(contentId);
+        if (content != null) {
+            toolWindow.getContentManager().setSelectedContent(content);
+        } else {
+            LOGGER.warn("Cannot find Content:" + contentId);
+        }
+    }
+
+    private static ToolWindow getToolWindow(Project project) {
         ToolWindowManager manager = ToolWindowManager.getInstance(project);
         ToolWindow toolWindow = manager.getToolWindow(BddToolWindowFactory.TOOL_WINDOW_ID);
-        if (toolWindow != null) {
-            Content content = toolWindow.getContentManager().findContent(contentId);
-            if (content != null) {
-                toolWindow.getContentManager().setSelectedContent(content);
-            } else {
-                LOGGER.warn("Cannot find Content:" + contentId);
-            }
-        } else {
+        if (toolWindow == null) {
             LOGGER.warn("Cannot find ToolWindow: " + BddToolWindowFactory.TOOL_WINDOW_ID);
         }
+        return toolWindow;
     }
 
     private static Content createTreeContent(Project project, BddTree tree, LauncherConsole console) {

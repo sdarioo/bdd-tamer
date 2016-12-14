@@ -1,4 +1,4 @@
-package com.sdarioo.bddviewer.launcher;
+package com.sdarioo.bddviewer.launcher.cmd;
 
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;

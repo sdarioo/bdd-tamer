@@ -1,4 +1,4 @@
-package com.sdarioo.bddviewer.launcher.app;
+package com.sdarioo.bddviewer.launcher.cmd.app;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -1,15 +1,15 @@
 package com.sdarioo.bddviewer;
 
 import com.intellij.openapi.components.ApplicationComponent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.sdarioo.bddviewer.launcher.CmdLauncher;
 import com.sdarioo.bddviewer.launcher.Launcher;
 import com.sdarioo.bddviewer.launcher.SessionManager;
+import com.sdarioo.bddviewer.launcher.cmd.CmdLauncher;
 import com.sdarioo.bddviewer.provider.ProjectStoryProvider;
 import com.sdarioo.bddviewer.provider.StoryProvider;
+import com.sdarioo.bddviewer.ui.BddToolWindowFactory;
 import org.jetbrains.annotations.NotNull;
-import com.intellij.openapi.diagnostic.Logger;
-
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,6 +74,7 @@ public class Plugin implements ApplicationComponent {
 
     public Launcher getLauncher(Project project) {
         Path path = Paths.get(project.getProjectFilePath());
-        return launchers.computeIfAbsent(path, p -> new CmdLauncher(project));
+        return launchers.computeIfAbsent(path, p -> new CmdLauncher(project, BddToolWindowFactory::getConsole));
     }
+
 }

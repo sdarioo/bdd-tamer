@@ -14,11 +14,4 @@ public interface LauncherListener {
 
     void sessionFinished(SessionContext context);
 
-    void outputLine(String line, Severity severity);
-
-    enum Severity {
-        Normal,
-        Info,
-        Error
-    }
 }

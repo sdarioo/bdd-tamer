@@ -1,4 +1,4 @@
-package com.sdarioo.bddviewer.launcher.app;
+package com.sdarioo.bddviewer.launcher.cmd.app;
 
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;

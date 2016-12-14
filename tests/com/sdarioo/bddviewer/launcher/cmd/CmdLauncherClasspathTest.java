@@ -1,5 +1,6 @@
-package com.sdarioo.bddviewer.launcher;
+package com.sdarioo.bddviewer.launcher.cmd;
 
+import com.sdarioo.bddviewer.launcher.cmd.CmdLauncherClasspath;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

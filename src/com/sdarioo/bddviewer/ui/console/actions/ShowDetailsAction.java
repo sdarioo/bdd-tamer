@@ -17,11 +17,11 @@ public class ShowDetailsAction extends ToggleAction {
 
     @Override
     public boolean isSelected(AnActionEvent anActionEvent) {
-        return console.isVerboseMode();
+        return console.isShowDetails();
     }
 
     @Override
     public void setSelected(AnActionEvent anActionEvent, boolean value) {
-        console.setVerboseMode(value);
+        console.setShowDetails(value);
     }
 }

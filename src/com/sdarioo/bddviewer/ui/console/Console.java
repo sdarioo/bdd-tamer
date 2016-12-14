@@ -15,6 +15,8 @@ public interface Console {
 
     int getTextLength();
 
+    boolean isShowDetails();
+
     void print(String text);
 
     void print(String text, ContentType contentType);
@@ -42,8 +44,7 @@ public interface Console {
     enum ContentType {
         NORMAL(ConsoleViewContentType.NORMAL_OUTPUT_KEY),
         WARNING(ConsoleViewContentType.LOG_WARNING_OUTPUT_KEY),
-        ERROR(ConsoleViewContentType.ERROR_OUTPUT_KEY),
-        GRAY(ConsoleViewContentType.LOG_EXPIRED_ENTRY);
+        ERROR(ConsoleViewContentType.ERROR_OUTPUT_KEY);
 
         TextAttributesKey key;
         ContentType(TextAttributesKey key) {
