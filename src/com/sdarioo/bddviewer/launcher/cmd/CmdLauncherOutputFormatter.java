@@ -44,15 +44,15 @@ public class CmdLauncherOutputFormatter implements LauncherOutputFormatter {
         this.formatterMode = formatterMode;
     }
 
-    private boolean isShowAll() {
-        return console.isShowDetails() || (formatterMode == FormatterMode.Full);
+    public FormatterMode getFormatterMode() {
+        return console.isShowDetails() ? FormatterMode.Full : formatterMode;
     }
 
     @Override
     public void sessionStarted(List<Scenario> scope, SessionContext context) {
         console.clear();
         console.println("Session started at " + Instant.now(), Console.FontStyle.ITALIC, JBColor.GRAY);
-        if (!isShowAll()) {
+        if (getFormatterMode() != FormatterMode.Full) {
             console.println(String.format("To see more console output press '%s' button.", ShowDetailsAction.TEXT),
                     Console.FontStyle.ITALIC, JBColor.GRAY);
         }
@@ -83,7 +83,7 @@ public class CmdLauncherOutputFormatter implements LauncherOutputFormatter {
         if (currentScenario == null) {
             if (isLoggerError(line) || (severity == Severity.Error)) {
                 console.println(line, Console.ContentType.ERROR);
-            } else if (isShowAll() || (severity == Severity.Info)) {
+            } else if ((getFormatterMode() == FormatterMode.Full) || (severity == Severity.Info)) {
                 console.println(line);
             }
             return;
@@ -160,7 +160,7 @@ public class CmdLauncherOutputFormatter implements LauncherOutputFormatter {
 
     private void stepFinished() {
         if (currentStep != null) {
-            if (formatterMode == FormatterMode.Compact) {
+            if (getFormatterMode() == FormatterMode.Compact) {
                 bufferedSteps.add(currentStep);
             } else {
                 println(currentStep);
@@ -171,7 +171,7 @@ public class CmdLauncherOutputFormatter implements LauncherOutputFormatter {
 
     private void println(StepOutput output) {
         boolean hideValues = output.hasValues() &&
-                (formatterMode.value < FormatterMode.Extended.value);
+                (getFormatterMode().value < FormatterMode.Extended.value);
 
         String[] stepText = splitFirstToken(output.lines.get(0));
         console.print(stepText[0] + ' ', Console.FontStyle.BOLD, JBColor.ORANGE);
@@ -196,7 +196,7 @@ public class CmdLauncherOutputFormatter implements LauncherOutputFormatter {
             return;
         }
         Status status = getOverallStatus(bufferedSteps);
-        if ((formatterMode == FormatterMode.Compact) && (status != Status.FAILED)) {
+        if ((getFormatterMode() == FormatterMode.Compact) && (status != Status.FAILED)) {
             console.print("[...] ", null, JBColor.GRAY);
             console.println(status.text, Console.FontStyle.BOLD, status.color);
         } else {
