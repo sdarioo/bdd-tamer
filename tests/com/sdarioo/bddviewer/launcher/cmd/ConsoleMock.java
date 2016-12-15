@@ -12,7 +12,7 @@ public class ConsoleMock implements Console {
 
     @Override
     public boolean isShowDetails() {
-        return true;
+        return false;
     }
 
     @Override

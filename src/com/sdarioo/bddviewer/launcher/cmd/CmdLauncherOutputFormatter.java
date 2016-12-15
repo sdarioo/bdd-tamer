@@ -38,18 +38,21 @@ public class CmdLauncherOutputFormatter implements LauncherOutputFormatter {
 
     public CmdLauncherOutputFormatter(Console console) {
         this.console = console;
-        this.formatterMode = console.isShowDetails() ? FormatterMode.Full : DEFAULT_FORMAT_MODE;
     }
 
     public void setFormatterMode(FormatterMode formatterMode) {
         this.formatterMode = formatterMode;
     }
 
+    private boolean isShowAll() {
+        return console.isShowDetails() || (formatterMode == FormatterMode.Full);
+    }
+
     @Override
     public void sessionStarted(List<Scenario> scope, SessionContext context) {
         console.clear();
         console.println("Session started at " + Instant.now(), Console.FontStyle.ITALIC, JBColor.GRAY);
-        if (formatterMode != FormatterMode.Full) {
+        if (!isShowAll()) {
             console.println(String.format("To see more console output press '%s' button.", ShowDetailsAction.TEXT),
                     Console.FontStyle.ITALIC, JBColor.GRAY);
         }
@@ -80,7 +83,7 @@ public class CmdLauncherOutputFormatter implements LauncherOutputFormatter {
         if (currentScenario == null) {
             if (isLoggerError(line) || (severity == Severity.Error)) {
                 console.println(line, Console.ContentType.ERROR);
-            } else if ((severity == Severity.Info) || (formatterMode == FormatterMode.Full)) {
+            } else if (isShowAll() || (severity == Severity.Info)) {
                 console.println(line);
             }
             return;
