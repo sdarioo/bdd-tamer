@@ -2,25 +2,25 @@ package com.sdarioo.bddviewer.launcher;
 
 import com.intellij.openapi.project.Project;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.ui.ConsoleProvider;
 import com.sdarioo.bddviewer.ui.console.Console;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 public abstract class AbstractLauncher implements Launcher {
 
     protected final Project project;
-    protected final Function<Project, Console> consoleProvider;
+    protected final ConsoleProvider consoleProvider;
 
     private final AtomicBoolean isRunning = new AtomicBoolean();
     private final List<LauncherListener> listeners = new CopyOnWriteArrayList<>();
 
     private LauncherOutputFormatter outputFormatter;
 
-    protected AbstractLauncher(Project project, Function<Project, Console> consoleProvider) {
+    protected AbstractLauncher(Project project, ConsoleProvider consoleProvider) {
         this.consoleProvider = consoleProvider;
         this.project = project;
     }
@@ -30,7 +30,8 @@ public abstract class AbstractLauncher implements Launcher {
         if (!isRunning.compareAndSet(false, true)) {
             throw new LauncherException("There is other run in progress.");
         }
-        outputFormatter = createOutputFormatter(consoleProvider.apply(project));
+        Console console = consoleProvider.getConsole(project);
+        outputFormatter = createOutputFormatter(console);
         addListener(outputFormatter);
 
         SessionContext context = new SessionContext();

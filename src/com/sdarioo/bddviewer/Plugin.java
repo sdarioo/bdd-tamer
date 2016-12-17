@@ -9,6 +9,7 @@ import com.sdarioo.bddviewer.launcher.cmd.CmdLauncher;
 import com.sdarioo.bddviewer.provider.ProjectStoryProvider;
 import com.sdarioo.bddviewer.provider.StoryProvider;
 import com.sdarioo.bddviewer.ui.BddToolWindowFactory;
+import com.sdarioo.bddviewer.ui.ConsoleProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -74,7 +75,11 @@ public class Plugin implements ApplicationComponent {
 
     public Launcher getLauncher(Project project) {
         Path path = Paths.get(project.getProjectFilePath());
-        return launchers.computeIfAbsent(path, p -> new CmdLauncher(project, BddToolWindowFactory::getConsole));
+        return launchers.computeIfAbsent(path, p -> new CmdLauncher(project, getConsoleProvider()));
+    }
+
+    public ConsoleProvider getConsoleProvider() {
+        return BddToolWindowFactory::getConsole;
     }
 
 }

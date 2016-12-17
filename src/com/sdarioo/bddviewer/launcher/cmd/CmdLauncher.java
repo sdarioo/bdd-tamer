@@ -8,6 +8,7 @@ import com.sdarioo.bddviewer.launcher.RunStatus;
 import com.sdarioo.bddviewer.launcher.TestResult;
 import com.sdarioo.bddviewer.launcher.cmd.app.Main;
 import com.sdarioo.bddviewer.model.Scenario;
+import com.sdarioo.bddviewer.ui.ConsoleProvider;
 import com.sdarioo.bddviewer.ui.console.Console;
 import com.sdarioo.bddviewer.util.FileUtil;
 import com.sdarioo.bddviewer.util.ProcessUtil;
@@ -19,7 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CmdLauncher extends AbstractLauncher {
@@ -37,7 +37,7 @@ public class CmdLauncher extends AbstractLauncher {
 
     private Process runningProcess;
 
-    public CmdLauncher(Project project, Function<Project, Console> console) {
+    public CmdLauncher(Project project, ConsoleProvider console) {
         super(project, console);
     }
 
